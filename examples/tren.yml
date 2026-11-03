@@ -1,0 +1,29 @@
+# Copia este archivo a .github/workflows/tren.yml en tu repositorio de perfil
+# (el que se llama igual que tu usuario).
+name: Tren de GitHub
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # cada día a las 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tren:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: TU_USUARIO/git-trenes@main
+        with:
+          tren: auto # o: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala
+          modo: single # o: multi (3 vías, un tren por lenguaje)
+
+      - name: Guardar los SVG
+        run: |
+          git config user.name "git-trenes"
+          git config user.email "git-trenes@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || (git commit -m "chore: actualizar tren" && git push)

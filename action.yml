@@ -1,0 +1,48 @@
+name: git-trenes
+description: Un tren en pixel art que crece, cambia de color y acelera según tu actividad en GitHub.
+author: Cracksmity
+branding:
+  icon: navigation
+  color: orange
+
+inputs:
+  github-token:
+    description: Token para leer tu actividad. Para contribuciones privadas usa un PAT.
+    default: ${{ github.token }}
+  usuario:
+    description: Usuario de GitHub a dibujar. Por defecto, el dueño del repositorio.
+    default: ${{ github.repository_owner }}
+  tren:
+    description: "auto (evoluciona con tus vagones) o un modelo: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala."
+    default: auto
+  modo:
+    description: "single (un tren con tu lenguaje principal) o multi (3 vías, un tren por lenguaje)."
+    default: single
+  tema:
+    description: "both (genera claro, oscuro y automático), light, dark o auto."
+    default: both
+  etiqueta:
+    description: Palabra del letrero LED antes del número de racha.
+    default: RACHA
+  escala:
+    description: Tamaño de cada píxel en el SVG (1 a 6).
+    default: "2"
+  salida:
+    description: Carpeta donde se escriben los SVG.
+    default: dist
+
+outputs:
+  archivos:
+    description: Rutas de los SVG generados, separadas por coma.
+  vagones:
+    description: Número de vagones del tren principal.
+  racha:
+    description: Racha actual en días.
+  estado:
+    description: idle, slow, normal o fast, según la actividad de ayer.
+  modelo:
+    description: Modelo de tren principal.
+
+runs:
+  using: node24
+  main: src/index.js
