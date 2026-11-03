@@ -18,7 +18,8 @@ jobs:
 
       - uses: Cracksmity/git-trains@main
         with:
-          tren: auto # o: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala
+          tren: auto # o: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala, o tu JSON: .github/tren.json
+          # fondo: nueva-york # o tu skyline en JSON: .github/fondo.json (ver docs/ia/fondo.md)
           modo: single # o: multi (3 vías, un tren por lenguaje)
           # tarjetas: both # añade tarjeta-stats.svg y tarjeta-lenguajes.svg (ver README)
 

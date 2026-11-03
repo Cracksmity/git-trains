@@ -1,18 +1,40 @@
 // Punto de entrada de la GitHub Action (y de `npm run muestra` para probar sin red).
 // Lee las entradas, consulta la actividad, escribe los SVG y expone salidas.
 
-import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { appendFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { fetchActivity, fetchProfile } from './github.js';
 import { summarize } from './stats.js';
 import { sampleStats, sampleProfile } from './sample.js';
 import { buildSpec } from './compose.js';
 import { renderScene } from './scene.js';
 import { renderStatsCard, renderLangsCard } from './cards.js';
+import { parseCustomModel } from './custom.js';
+import { parseSkyline } from './skyline.js';
 
 // Las entradas de una Action llegan como INPUT_<NOMBRE> (con guiones intactos).
 const input = (name, fallback = '') =>
   (process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] ?? '').trim() || fallback;
+
+// Lee un JSON del repositorio (tren o fondo personalizado). Las rutas son relativas
+// a la raíz del repositorio, que es donde corre la Action.
+function readJson(path, what) {
+  const file = resolve(process.env.GITHUB_WORKSPACE || process.cwd(), path);
+  let text;
+  try {
+    if (statSync(file).size > 256 * 1024) throw new Error('pesa más de 256 KB');
+    text = readFileSync(file, 'utf8');
+  } catch (err) {
+    throw new Error(`No se pudo leer ${what} "${path}": ${err.code === 'ENOENT' ? 'no existe' : err.message}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`${what} "${path}" no es JSON válido: ${err.message}`);
+  }
+}
+
+const isJsonPath = (v) => /\.json$/i.test(v);
 
 const THEMES = ['light', 'dark', 'auto', 'both'];
 const IDIOMAS = ['es', 'en'];
@@ -33,10 +55,14 @@ async function main() {
   const rango = input('rango', 'letra');
   if (!RANGOS.includes(rango)) throw new Error(`"rango" desconocido: "${rango}". Opciones: ${RANGOS.join(', ')}`);
   const outDir = input('salida', sample ? 'muestra' : 'dist');
+  // tren y fondo aceptan un id del catálogo o la ruta a un JSON personalizado.
+  const trenIn = input('tren', 'auto');
+  const fondoIn = input('fondo', 'ciudad');
   const options = {
-    tren: input('tren', 'auto'),
+    tren: isJsonPath(trenIn) ? parseCustomModel(readJson(trenIn, 'el tren')) : trenIn,
     modo: input('modo', 'single'),
     label: input('etiqueta', idioma === 'en' ? 'STREAK' : 'RACHA'),
+    skyline: parseSkyline(isJsonPath(fondoIn) ? readJson(fondoIn, 'el fondo') : fondoIn),
     scale,
   };
   const cardStyle = {
@@ -102,18 +128,21 @@ async function main() {
   }
 
   const main = buildSpec(stats, options).tracks[0];
+  const modelId = typeof main.model === 'string' ? main.model : main.model.id;
   console.log(
     `${stats.user}: ${stats.total} contribuciones, racha ${stats.streak}, ayer ${stats.yesterday} -> ` +
-      `${main.cars} vagón(es) ${main.model}, estado ${stats.state}`,
+      `${main.cars} vagón(es) ${modelId}, estado ${stats.state}`,
   );
 
   if (process.env.GITHUB_OUTPUT) {
-    const out = { archivos: files.join(','), vagones: main.cars, racha: stats.streak, estado: stats.state, modelo: main.model };
+    const out = { archivos: files.join(','), vagones: main.cars, racha: stats.streak, estado: stats.state, modelo: modelId };
     appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(out).map(([k, v]) => `${k}=${v}\n`).join(''));
   }
 }
 
 main().catch((err) => {
-  console.log(`::error::${err.message}`);
+  // En una anotación de GitHub los saltos de línea van codificados; si no, solo se
+  // ve la primera línea de la lista de problemas.
+  console.log(`::error::${err.message.replace(/%/g, '%25').replace(/\r?\n/g, '%0A')}`);
   process.exitCode = 1;
 });

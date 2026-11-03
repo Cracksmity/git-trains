@@ -54,7 +54,8 @@ Y en tu `README.md`, para que cambie con el tema de GitHub:
 
 | Entrada | Por defecto | Qué hace |
 | --- | --- | --- |
-| `tren` | `auto` | `auto` evoluciona con tus vagones; o fija un modelo (ver abajo) |
+| `tren` | `auto` | `auto` evoluciona con tus vagones; o fija un modelo (ver abajo); o la ruta a [tu propio tren](#haz-tu-propio-tren-con-ia) en JSON |
+| `fondo` | `ciudad` | `ciudad` (aleatoria), `nueva-york` o la ruta a [tu propio skyline](#fondos-de-ciudad) en JSON |
 | `modo` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `tema` | `both` | `both` escribe `tren-light.svg`, `tren-dark.svg` y `tren.svg` (automático); o `light`, `dark`, `auto` |
 | `idioma` | `es` | `es` o `en`: cambia la palabra del letrero (`RACHA` / `STREAK`) y los textos de las tarjetas |
@@ -110,6 +111,35 @@ Con `tren: auto` el modelo sube con los vagones: tranvía → metro naranja → 
 
 Todos los trenes tienen cabina en ambos extremos (faros blancos adelante, luces rojas atrás). La catenaria solo aparece sobre los trenes con pantógrafo; los demás corren sobre un tercer riel.
 
+## Haz tu propio tren (con IA)
+
+Cualquier tren se describe como un JSON pequeño: colores, franjas, puertas y la trompa dibujada fila por fila. No hace falta saber programar; lo escribe una IA a partir de una foto o una descripción:
+
+1. Copia [docs/ia/tren.md](docs/ia/tren.md) en el chat de tu IA (Claude, ChatGPT, Gemini...) y, al final, describe tu tren o adjunta una foto.
+2. Guarda el JSON que te devuelva en tu repositorio de perfil, por ejemplo en `.github/tren.json`.
+3. En el workflow, usa `tren: .github/tren.json`.
+
+```yaml
+      - uses: Cracksmity/git-trains@main
+        with:
+          tren: .github/tren.json
+          fondo: nueva-york
+```
+
+Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene y lista **todos** los problemas en el log; pégaselos a la IA y que los corrija. En el playground (`npm run preview`) puedes pegar el JSON y verlo al instante, con los mismos mensajes de error.
+
+![Metro de Nueva York](docs/ejemplo-nueva-york.svg)
+
+Ejemplo: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
+
+## Fondos de ciudad
+
+Detrás del tren va una ciudad. Por defecto es aleatoria; con `fondo: nueva-york` es el skyline de Manhattan (One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad), y con `fondo: .github/fondo.json` es el tuyo.
+
+Un fondo es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para monumentos con forma propia. No lleva colores: usa los del tema, así que cambia solo entre claro y oscuro y de noche se prenden las ventanas. Para hacer el tuyo, copia [docs/ia/fondo.md](docs/ia/fondo.md) en tu IA con la ciudad que quieras o una foto. Ejemplo: [examples/fondo-cdmx.json](examples/fondo-cdmx.json).
+
+La foto solo sirve de referencia: lo que se guarda es la silueta, nunca la imagen.
+
 ## Cómo funciona
 
 - Sin dependencias ni compilación: JavaScript puro (Node 24) que corre directo en el runner.
@@ -125,8 +155,12 @@ npm run preview    # playground en http://localhost:4173 (controles en vivo)
 npm run muestra    # genera SVG con datos de ejemplo en ./muestra
 npm test           # pruebas
 node scripts/sheet.js hoja.png 5 3 0   # hoja PNG ampliada de todos los modelos
+node scripts/sheet.js mio.png 5 2 0 examples/tren-nueva-york.json   # ...o de un tren en JSON
+INPUT_TREN=examples/tren-nueva-york.json INPUT_FONDO=examples/fondo-cdmx.json npm run muestra
 node scripts/docs.js                   # regenera los SVG de docs/
 ```
+
+Para añadir un fondo incluido, agrégalo a `SKYLINES` en [src/skyline.js](src/skyline.js).
 
 Para añadir un modelo, agrega una entrada en [src/models.js](src/models.js) (paleta, franjas, forma de la trompa) y su id en `MODEL_ORDER`.
 

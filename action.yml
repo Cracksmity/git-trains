@@ -13,8 +13,11 @@ inputs:
     description: Usuario de GitHub a dibujar. Por defecto, el dueño del repositorio.
     default: ${{ github.repository_owner }}
   tren:
-    description: "auto (evoluciona con tus vagones) o un modelo: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala."
+    description: "auto (evoluciona con tus vagones), un modelo (tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala) o la ruta a tu propio tren en JSON (por ejemplo .github/tren.json)."
     default: auto
+  fondo:
+    description: "Ciudad del fondo: ciudad (aleatoria), nueva-york o la ruta a tu propio skyline en JSON (por ejemplo .github/fondo.json)."
+    default: ciudad
   modo:
     description: "single (un tren con tu lenguaje principal) o multi (3 vías, un tren por lenguaje)."
     default: single

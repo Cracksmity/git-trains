@@ -1,11 +1,15 @@
 // Regenera los SVG de ejemplo que usa el README (datos de muestra, sin red).
 // node scripts/docs.js
 
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { renderScene } from '../src/scene.js';
 import { buildSpec } from '../src/compose.js';
 import { sampleStats, sampleProfile } from '../src/sample.js';
 import { renderStatsCard, renderLangsCard } from '../src/cards.js';
+import { parseCustomModel } from '../src/custom.js';
+import { parseSkyline } from '../src/skyline.js';
+
+const nuevaYork = parseCustomModel(JSON.parse(readFileSync('examples/tren-nueva-york.json', 'utf8')));
 
 mkdirSync('docs', { recursive: true });
 
@@ -14,6 +18,11 @@ const casos = [
   ['ejemplo-oscuro', sampleStats({ total: 900, streak: 30, yesterday: 14 }), { tren: 'auto', modo: 'single', theme: 'dark' }],
   ['ejemplo-multi', sampleStats({ total: 1500, yesterday: 5 }), { tren: 'auto', modo: 'multi', theme: 'light' }],
   ['ejemplo-parado', sampleStats({ total: 300, streak: 0, yesterday: 0 }), { tren: 'tranvia', modo: 'single', theme: 'light' }],
+  [
+    'ejemplo-nueva-york',
+    sampleStats({ total: 400, streak: 20, yesterday: 5 }),
+    { tren: nuevaYork, modo: 'single', theme: 'auto', skyline: parseSkyline('nueva-york') },
+  ],
 ];
 
 for (const [nombre, stats, opts] of casos) {

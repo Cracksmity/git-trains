@@ -344,7 +344,7 @@ function drawCar(ctx, car) {
 }
 
 // Mezcla dos colores #rrggbb (t = 0 devuelve a, t = 1 devuelve b).
-function mix(a, b, t) {
+export function mix(a, b, t) {
   const ca = parseInt(a.slice(1), 16);
   const cb = parseInt(b.slice(1), 16);
   let out = '#';

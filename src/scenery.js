@@ -2,9 +2,12 @@
 // y semáforos. Todo se dibuja sobre rejillas de píxeles (ver pixel.js). Los colores
 // con "@" son variables de tema (THEMES) y cambian entre claro y oscuro.
 
-import { Grid } from './pixel.js';
+import { Grid, rng } from './pixel.js';
 import { TRAIN_H } from './train.js';
 import { drawText, textWidth, clean } from './font.js';
+import { paintSkyline, skylineColumns } from './skyline.js';
+
+export { rng };
 
 export const SCENE_W = 448;
 export const GY0 = 88; // fila del riel de la primera vía
@@ -35,16 +38,6 @@ export const THEMES = {
     text: '#a7b4d0', capbg: 'rgba(0,0,0,0.45)', speed: 'rgba(255,255,255,0.7)',
   },
 };
-
-export function rng(seed) {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 export function sceneHeight(nTracks) {
   return GY0 + BALLAST + PITCH * (nTracks - 1);
@@ -260,12 +253,10 @@ function signal(g, x, gy, state) {
 
 // --- Decorado principal -----------------------------------------------------
 
-export function paintBackdrop(W, H, tracks, user) {
-  const g = new Grid(W, H);
-  const rand = rng(20261102);
-
-  // Ciudad en dos planos.
-  for (const [color, minH, maxH, win] of [['@city2', 16, 44, false], ['@city', 8, 26, true]]) {
+// Ciudad aleatoria en dos planos (el fondo de siempre): el lejano en `far` y el
+// cercano, con ventanas, en `near` (pueden ser la misma rejilla).
+function randomCity(far, near, W, rand) {
+  for (const [g, color, minH, maxH, win] of [[far, '@city2', 16, 44, false], [near, '@city', 8, 26, true]]) {
     let x = -4;
     while (x < W) {
       const w = 8 + Math.floor(rand() * 14);
@@ -278,6 +269,35 @@ export function paintBackdrop(W, H, tracks, user) {
       }
       x += w + Math.floor(rand() * 3);
     }
+  }
+}
+
+// skyline: el fondo ya validado (ver skyline.js) o null para la ciudad aleatoria.
+export function paintBackdrop(W, H, tracks, user, skyline = null) {
+  const g = new Grid(W, H);
+  const rand = rng(20261102);
+
+  // Ciudad. Con un skyline propio la ciudad aleatoria se calcula igual, en rejillas
+  // aparte, para que consuma los mismos números al azar y el resto del decorado
+  // (arbustos, balasto, pueblos) no cambie. Con `fill` se usa solo su plano cercano
+  // (edificios bajos con ventanas) como relleno: delante de los edificios lejanos,
+  // detrás de los cercanos y sin tocar las columnas de estos.
+  if (!skyline) randomCity(g, g, W, rand);
+  else {
+    const scratch = new Grid(W, H);
+    const filler = skyline.fill ? new Grid(W, H) : scratch;
+    randomCity(scratch, filler, W, rand);
+    paintSkyline(g, skyline, GY0, 'far');
+    if (skyline.fill) {
+      const busy = skylineColumns(skyline, 'near', 2);
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const c = filler.get(x, y);
+          if (c && !busy.has(x)) g.set(x, y, c);
+        }
+      }
+    }
+    paintSkyline(g, skyline, GY0, 'near');
   }
 
   // Talud con arbustos delante de la ciudad.
