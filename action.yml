@@ -21,15 +21,45 @@ inputs:
   tema:
     description: "both (genera claro, oscuro y automático), light, dark o auto."
     default: both
+  idioma:
+    description: "Idioma de los textos: es o en. Cambia la palabra del letrero (RACHA / STREAK) y las tarjetas."
+    default: es
   etiqueta:
-    description: Palabra del letrero LED antes del número de racha.
-    default: RACHA
+    description: Palabra del letrero LED antes del número de racha. Si se omite depende de idioma.
+    default: ""
   escala:
     description: Tamaño de cada píxel en el SVG (1 a 6).
     default: "2"
   salida:
     description: Carpeta donde se escriben los SVG.
     default: dist
+  tarjetas:
+    description: "Tarjetas de perfil a generar: none, stats (estadísticas), langs (lenguajes) o both."
+    default: none
+  rango:
+    description: "Centro del anillo de la tarjeta de estadísticas: letra (S, A+, B...) o github (la marca)."
+    default: letra
+  borde:
+    description: "Borde de las tarjetas: true o false."
+    default: "true"
+  lenguajes-max:
+    description: Máximo de lenguajes en la tarjeta de lenguajes (1 a 10).
+    default: "6"
+  color-fondo:
+    description: Color de fondo de las tarjetas, hexadecimal sin #.
+    default: ""
+  color-titulo:
+    description: Color del título de las tarjetas, hexadecimal sin #.
+    default: ""
+  color-icono:
+    description: Color de los iconos de las tarjetas, hexadecimal sin #.
+    default: ""
+  color-texto:
+    description: Color del texto de las tarjetas, hexadecimal sin #.
+    default: ""
+  color-anillo:
+    description: Color del anillo de rango de las tarjetas, hexadecimal sin #.
+    default: ""
 
 outputs:
   archivos:

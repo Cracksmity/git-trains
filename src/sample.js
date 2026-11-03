@@ -37,3 +37,18 @@ export function sampleStats(overrides = {}) {
     languages: SAMPLE_LANGUAGES,
   });
 }
+
+// Cifras de perfil de ejemplo para las tarjetas.
+export function sampleProfile() {
+  return {
+    login: 'octocat',
+    name: 'The Octocat',
+    followers: 120,
+    stars: 340,
+    commits: 880,
+    prs: 64,
+    issues: 21,
+    contributed: 18,
+    reviews: 12,
+  };
+}

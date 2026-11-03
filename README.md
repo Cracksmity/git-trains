@@ -57,13 +57,41 @@ Y en tu `README.md`, para que cambie con el tema de GitHub:
 | `tren` | `auto` | `auto` evoluciona con tus vagones; o fija un modelo (ver abajo) |
 | `modo` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `tema` | `both` | `both` escribe `tren-light.svg`, `tren-dark.svg` y `tren.svg` (automático); o `light`, `dark`, `auto` |
-| `etiqueta` | `RACHA` | Palabra del letrero LED |
+| `idioma` | `es` | `es` o `en`: cambia la palabra del letrero (`RACHA` / `STREAK`) y los textos de las tarjetas |
+| `etiqueta` | según `idioma` | Palabra del letrero LED (si la fijas, manda sobre `idioma`) |
 | `escala` | `2` | Tamaño de cada píxel (1 a 6) |
 | `usuario` | dueño del repo | Usuario a dibujar |
 | `github-token` | `github.token` | Para contar contribuciones privadas usa un PAT |
 | `salida` | `dist` | Carpeta de salida |
+| `tarjetas` | `none` | Tarjetas de perfil: `stats`, `langs` o `both` (ver abajo) |
+| `rango` | `letra` | Centro del anillo de la tarjeta de estadísticas: `letra` (S, A+, B...) o `github` (la marca) |
+| `borde` | `true` | Borde de las tarjetas |
+| `lenguajes-max` | `6` | Lenguajes en la tarjeta de lenguajes (1 a 10) |
+| `color-fondo`, `color-titulo`, `color-icono`, `color-texto`, `color-anillo` | tema oscuro de GitHub | Colores de las tarjetas, hexadecimal sin `#` |
 
 Salidas: `archivos`, `vagones`, `racha`, `estado`, `modelo`.
+
+## Tarjetas de perfil
+
+Con `tarjetas: both` la Action escribe además `tarjeta-stats.svg` y `tarjeta-lenguajes.svg`: una tarjeta de estadísticas (estrellas, commits del último año, PRs, issues y repositorios a los que contribuiste, con un anillo de rango) y otra con tus lenguajes más usados. Siguen el esquema de las tarjetas de [github-readme-stats](https://github.com/anuraghazra/github-readme-stats), pero se **generan dentro de tu workflow**, con código propio: no dependen de ningún servicio externo que pueda caerse, ni de acciones de terceros.
+
+![Estadísticas](docs/tarjeta-stats.svg) ![Lenguajes](docs/tarjeta-lenguajes.svg)
+
+```yaml
+      - uses: Cracksmity/git-trains@main
+        with:
+          tarjetas: both
+          idioma: en
+          rango: github
+          borde: "false"
+          color-fondo: 0F1115
+          color-titulo: C9A04A
+          color-icono: 12A5A5
+          color-texto: EEE8DC
+          color-anillo: C9A04A
+```
+
+Si la consulta de las estadísticas falla (por ejemplo, un límite de la API), la Action avisa con un `::warning::` y sigue: el tren se genera igual. El rango es una aproximación (mezcla ponderada de commits, PRs, issues, reseñas, estrellas y seguidores). Para contar contribuciones privadas usa un PAT en `github-token`.
 
 ![Tres vías](docs/ejemplo-multi.svg)
 
@@ -88,7 +116,7 @@ Todos los trenes tienen cabina en ambos extremos (faros blancos adelante, luces 
 - Cada tren se dibuja **por código sobre una cuadrícula común** (coches de 64 px con 2 o 3 puertas por lado, bogies de dos ruedas de disco de 7 px con bastidor y cajas de grasa, pintados con la paleta de cada modelo), no a partir de imágenes. Las capas (carrocería, puertas, ruedas, letrero, chispas) se animan por separado.
 - El resultado es un SVG de ~50 KB (~80 KB en modo `multi`) con CSS: el tren avanza **de 1 px en 1 px** (`steps()`), las marcas del disco de las ruedas alternan dos fotogramas girados 60°, las nubes derivan despacio y en el tema oscuro titilan las estrellas. Respeta `prefers-reduced-motion`.
 - La escena trae ciudad, talud con arbustos, catenaria o tercer riel según el tren y, en el modo `multi`, un paisaje distinto detrás de cada vía extra (pueblo, bosque).
-- El letrero LED usa una fuente propia de 3×5 píxeles; no hay texto SVG, así que no depende de fuentes.
+- El letrero LED usa una fuente propia de 3×5 píxeles; el tren no usa texto SVG, así que no depende de fuentes. (Las tarjetas sí usan texto, con la fuente del sistema de quien las ve.)
 
 ## Desarrollo
 

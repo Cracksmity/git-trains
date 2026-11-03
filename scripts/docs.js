@@ -4,7 +4,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { renderScene } from '../src/scene.js';
 import { buildSpec } from '../src/compose.js';
-import { sampleStats } from '../src/sample.js';
+import { sampleStats, sampleProfile } from '../src/sample.js';
+import { renderStatsCard, renderLangsCard } from '../src/cards.js';
 
 mkdirSync('docs', { recursive: true });
 
@@ -17,6 +18,17 @@ const casos = [
 
 for (const [nombre, stats, opts] of casos) {
   const svg = renderScene(buildSpec(stats, opts));
+  writeFileSync(`docs/${nombre}.svg`, svg);
+  console.log(`docs/${nombre}.svg ${(svg.length / 1024).toFixed(1)} KB`);
+}
+
+// Tarjetas de perfil de ejemplo (colores por defecto, tema oscuro de GitHub).
+const demo = sampleStats();
+const tarjetas = [
+  ['tarjeta-stats', renderStatsCard(sampleProfile(), { idioma: 'es' })],
+  ['tarjeta-lenguajes', renderLangsCard(demo.languages, { idioma: 'es', max: 6 })],
+];
+for (const [nombre, svg] of tarjetas) {
   writeFileSync(`docs/${nombre}.svg`, svg);
   console.log(`docs/${nombre}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }

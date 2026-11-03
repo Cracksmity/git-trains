@@ -20,6 +20,7 @@ jobs:
         with:
           tren: auto # o: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala
           modo: single # o: multi (3 vías, un tren por lenguaje)
+          # tarjetas: both # añade tarjeta-stats.svg y tarjeta-lenguajes.svg (ver README)
 
       - name: Guardar los SVG
         run: |
