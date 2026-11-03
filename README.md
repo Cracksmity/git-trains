@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: TU_USUARIO/git-trenes@main
+      - uses: Cracksmity/git-trains@main
       - run: |
           git config user.name "git-trenes"
           git config user.email "git-trenes@users.noreply.github.com"

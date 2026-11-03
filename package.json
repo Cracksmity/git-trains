@@ -4,10 +4,17 @@
   "description": "Un tren en pixel art que crece, cambia de color y acelera según tu actividad en GitHub.",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "preview": "node scripts/serve.js",
     "muestra": "node src/index.js --sample",
     "test": "node --test"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cracksmity/git-trains.git"
+  },
+  "homepage": "https://github.com/Cracksmity/git-trains#readme"
 }

@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: TU_USUARIO/git-trenes@main
+      - uses: Cracksmity/git-trains@main
         with:
           tren: auto # o: tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala
           modo: single # o: multi (3 vías, un tren por lenguaje)
