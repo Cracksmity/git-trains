@@ -55,7 +55,7 @@ Y en tu `README.md`, para que cambie con el tema de GitHub:
 | Entrada | Por defecto | Qué hace |
 | --- | --- | --- |
 | `tren` | `auto` | `auto` evoluciona con tus vagones; o fija un modelo (ver abajo); o la ruta a [tu propio tren](#haz-tu-propio-tren-con-ia) en JSON |
-| `fondo` | `ciudad` | `ciudad` (aleatoria), `nueva-york` o la ruta a [tu propio skyline](#fondos-de-ciudad) en JSON |
+| `fondo` | `ciudad` | `ciudad` (aleatoria), `nueva-york`, `osaka` o la ruta a [tu propio skyline](#fondos-de-ciudad) en JSON |
 | `modo` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `tema` | `both` | `both` escribe `tren-light.svg`, `tren-dark.svg` y `tren.svg` (automático); o `light`, `dark`, `auto` |
 | `idioma` | `es` | `es` o `en`: cambia la palabra del letrero (`RACHA` / `STREAK`) y los textos de las tarjetas |
@@ -130,15 +130,24 @@ Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene
 
 ![Metro de Nueva York](docs/ejemplo-nueva-york.svg)
 
-Ejemplo: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
+Ejemplos: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York, y [examples/tren-osaka.json](examples/tren-osaka.json), en la serie 400 del metro de Osaka. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
 
 ## Fondos de ciudad
 
-Detrás del tren va una ciudad. Por defecto es aleatoria; con `fondo: nueva-york` es el skyline de Manhattan (One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad), y con `fondo: .github/fondo.json` es el tuyo.
+Detrás del tren va una ciudad. Por defecto es aleatoria, y con `fondo: .github/fondo.json` es la tuya. Vienen dos incluidas:
+
+| `fondo` | Qué se ve |
+| --- | --- |
+| `nueva-york` | One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad |
+| `osaka` | Pagoda de Shitennō-ji, la noria, Tsutenkaku, Abeno Harukas, el Umeda Sky Building, un puente atirantado y el castillo |
 
 Un fondo es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para monumentos con forma propia. No lleva colores: usa los del tema, así que cambia solo entre claro y oscuro y de noche se prenden las ventanas. Para hacer el tuyo, copia [docs/ia/fondo.md](docs/ia/fondo.md) en tu IA con la ciudad que quieras o una foto. Ejemplo: [examples/fondo-cdmx.json](examples/fondo-cdmx.json).
 
 La foto solo sirve de referencia: lo que se guarda es la silueta, nunca la imagen.
+
+![Osaka](docs/ejemplo-osaka.svg)
+
+Así salió Osaka a partir de dos fotos (un skyline y un tren de la serie 400 de la línea Chuo), siguiendo esas mismas instrucciones: el fondo es `fondo: osaka` y el tren es [examples/tren-osaka.json](examples/tren-osaka.json).
 
 ## Cómo funciona
 

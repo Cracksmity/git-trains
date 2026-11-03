@@ -9,7 +9,9 @@ import { renderStatsCard, renderLangsCard } from '../src/cards.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
 
-const nuevaYork = parseCustomModel(JSON.parse(readFileSync('examples/tren-nueva-york.json', 'utf8')));
+const ejemplo = (nombre) => parseCustomModel(JSON.parse(readFileSync(`examples/${nombre}.json`, 'utf8')));
+const nuevaYork = ejemplo('tren-nueva-york');
+const osaka = ejemplo('tren-osaka');
 
 mkdirSync('docs', { recursive: true });
 
@@ -22,6 +24,11 @@ const casos = [
     'ejemplo-nueva-york',
     sampleStats({ total: 400, streak: 20, yesterday: 5 }),
     { tren: nuevaYork, modo: 'single', theme: 'auto', skyline: parseSkyline('nueva-york') },
+  ],
+  [
+    'ejemplo-osaka',
+    sampleStats({ total: 400, streak: 9, yesterday: 3 }),
+    { tren: osaka, modo: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
   ],
 ];
 

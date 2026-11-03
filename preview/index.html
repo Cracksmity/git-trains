@@ -73,11 +73,7 @@
       <select id="tren"></select>
 
       <label for="fondo">Fondo</label>
-      <select id="fondo">
-        <option value="ciudad">Ciudad (aleatoria)</option>
-        <option value="nueva-york">Nueva York</option>
-        <option value="custom">Tu fondo (JSON, abajo)</option>
-      </select>
+      <select id="fondo"></select>
 
       <label for="lang">Lenguaje principal (color de la franja)</label>
       <select id="lang"></select>
@@ -160,7 +156,7 @@ import { summarize, stateFor, carsFor, CAR_THRESHOLDS } from '../src/stats.js';
 import { buildSpec } from '../src/compose.js';
 import { sampleDays, SAMPLE_LANGUAGES } from '../src/sample.js';
 import { parseCustomModel } from '../src/custom.js';
-import { parseSkyline } from '../src/skyline.js';
+import { parseSkyline, SKYLINES } from '../src/skyline.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { modo: 'single', tema: 'light', puertas: 'closed' };
@@ -169,6 +165,9 @@ const state = { modo: 'single', tema: 'light', puertas: 'closed' };
 $('tren').innerHTML = '<option value="auto">Auto (evoluciona con los vagones)</option>' +
   MODEL_ORDER.map((id) => `<option value="${id}">${MODELS[id].name}</option>`).join('') +
   '<option value="custom">Tu tren (JSON, abajo)</option>';
+$('fondo').innerHTML = '<option value="ciudad">Ciudad (aleatoria)</option>' +
+  Object.entries(SKYLINES).map(([id, s]) => `<option value="${id}">${s.name}</option>`).join('') +
+  '<option value="custom">Tu fondo (JSON, abajo)</option>';
 const langNames = Object.keys(LANGUAGE_COLORS);
 $('lang').innerHTML = langNames.map((n) => `<option>${n}</option>`).join('');
 $('lang').value = 'TypeScript';

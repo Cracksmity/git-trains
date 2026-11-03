@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { MODELS, MODEL_ORDER } from '../src/models.js';
 import { buildTrain, trainWidth, MAX_CARS } from '../src/train.js';
 import { parseCustomModel, CustomError } from '../src/custom.js';
@@ -52,8 +52,12 @@ test('una trompa del catálogo se puede repintar y conserva su bogie', () => {
   assert.equal(m.cabBogieOff, MODELS.bala.cabBogieOff);
 });
 
+const examples = (prefix) =>
+  readdirSync(new URL('../examples/', import.meta.url)).filter((f) => f.startsWith(prefix) && f.endsWith('.json'));
+
 test('los ejemplos y las instrucciones para la IA son trenes válidos', () => {
-  parseCustomModel(JSON.parse(read('examples/tren-nueva-york.json')));
+  assert.ok(examples('tren-').length >= 2);
+  for (const f of examples('tren-')) parseCustomModel(JSON.parse(read(`examples/${f}`)));
   const blocks = jsonBlocks(read('docs/ia/tren.md'));
   assert.ok(blocks.length >= 2);
   for (const b of blocks) parseCustomModel(b);
@@ -121,7 +125,7 @@ test('"ciudad" o vacío es la ciudad aleatoria de siempre', () => {
 
 test('los fondos incluidos, los ejemplos y las instrucciones son válidos', () => {
   for (const id of Object.keys(SKYLINES)) assert.ok(parseSkyline(id).buildings.length > 0, id);
-  parseSkyline(JSON.parse(read('examples/fondo-cdmx.json')));
+  for (const f of examples('fondo-')) parseSkyline(JSON.parse(read(`examples/${f}`)));
   const blocks = jsonBlocks(read('docs/ia/fondo.md'));
   assert.ok(blocks.some((b) => b.buildings));
   for (const b of blocks) parseSkyline(b.buildings ? b : { buildings: [b] });
