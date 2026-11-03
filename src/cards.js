@@ -100,21 +100,23 @@ export function calculateRank({ commits, prs, issues, reviews = 0, stars, follow
   return { level: levels[i === -1 ? levels.length - 1 : i], percentile };
 }
 
+// Visibles por defecto: la animación de entrada (fade/ring) es solo un adorno, así que un
+// visor que no ejecute animaciones sigue mostrando la tarjeta completa.
 function shell({ width, height, title, body, c, border, css = '' }) {
   return (
     `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" ` +
     `xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t"><title id="t">${esc(title)}</title>` +
     `<style>` +
-    `.header{font:600 18px ${FONT};fill:${c.titulo};opacity:0;animation:fade .8s ease-in-out forwards}` +
+    `.header{font:600 18px ${FONT};fill:${c.titulo};animation:fade .8s ease-in-out both}` +
     `.stat{font:600 14px ${FONT};fill:${c.texto}}` +
     `.bold{font-weight:700}` +
     `.lang{font:400 11px ${FONT};fill:${c.texto}}` +
     `.icon{fill:none;stroke:${c.icono};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}` +
     `.icon .fill{fill:${c.icono}}` +
-    `.row{opacity:0;animation:fade .3s ease-in-out forwards}` +
+    `.row{animation:fade .3s ease-in-out both}` +
     `@keyframes fade{from{opacity:0}to{opacity:1}}` +
     css +
-    `@media (prefers-reduced-motion:reduce){.header,.row{animation:none;opacity:1}.ring{animation:none}}` +
+    `@media (prefers-reduced-motion:reduce){.header,.row,.ring{animation:none}}` +
     `</style>` +
     `<rect x=".5" y=".5" rx="4.5" width="${width - 1}" height="${height - 1}" fill="${c.fondo}" ` +
     `stroke="${c.texto}" stroke-opacity="${border ? 0.25 : 0}"/>` +
@@ -165,7 +167,7 @@ export function renderStatsCard(p, o = {}) {
 
   const css =
     `.rank-text{font:800 24px ${FONT};fill:${c.texto}}` +
-    `.ring{animation:ring 1s ease-in-out forwards}` +
+    `.ring{animation:ring 1s ease-in-out both}` +
     `@keyframes ring{from{stroke-dashoffset:${RING}}}`;
 
   return shell({ width: W, height: H, title: L.stats(p.name || p.login), body, c, border: o.borde !== false, css });
