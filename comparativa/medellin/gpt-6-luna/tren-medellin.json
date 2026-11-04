@@ -1,0 +1,61 @@
+{
+  "id": "metro-medellin",
+  "name": "Metro de Medell?n",
+  "description": "Inspirado en el material rodante del Metro de Medell?n: carrocer?a clara, techo oscuro, m?scara frontal envolvente y franjas amarilla y verde.",
+  "pal": {
+    "body": "#d9dde0",
+    "bodyHi": "#f2f4f6",
+    "bodyLo": "#aeb4bb",
+    "upper": "#e9ecef",
+    "roof": "#343a42",
+    "roofHi": "#626b75",
+    "roofVent": "#262b31",
+    "trim": "#f2c230",
+    "dark": "#252a31",
+    "glass": "#141a21",
+    "glassHi": "#b4d7e3",
+    "door": "#dfe3e6",
+    "doorHi": "#f5f6f7",
+    "skirt": "#3c4149",
+    "outline": "#14171c",
+    "gangway": "#333840",
+    "wheel": "#282c33"
+  },
+  "bands": "btaaabb",
+  "row3": "h",
+  "win": {
+    "y0": 4,
+    "y1": 9
+  },
+  "winBand": "#1a1e25",
+  "doors": 3,
+  "nose": {
+    "color": "#d9dde0",
+    "face": "#11161d",
+    "rows": [
+      "ssssssssss",
+      "sssssssssss",
+      "sssssssssGGG",
+      "sssssssffGggg",
+      "ssssssffGGggggg",
+      "sssssffGggggggg",
+      "ssssffGgggggggg",
+      "ssssffggggggggg",
+      "sssffgggggggggg",
+      "sssffgggggggggg",
+      "ssssffggggggggg",
+      "sssssffgggggggg",
+      "ssssssffggggggg",
+      "sssssssffgggggg",
+      "ssssssssffgglgg",
+      "sssssssssffgggg",
+      "ssssssssssffggg",
+      "ssssssssssffggg",
+      "sssssssssskkk.",
+      "sssssssssskk..."
+    ]
+  },
+  "pant": "alt",
+  "roofBoxes": true,
+  "cabBogieOff": 24
+}

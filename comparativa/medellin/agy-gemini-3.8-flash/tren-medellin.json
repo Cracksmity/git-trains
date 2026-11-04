@@ -1,0 +1,58 @@
+{
+  "id": "metro-medellin",
+  "name": "Metro de Medellín",
+  "description": "Inspirado en los trenes CAF del Metro de Medellín: carrocería blanca con máscara frontal negra, franja verde curvada hacia la trompa y franja del lenguaje.",
+  "pal": {
+    "body": "#f0f2f5",
+    "bodyHi": "#ffffff",
+    "bodyLo": "#cfd3dc",
+    "upper": "#f0f2f5",
+    "roof": "#9096a2",
+    "roofHi": "#bdc3ce",
+    "roofVent": "#6c727d",
+    "trim": "#009a44",
+    "dark": "#1b1e25",
+    "glass": "#222834",
+    "glassHi": "#445268",
+    "door": "#f0f2f5",
+    "doorHi": "#ffffff",
+    "skirt": "#3a3e47"
+  },
+  "bands": "babttbl",
+  "row3": "u",
+  "win": {
+    "y0": 4,
+    "y1": 10
+  },
+  "winBand": "#1c1f26",
+  "doors": 3,
+  "nose": {
+    "color": "#f0f2f5",
+    "face": "#15181f",
+    "rows": [
+      "sssssss........",
+      "sssnnnnnn......",
+      "sssnnnnnnnn....",
+      "sssnnfffffff...",
+      "sssnnfGgggiif..",
+      "sssnnfGggggif..",
+      "sssnnfggggggf..",
+      "sssnnfggggggf..",
+      "sssnnfgggggfff.",
+      "sssnnffffffffff",
+      "sssnnfffffffffn",
+      "sssttnnnfffffn.",
+      "sssnttnnnffffnn",
+      "sssnnnttnnffffn",
+      "sssnnnnnttllffn",
+      "sssnnnnnnttlffn",
+      "sssnnnnnnnffffn",
+      "sssnnnnnnnnnnn.",
+      "sssssskkkkkk...",
+      "ssssskkkkkk...."
+    ]
+  },
+  "pant": "alt",
+  "pantX": 28,
+  "roofBoxes": false
+}

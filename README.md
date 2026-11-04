@@ -133,11 +133,11 @@ Any train fits in a small JSON file: colors, stripes, doors, and the front drawn
           idioma: en
 ```
 
-If something doesn't add up (a mistyped color, an extra row), the Action stops and lists **every** problem in the log; paste them back to the AI so it fixes them. In the playground (`npm run preview`) you can paste the JSON and see it right away, with the same error messages.
+If something doesn't add up (a mistyped color, an extra row), the Action stops and lists **every** problem in the log; paste them back to the AI so it fixes them. In the [online playground](https://cracksmity.github.io/git-trains/preview/) (or locally with `npm run preview`) you can paste the JSON and see it right away, with the same error messages.
 
 ![New York subway](docs/ejemplo-nueva-york.svg)
 
-Examples: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspired by New York's R160 subway cars, and [examples/tren-osaka.json](examples/tren-osaka.json), based on Osaka Metro's 400 series. The format uses the same keys as [src/models.js](src/models.js), so a train people love can join the catalog as is. The file is only read as data: nothing in it runs, and every color and size is checked before drawing.
+Examples: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspired by New York's R160 subway cars, and [examples/tren-osaka.json](examples/tren-osaka.json), based on Osaka Metro's 400 series. [examples/tren-medellin.json](examples/tren-medellin.json) and [examples/fondo-medellin.json](examples/fondo-medellin.json), the Medellín Metro CAF train and skyline, came out of a [comparison of ten AI runs](https://cracksmity.github.io/git-trains/comparativa/medellin/) given the same guides and photos. The format uses the same keys as [src/models.js](src/models.js), so a train people love can join the catalog as is. The file is only read as data: nothing in it runs, and every color and size is checked before drawing.
 
 ## City skylines
 

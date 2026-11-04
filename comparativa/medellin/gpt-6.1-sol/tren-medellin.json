@@ -1,0 +1,63 @@
+{
+  "id": "caf-medellin",
+  "name": "CAF del Metro de Medellín",
+  "description": "Inspirado en la fotografía local del CAF de Medellín: caja blanca, banda acristalada oscura, amarillo fino sobre verde y cabina inclinada con defensa gris. Sin logotipos ni textos de la referencia.",
+  "pal": {
+    "body": "#e6ebe7",
+    "bodyHi": "#f5f7f5",
+    "bodyLo": "#009747",
+    "upper": "#e6ebe7",
+    "roof": "#c4cbc7",
+    "roofHi": "#f5f7f5",
+    "roofVent": "#939d98",
+    "trim": "#f1c40f",
+    "dark": "#202a2d",
+    "glass": "#34474a",
+    "glassHi": "#6c8585",
+    "door": "#e6ebe7",
+    "doorHi": "#f5f7f5",
+    "skirt": "#3a4243",
+    "outline": "#20272a",
+    "gangway": "#283033",
+    "wheel": "#303839"
+  },
+  "bands": "htllabb",
+  "row3": "h",
+  "win": {
+    "y0": 4,
+    "y1": 10
+  },
+  "winBand": "#202a2d",
+  "doors": 3,
+  "nose": {
+    "color": "#e6ebe7",
+    "face": "#202a2d",
+    "rows": [
+      "sssssssss.......",
+      "sssnnnnnnnn.....",
+      "sssnnnnffffn....",
+      "sssnnnffiiffn...",
+      "fGGfnnfGgggfn...",
+      "fggfnnfGggggfn..",
+      "fggfnnnfGgggfn..",
+      "fggfnnnfgggggfn.",
+      "fggfnnnfgggggfn.",
+      "fggfnnnnfggggfn.",
+      "ffffnnnnfffffffn",
+      "sssnnnnnnfffflln",
+      "sssnnnnnnnffffqn",
+      "mmmmnnnnnnnffffn",
+      "mmmmmmmnnnnnfffn",
+      "aaaammmmmnnnfffn",
+      "sssnaaaammmmfffn",
+      "sssnnnnnaaammffn",
+      "sssskkkkkkkkkkk.",
+      "sssskkkkkkkkkk.."
+    ]
+  },
+  "pant": "alt",
+  "roofBoxes": true,
+  "articulated": false,
+  "tyres": false,
+  "cabBogieOff": 20
+}
