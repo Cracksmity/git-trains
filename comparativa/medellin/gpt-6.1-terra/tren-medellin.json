@@ -1,0 +1,60 @@
+{
+  "id": "metro-medellin",
+  "name": "Metro de Medell?n",
+  "description": "Inspirado en el tren CAF: caja blanca, m?scara oscura y franjas verde y amarilla.",
+  "pal": {
+    "body": "#e4e8e5",
+    "bodyHi": "#f8faf7",
+    "bodyLo": "#009b49",
+    "upper": "#e4e8e5",
+    "roof": "#b8c1bf",
+    "roofHi": "#eef2ed",
+    "roofVent": "#8d9996",
+    "trim": "#edc000",
+    "dark": "#151d22",
+    "glass": "#253840",
+    "glassHi": "#668083",
+    "door": "#e4e8e5",
+    "doorHi": "#f8faf7",
+    "skirt": "#353b40",
+    "outline": "#1c252a",
+    "gangway": "#30383c",
+    "wheel": "#202529"
+  },
+  "bands": "btlabbb",
+  "row3": "h",
+  "win": {
+    "y0": 4,
+    "y1": 10
+  },
+  "winBand": "#192327",
+  "doors": 3,
+  "nose": {
+    "color": "#edf1ee",
+    "face": "#151f24",
+    "rows": [
+      "ssssssssss......",
+      "ssssnnnnnnnn....",
+      "ssssnnnnnnnnn...",
+      "sssnffffffnnnn..",
+      "sssnfGGggffnnnn.",
+      "sssnfGgggfffnnn",
+      "sssnfggggffffnnn",
+      "sssnfggggffffnnn",
+      "sssnfggggffffnnn",
+      "sssnfffffffffnnn",
+      "sssnfffffffffnnn",
+      "sssnnnfffffffnn",
+      "sssttnnfffffflnn",
+      "sssmmmnnffffflnn",
+      "sssaammmnnfffnn",
+      "sssnnmmmmnnnnnn",
+      "sssnnnnmmmmnnnnn",
+      "sssnnnnnnmmmmnnn",
+      "sssskkkkkkkkkkk.",
+      "sssskkkkkkkkkk.."
+    ]
+  },
+  "pant": "alt",
+  "roofBoxes": true
+}

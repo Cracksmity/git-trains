@@ -1,0 +1,36 @@
+{
+  "name": "MedellÃ­n",
+  "fill": true,
+  "buildings": [
+    { "name": "MontaÃ±as del valle", "x": 200, "w": 200, "h": 4, "layer": "far", "windows": false, "top": [{ "type": "pyramid", "h": 40, "tip": 20 }] },
+    { "name": "MontaÃ±as del valle 2", "x": 0, "w": 160, "h": 4, "layer": "far", "windows": false, "top": [{ "type": "pyramid", "h": 28, "tip": 16 }] },
+    {
+      "name": "BasÃ­lica de torres gemelas",
+      "x": 96,
+      "rows": [
+        "..#..........#..",
+        ".###........###.",
+        ".###........###.",
+        ".###........###.",
+        ".#w#........#w#.",
+        ".#w#........#w#.",
+        ".#w#........#w#.",
+        ".###..####..###.",
+        ".#w#.######.#w#.",
+        ".#w#.#w##w#.#w#.",
+        ".###.######.###.",
+        "################"
+      ]
+    },
+    { "name": "Torre ornamentada", "x": 142, "w": 16, "h": 46, "top": [{ "type": "dome", "h": 6 }] },
+    { "name": "Iglesia gÃ³tica", "x": 164, "w": 20, "h": 34, "top": [{ "type": "stepped", "steps": 1, "h": 4 }, { "type": "spire", "h": 12 }] },
+    { "name": "Torre oscura", "x": 194, "w": 24, "h": 74 },
+    { "name": "Torre oscura delgada", "x": 220, "w": 4, "h": 66 },
+    { "name": "Palacio de la Cultura", "x": 234, "w": 56, "h": 34, "top": ["flat"] },
+    { "name": "Torre del reloj", "x": 252, "w": 16, "h": 46, "top": [{ "type": "stepped", "steps": 1, "h": 4 }, { "type": "dome", "h": 5 }, { "type": "spire", "h": 4 }] },
+    { "name": "Coltejer", "x": 304, "w": 20, "h": 62, "top": [{ "type": "pyramid", "h": 12, "tip": 2 }, { "type": "spire", "h": 6 }] },
+    { "name": "Iglesia de la Candelaria", "x": 332, "w": 20, "h": 38, "top": [{ "type": "stepped", "steps": 1, "h": 4 }, { "type": "pyramid", "h": 8, "tip": 4 }, { "type": "spire", "h": 10 }] },
+    { "name": "Torre rectangular", "x": 362, "w": 26, "h": 58, "top": ["flat"] }
+  ]
+}
+

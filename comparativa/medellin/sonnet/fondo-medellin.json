@@ -1,0 +1,22 @@
+{
+  "name": "Medellín",
+  "fill": true,
+  "buildings": [
+    { "name": "Iglesia de torres gemelas (torre izquierda)", "x": 40, "w": 14, "h": 40, "top": [{ "type": "pyramid", "h": 12, "tip": 2 }, { "type": "spire", "h": 5 }] },
+    { "name": "Iglesia de torres gemelas (nave)", "x": 54, "w": 40, "h": 34, "top": [{ "type": "dome", "h": 6 }] },
+    { "name": "Iglesia de torres gemelas (torre derecha)", "x": 94, "w": 14, "h": 40, "top": [{ "type": "pyramid", "h": 12, "tip": 2 }, { "type": "spire", "h": 5 }] },
+    { "name": "Edificio de ventanas en arco", "x": 108, "w": 32, "h": 42, "top": [{ "type": "dome", "h": 5 }] },
+    { "name": "Iglesia de la aguja (nave)", "x": 142, "w": 43, "h": 34, "top": [{ "type": "stepped", "steps": 1, "h": 3 }] },
+    { "name": "Iglesia de la aguja (torre)", "x": 156, "w": 14, "h": 44, "top": [{ "type": "pyramid", "h": 8, "tip": 2 }, { "type": "spire", "h": 4 }] },
+    { "name": "Torre oscura", "x": 185, "w": 29, "h": 65 },
+    { "name": "Torre oscura delgada", "x": 213, "w": 5, "h": 56 },
+    { "name": "Palacio de la Cultura (cuerpo)", "x": 220, "w": 76, "h": 36 },
+    { "name": "Palacio de la Cultura (torre del reloj)", "x": 249, "w": 16, "h": 40, "top": [{ "type": "pyramid", "h": 8, "tip": 4 }, { "type": "spire", "h": 5 }] },
+    { "name": "Edificio Coltejer", "x": 296, "w": 27, "h": 62, "top": [{ "type": "pyramid", "h": 14, "tip": 2 }, { "type": "antenna", "h": 6 }] },
+    { "name": "Iglesia de la Veracruz (nave)", "x": 324, "w": 38, "h": 38, "top": [{ "type": "stepped", "steps": 1, "h": 3 }] },
+    { "name": "Iglesia de la Veracruz (torre)", "x": 337, "w": 12, "h": 40, "top": [{ "type": "pyramid", "h": 10, "tip": 2 }, { "type": "spire", "h": 8 }] },
+    { "name": "Iglesia de la Veracruz (torrecilla izquierda)", "x": 326, "w": 5, "h": 42, "top": [{ "type": "spire", "h": 5 }] },
+    { "name": "Iglesia de la Veracruz (torrecilla derecha)", "x": 354, "w": 5, "h": 42, "top": [{ "type": "spire", "h": 5 }] },
+    { "name": "Torre rectangular", "x": 362, "w": 32, "h": 55 }
+  ]
+}

@@ -128,11 +128,11 @@ Cualquier tren se describe como un JSON pequeño: colores, franjas, puertas y la
           fondo: nueva-york
 ```
 
-Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene y lista **todos** los problemas en el log; pégaselos a la IA y que los corrija. En el playground (`npm run preview`) puedes pegar el JSON y verlo al instante, con los mismos mensajes de error.
+Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene y lista **todos** los problemas en el log; pégaselos a la IA y que los corrija. En el [playground en línea](https://cracksmity.github.io/git-trains/preview/) (o en local con `npm run preview`) puedes pegar el JSON y verlo al instante, con los mismos mensajes de error.
 
 ![Metro de Nueva York](docs/ejemplo-nueva-york.svg)
 
-Ejemplos: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York, y [examples/tren-osaka.json](examples/tren-osaka.json), en la serie 400 del metro de Osaka. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
+Ejemplos: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York, y [examples/tren-osaka.json](examples/tren-osaka.json), en la serie 400 del metro de Osaka. [examples/tren-medellin.json](examples/tren-medellin.json) y [examples/fondo-medellin.json](examples/fondo-medellin.json), el CAF y el skyline de Medellín, salieron de una [comparativa de diez corridas de IA](https://cracksmity.github.io/git-trains/comparativa/medellin/) con las mismas guías y fotos. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
 
 ## Fondos de ciudad
 
