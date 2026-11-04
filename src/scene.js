@@ -43,6 +43,7 @@ function speedLines(seed) {
 }
 
 export function renderScene(spec) {
+  // spec.skyline: fondo ya validado con parseSkyline (null = la ciudad aleatoria).
   const { theme = 'auto', scale = 2, user = '', title = 'Tren de GitHub' } = spec;
   if (!spec.tracks?.length) throw new Error('renderScene necesita al menos una vía');
   // Cada vía sabe si su tren toma corriente de catenaria (pantógrafo) o de tercer riel.
@@ -64,7 +65,7 @@ export function renderScene(spec) {
     `<g class="cl">${cloudsLayer(W, used)}</g>` +
     bandsLayer(W, tracks, used) +
     railsLayer(W, tracks, used) +
-    paintBackdrop(W, H, tracks, user).paths(used);
+    paintBackdrop(W, H, tracks, user, spec.skyline ?? null).paths(used);
   used.add('shadow');
 
   tracks.forEach((t, k) => {

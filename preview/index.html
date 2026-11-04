@@ -41,6 +41,19 @@
   .card h3 { margin: 0 0 6px; font-size: 14px; }
   .card.pick { outline: 2px solid var(--accent); }
   a { color: var(--accent); }
+  .editors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 820px) { .editors { grid-template-columns: 1fr; } }
+  .editor h3 { margin: 0 0 4px; font-size: 15px; }
+  .editor ol { margin: 0 0 10px; padding-left: 20px; color: var(--muted); font-size: 13px; }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .btns button { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+  .btns button.main { background: var(--accent); border-color: var(--accent); color: #fff; }
+  textarea { width: 100%; min-height: 220px; resize: vertical; padding: 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .status { font-size: 13px; margin-top: 6px; color: var(--muted); }
+  .status.ok { color: #1a7f37; }
+  .status.bad { color: #cf222e; }
+  @media (prefers-color-scheme: dark) { .status.ok { color: #3fb950; } .status.bad { color: #ff7b72; } }
+  .status ul { margin: 4px 0 0; padding-left: 18px; }
 </style>
 </head>
 <body>
@@ -58,6 +71,9 @@
 
       <label for="tren">Modelo</label>
       <select id="tren"></select>
+
+      <label for="fondo">Fondo</label>
+      <select id="fondo"></select>
 
       <label for="lang">Lenguaje principal (color de la franja)</label>
       <select id="lang"></select>
@@ -84,6 +100,42 @@
     </section>
   </div>
 
+  <h2 id="tuyo">Haz tu propio tren o fondo con IA</h2>
+  <div class="editors">
+    <div class="panel editor">
+      <h3>Tu tren</h3>
+      <ol>
+        <li>Copia las instrucciones y pégalas en tu IA (Claude, ChatGPT, Gemini...) con una foto o una descripción del tren.</li>
+        <li>Pega aquí el JSON que te devuelva. Si hay errores, cópialos y pásaselos a la IA para que los corrija.</li>
+        <li>Guárdalo en tu repositorio de perfil como <code>.github/tren.json</code> y usa <code>tren: .github/tren.json</code>.</li>
+      </ol>
+      <div class="btns">
+        <button class="main" data-copy="tren">Copiar instrucciones para la IA</button>
+        <button data-example="tren">Ejemplo</button>
+        <button data-errors="tren">Copiar errores</button>
+        <button data-download="tren">Descargar tren.json</button>
+      </div>
+      <textarea id="json-tren" spellcheck="false" placeholder='{ "pal": { "body": "#1a7f37" }, "nose": "metro-blanco" }'></textarea>
+      <div class="status" id="st-tren"></div>
+    </div>
+    <div class="panel editor">
+      <h3>Tu fondo</h3>
+      <ol>
+        <li>Copia las instrucciones y pégalas en tu IA con la ciudad que quieres o una foto de su skyline.</li>
+        <li>Pega aquí el JSON. Son siluetas en pixel art: los colores cambian solos con el tema.</li>
+        <li>Guárdalo como <code>.github/fondo.json</code> y usa <code>fondo: .github/fondo.json</code>.</li>
+      </ol>
+      <div class="btns">
+        <button class="main" data-copy="fondo">Copiar instrucciones para la IA</button>
+        <button data-example="fondo">Ejemplo</button>
+        <button data-errors="fondo">Copiar errores</button>
+        <button data-download="fondo">Descargar fondo.json</button>
+      </div>
+      <textarea id="json-fondo" spellcheck="false" placeholder='{ "fill": true, "buildings": [ { "x": 200, "w": 14, "h": 50, "top": "spire" } ] }'></textarea>
+      <div class="status" id="st-fondo"></div>
+    </div>
+  </div>
+
   <h2>Pixel art ampliado (modelo y vagones actuales)</h2>
   <div class="seg" id="puertas" style="max-width:340px;margin-bottom:8px">
     <button data-v="closed" aria-pressed="true">Puertas cerradas</button>
@@ -103,13 +155,19 @@ import { LANGUAGE_COLORS } from '../src/languages.js';
 import { summarize, stateFor, carsFor, CAR_THRESHOLDS } from '../src/stats.js';
 import { buildSpec } from '../src/compose.js';
 import { sampleDays, SAMPLE_LANGUAGES } from '../src/sample.js';
+import { parseCustomModel } from '../src/custom.js';
+import { parseSkyline, SKYLINES } from '../src/skyline.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { modo: 'single', tema: 'light', puertas: 'closed' };
 
 // --- selects
 $('tren').innerHTML = '<option value="auto">Auto (evoluciona con los vagones)</option>' +
-  MODEL_ORDER.map((id) => `<option value="${id}">${MODELS[id].name}</option>`).join('');
+  MODEL_ORDER.map((id) => `<option value="${id}">${MODELS[id].name}</option>`).join('') +
+  '<option value="custom">Tu tren (JSON, abajo)</option>';
+$('fondo').innerHTML = '<option value="ciudad">Ciudad (aleatoria)</option>' +
+  Object.entries(SKYLINES).map(([id, s]) => `<option value="${id}">${s.name}</option>`).join('') +
+  '<option value="custom">Tu fondo (JSON, abajo)</option>';
 const langNames = Object.keys(LANGUAGE_COLORS);
 $('lang').innerHTML = langNames.map((n) => `<option>${n}</option>`).join('');
 $('lang').value = 'TypeScript';
@@ -135,13 +193,108 @@ function statsFromControls() {
   return s;
 }
 
+// --- tren y fondo propios (JSON)
+// Cada editor guarda el último resultado válido y el último error, para seguir
+// mostrando algo mientras se escribe.
+const SOURCES = {
+  tren: { file: '../docs/ia/tren.md', example: '../examples/tren-nueva-york.json', parse: parseCustomModel, what: 'El tren' },
+  fondo: { file: '../docs/ia/fondo.md', example: '../examples/fondo-cdmx.json', parse: parseSkyline, what: 'El fondo' },
+};
+const custom = { tren: { value: null, error: '' }, fondo: { value: null, error: '' } };
+const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+function readEditor(kind) {
+  const text = $(`json-${kind}`).value.trim();
+  const st = $(`st-${kind}`);
+  const c = custom[kind];
+  store.set(`git-trenes:${kind}`, $(`json-${kind}`).value);
+  if (!text) {
+    c.value = null; c.error = '';
+    st.className = 'status'; st.textContent = '';
+    return;
+  }
+  try {
+    let raw;
+    try { raw = JSON.parse(text); } catch (err) { throw new Error(`${SOURCES[kind].what} no es JSON válido: ${err.message}`); }
+    c.value = SOURCES[kind].parse(raw);
+    c.error = '';
+    st.className = 'status ok';
+    st.textContent = `✓ ${c.value.name}: listo.`;
+  } catch (err) {
+    c.error = err.message;
+    const items = err.errors ?? [err.message];
+    st.className = 'status bad';
+    st.innerHTML = `${items.length} problema(s)${c.value ? ' (se muestra la última versión válida)' : ''}:<ul>${items.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`;
+  }
+}
+
+async function copyText(text, button) {
+  const label = button.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    button.textContent = '¡Copiado!';
+  } catch {
+    // Sin portapapeles (por ejemplo, fuera de https): se abre el texto para copiarlo a mano.
+    const w = window.open('', '_blank');
+    if (w) { w.document.title = 'git-trenes'; const pre = w.document.createElement('pre'); pre.style.whiteSpace = 'pre-wrap'; pre.textContent = text; w.document.body.append(pre); }
+    button.textContent = 'Ábrelo y cópialo';
+  }
+  setTimeout(() => { button.textContent = label; }, 1800);
+}
+
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const kind = b.dataset.copy ?? b.dataset.example ?? b.dataset.errors ?? b.dataset.download;
+  if (!kind) return;
+  const src = SOURCES[kind];
+  if (b.dataset.copy) {
+    const text = await (await fetch(src.file)).text();
+    copyText(text, b);
+  } else if (b.dataset.example) {
+    $(`json-${kind}`).value = await (await fetch(src.example)).text();
+    onEdit(kind);
+  } else if (b.dataset.errors) {
+    copyText(custom[kind].error ? `Corrige estos errores y devuélveme el JSON completo:\n${custom[kind].error}` : 'Sin errores.', b);
+  } else if (b.dataset.download) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([$(`json-${kind}`).value], { type: 'application/json' }));
+    a.download = `${kind}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+});
+
+function onEdit(kind) {
+  readEditor(kind);
+  const select = kind === 'tren' ? $('tren') : $('fondo');
+  if (custom[kind].value) select.value = 'custom';
+  render();
+}
+for (const kind of ['tren', 'fondo']) {
+  $(`json-${kind}`).value = store.get(`git-trenes:${kind}`) ?? '';
+  readEditor(kind);
+  $(`json-${kind}`).addEventListener('input', () => onEdit(kind));
+}
+
+function pickedTrain() {
+  const v = $('tren').value;
+  return v === 'custom' ? custom.tren.value ?? 'auto' : v;
+}
+function pickedSkyline() {
+  const v = $('fondo').value;
+  return v === 'custom' ? custom.fondo.value : parseSkyline(v);
+}
+
 let url;
 function render() {
   $('o-total').textContent = $('total').value;
   $('o-streak').textContent = $('streak').value;
   $('o-yesterday').textContent = $('yesterday').value;
   const s = statsFromControls();
-  const spec = buildSpec(s, { tren: $('tren').value, modo: state.modo, theme: state.tema, scale: 2 });
+  const spec = buildSpec(s, { tren: pickedTrain(), modo: state.modo, theme: state.tema, scale: 2, skyline: pickedSkyline() });
   const svg = renderScene(spec);
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
@@ -169,7 +322,8 @@ function paint(canvas, train, scale, openDoors) {
 }
 
 function zoom(t) {
-  const train = buildTrain(MODELS[t.model], { cars: t.cars, stripe: t.stripe, streak: t.streak, label: 'RACHA', dir: t.dir });
+  const model = typeof t.model === 'string' ? MODELS[t.model] : t.model;
+  const train = buildTrain(model, { cars: t.cars, stripe: t.stripe, streak: t.streak, label: 'RACHA', dir: t.dir });
   paint($('zoom'), train, 5, state.puertas === 'open');
 }
 
@@ -186,6 +340,7 @@ function gallery() {
 
 for (const id of ['total', 'streak', 'yesterday']) $(id).addEventListener('input', () => { render(); });
 $('tren').addEventListener('change', render);
+$('fondo').addEventListener('change', render);
 $('lang').addEventListener('change', () => { render(); gallery(); });
 seg('modo', 'modo', render);
 seg('tema', 'tema', render);

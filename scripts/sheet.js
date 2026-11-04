@@ -1,10 +1,13 @@
 // Herramienta de desarrollo: dibuja una hoja PNG con los trenes ampliados.
 // node scripts/sheet.js salida.png [escala] [vagones] [abiertas] [modelo,modelo...]
+// Cada modelo puede ser un id del catálogo o la ruta a un tren personalizado (.json):
+// node scripts/sheet.js mi-tren.png 5 2 0 examples/tren-nueva-york.json
 
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { buildTrain, TRAIN_H } from '../src/train.js';
 import { MODELS, MODEL_ORDER } from '../src/models.js';
+import { parseCustomModel } from '../src/custom.js';
 
 const [out = 'hoja.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a'] = process.argv.slice(2);
 const scale = Number(scaleArg);
@@ -21,8 +24,9 @@ function hex(c) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+const load = (id) => (id.endsWith('.json') ? parseCustomModel(JSON.parse(readFileSync(id, 'utf8'))) : MODELS[id]);
 const trains = ids.map((id, i) =>
-  buildTrain(MODELS[id], { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'RACHA' }),
+  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'RACHA' }),
 );
 const gap = 6;
 const W = Math.max(...trains.map((t) => t.width)) * scale + 16;
