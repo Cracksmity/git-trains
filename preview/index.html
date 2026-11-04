@@ -112,6 +112,7 @@
       <div class="btns">
         <button class="main" data-copy="tren">Copiar instrucciones para la IA</button>
         <button data-example="tren">Ejemplo</button>
+        <button data-example="tren" data-file="../examples/tren-vapor.json">Ejemplo de vapor</button>
         <button data-errors="tren">Copiar errores</button>
         <button data-download="tren">Descargar tren.json</button>
       </div>
@@ -255,7 +256,7 @@ document.addEventListener('click', async (e) => {
     const text = await (await fetch(src.file)).text();
     copyText(text, b);
   } else if (b.dataset.example) {
-    $(`json-${kind}`).value = await (await fetch(src.example)).text();
+    $(`json-${kind}`).value = await (await fetch(b.dataset.file ?? src.example)).text();
     onEdit(kind);
   } else if (b.dataset.errors) {
     copyText(custom[kind].error ? `Corrige estos errores y devuélveme el JSON completo:\n${custom[kind].error}` : 'Sin errores.', b);
@@ -310,7 +311,7 @@ function paint(canvas, train, scale, openDoors) {
   canvas.width = train.width * scale; canvas.height = train.height * scale;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const order = ['body', 'lit', 'wa'].concat(openDoors ? ['open'] : [], ['led']);
+  const order = ['body', 'lit', 'wa'].concat(openDoors ? ['open'] : [], ['led', 'pa']);
   for (const name of order) {
     const g = train.layers[name];
     for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) {

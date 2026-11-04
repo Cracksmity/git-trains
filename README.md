@@ -139,6 +139,10 @@ If something doesn't add up (a mistyped color, an extra row), the Action stops a
 
 Examples: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspired by New York's R160 subway cars, and [examples/tren-osaka.json](examples/tren-osaka.json), based on Osaka Metro's 400 series. [examples/tren-medellin.json](examples/tren-medellin.json) and [examples/fondo-medellin.json](examples/fondo-medellin.json), the Medellín Metro CAF train and skyline, came out of a [comparison of ten AI runs](https://cracksmity.github.io/git-trains/comparativa/medellin/) given the same guides and photos. The format uses the same keys as [src/models.js](src/models.js), so a train people love can join the catalog as is. The file is only read as data: nothing in it runs, and every color and size is checked before drawing.
 
+**Steam trains.** With `loco` instead of `nose`, the train gets a locomotive up front: its own 30-row drawing, with the chimney and dome rising above the cars, driving wheels joined by a moving coupling rod, and smoke that puffs faster the faster it goes. The cars follow behind (the first one carries the sign) and the last one ends in a flat tail with a red lamp. Example: [examples/tren-vapor.json](examples/tren-vapor.json), a generic tank engine; the AI instructions explain the format.
+
+![Steam train](docs/ejemplo-vapor.svg)
+
 ## City skylines
 
 There's a city behind the train. By default it's random; with `fondo: .github/fondo.json` it's yours. Two come built in:

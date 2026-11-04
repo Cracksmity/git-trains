@@ -134,6 +134,10 @@ Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene
 
 Ejemplos: [examples/tren-nueva-york.json](examples/tren-nueva-york.json), inspirado en los R160 del metro de Nueva York, y [examples/tren-osaka.json](examples/tren-osaka.json), en la serie 400 del metro de Osaka. [examples/tren-medellin.json](examples/tren-medellin.json) y [examples/fondo-medellin.json](examples/fondo-medellin.json), el CAF y el skyline de Medellín, salieron de una [comparativa de diez corridas de IA](https://cracksmity.github.io/git-trains/comparativa/medellin/) con las mismas guías y fotos. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste mucho puede pasar al catálogo copiándolo tal cual. El archivo solo se lee como datos: nada de lo que traiga se ejecuta, y cada color y medida se valida antes de dibujar.
 
+**Trenes de vapor.** Con `loco` en vez de `nose`, el tren lleva una locomotora al frente: un dibujo propio de 30 filas, con chimenea y domo por encima de los vagones, ruedas motrices unidas por una biela que se mueve y humo que sale más seguido cuanto más rápido va. Los vagones van detrás (el primero lleva el letrero) y el último termina en una cola plana con luz roja. Ejemplo: [examples/tren-vapor.json](examples/tren-vapor.json), una locomotora tanque genérica; las instrucciones para la IA explican el formato.
+
+![Tren de vapor](docs/ejemplo-vapor.svg)
+
 ## Fondos de ciudad
 
 Detrás del tren va una ciudad. Por defecto es aleatoria, y con `fondo: .github/fondo.json` es la tuya. Vienen dos incluidas:

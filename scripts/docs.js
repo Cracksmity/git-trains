@@ -12,6 +12,7 @@ import { parseSkyline } from '../src/skyline.js';
 const ejemplo = (nombre) => parseCustomModel(JSON.parse(readFileSync(`examples/${nombre}.json`, 'utf8')));
 const nuevaYork = ejemplo('tren-nueva-york');
 const osaka = ejemplo('tren-osaka');
+const vapor = ejemplo('tren-vapor');
 
 mkdirSync('docs', { recursive: true });
 
@@ -30,6 +31,7 @@ const casos = [
     sampleStats({ total: 400, streak: 9, yesterday: 3 }),
     { tren: osaka, modo: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
   ],
+  ['ejemplo-vapor', sampleStats({ total: 600, streak: 15, yesterday: 3 }), { tren: vapor, modo: 'single', theme: 'auto' }],
 ];
 
 for (const [nombre, stats, opts] of casos) {

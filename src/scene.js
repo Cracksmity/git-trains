@@ -94,6 +94,13 @@ export function renderScene(spec) {
     inner += group('wb', `wb wb${k}`);
     inner += group('open', `do do${k}`);
     inner += group('led', 'led');
+    // Humo de la locomotora: bocanadas más seguidas cuanto más rápido va; parada,
+    // echa vapor despacio.
+    if (!L.pa.isEmpty()) {
+      inner += group('pa', `sm pa${k}`) + group('pb', `sm pb pb${k}`);
+      const puff = moving ? +(st.wheel * 4).toFixed(2) : 3;
+      css.push(`.pa${k}{animation:sa ${puff}s step-end infinite}`, `.pb${k}{animation:sb ${puff}s step-end infinite}`);
+    }
     if (moving && st.sparks) inner += group('sa', `sp sa${k}`) + group('sb', `sp sb${k}`);
 
     if (moving) {
@@ -143,7 +150,7 @@ export function renderScene(spec) {
     '@keyframes sa{0%{opacity:1}50%{opacity:0}}',
     '@keyframes sb{0%{opacity:0}50%{opacity:1}}',
     '@keyframes dopen{0%{opacity:0}8%{opacity:1}78%{opacity:0}}',
-    '@media (prefers-reduced-motion:reduce){.tr,.wa,.wb,.sp,.led,.do,.cl,.tw{animation:none!important}}',
+    '@media (prefers-reduced-motion:reduce){.tr,.wa,.wb,.sp,.sm,.led,.do,.cl,.tw{animation:none!important}.pb{opacity:0}}',
   ].join('');
 
   const safeTitle = String(title).replace(/[<&>"]/g, '');

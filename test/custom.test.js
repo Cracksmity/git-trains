@@ -61,8 +61,9 @@ test('los ejemplos y las instrucciones para la IA son trenes válidos', () => {
   const blocks = jsonBlocks(read('docs/ia/tren.md'));
   assert.ok(blocks.length >= 2);
   for (const b of blocks) parseCustomModel(b);
-  // El ejemplo grande de las instrucciones es el mismo del archivo de ejemplo.
+  // Los ejemplos grandes de las instrucciones son los mismos de los archivos de ejemplo.
   assert.deepEqual(blocks[0], JSON.parse(read('examples/tren-nueva-york.json')));
+  assert.deepEqual(blocks.find((b) => b.loco), JSON.parse(read('examples/tren-vapor.json')));
 });
 
 test('los errores se juntan en una lista para pasársela a la IA', () => {
@@ -93,6 +94,92 @@ test('los colores no pueden colar nada en el SVG', () => {
     assert.ok(problems(() => parseCustomModel({ pal: { body }, nose: 'bala' })).some((e) => e.startsWith('pal.body')), body);
   }
   assert.ok(problems(() => parseCustomModel({ id: '<script>', pal: { body: '#fff' }, nose: 'bala' })).some((e) => e.startsWith('id')));
+});
+
+// --- Locomotora (trenes de vapor) ---------------------------------------------
+
+const vapor = () => JSON.parse(read('examples/tren-vapor.json'));
+const locoRows = (w = 20) => Array.from({ length: 30 }, (_, y) => (y >= 5 && y <= 24 ? 'n'.repeat(w) : ''));
+const locoTrain = (loco, extra = {}) => ({ pal: { body: '#888' }, loco: { rows: locoRows(), wheels: { drive: [5, 14] }, ...loco }, ...extra });
+
+test('con locomotora: vagones detrás, enganche y la locomotora al frente', () => {
+  const m = parseCustomModel(vapor());
+  assert.equal(m.nose, undefined);
+  assert.equal(m.loco.w, 48);
+  for (let cars = 1; cars <= MAX_CARS; cars++) {
+    for (const dir of [1, -1]) {
+      const t = buildTrain(m, { cars, dir, streak: 12 });
+      assert.equal(t.width, cars * 64 + 2 + m.loco.w);
+      assert.equal(t.width, trainWidth(m, cars));
+      assert.ok(t.led && t.led.x >= 0 && t.led.x + 39 <= t.width, 'el letrero va en el primer vagón');
+    }
+  }
+  assert.ok(trainWidth(m, MAX_CARS) <= SCENE_W);
+});
+
+test('con locomotora la cola es plana con luz roja y el faro va solo adelante', () => {
+  const m = parseCustomModel(vapor());
+  const t = buildTrain(m, { cars: 2 });
+  const colorsIn = (x0, x1) => {
+    const out = new Set();
+    for (let y = 0; y < t.height; y++) for (let x = x0; x < x1; x++) out.add(t.layers.body.get(x, y));
+    return out;
+  };
+  const rear = colorsIn(0, 4);
+  const front = colorsIn(t.width - m.loco.w, t.width);
+  assert.ok(rear.has('#ff4a4a') && !rear.has('#fff4b0'), 'cola');
+  assert.ok(front.has('#fff4b0') && !front.has('#ff4a4a'), 'locomotora');
+});
+
+test('la biela y el humo cambian entre fotogramas; sin chimenea no hay humo', () => {
+  const m = parseCustomModel(vapor());
+  const t = buildTrain(m, { cars: 1 });
+  const loco = (g) => {
+    const out = [];
+    for (let y = 0; y < g.h; y++) for (let x = t.width - m.loco.w; x < t.width; x++) out.push(g.get(x, y));
+    return out.join();
+  };
+  assert.notEqual(loco(t.layers.wa), loco(t.layers.wb));
+  assert.ok(!t.layers.pa.isEmpty() && !t.layers.pb.isEmpty());
+  assert.notEqual(loco(t.layers.pa), loco(t.layers.pb));
+  const sinHumo = vapor();
+  delete sinHumo.loco.smoke;
+  const t2 = buildTrain(parseCustomModel(sinHumo), { cars: 1 });
+  assert.ok(t2.layers.pa.isEmpty() && t2.layers.pb.isEmpty());
+  // Los trenes del catálogo no echan humo.
+  assert.ok(buildTrain(MODELS.bala, { cars: 2 }).layers.pa.isEmpty());
+});
+
+test('la locomotora se valida con mensajes para la IA', () => {
+  assert.doesNotThrow(() => parseCustomModel(locoTrain({})));
+  const has = (raw, text) => assert.ok(problems(() => parseCustomModel(raw)).some((e) => e.includes(text)), text);
+  has(locoTrain({}, { nose: 'bala' }), 'nose: con "loco"');
+  has(locoTrain({}, { pant: 'lead' }), 'pant: con "loco"');
+  has(locoTrain({}, { articulated: true }), 'articulated');
+  has(locoTrain({ rows: locoRows().slice(0, 20) }), 'loco.rows: deben ser 30');
+  has(locoTrain({ rows: locoRows(70) }), 'de 16 a 60');
+  has(locoTrain({ rows: locoRows().map((r, y) => (y === 9 ? 'nnxn' : r)) }), 'loco.rows[9]: símbolos desconocidos "x"');
+  has(locoTrain({ wheels: { drive: [5, 10] } }), 'se enciman');
+  has(locoTrain({ wheels: { drive: [2] } }), 'se sale de la locomotora');
+  has(locoTrain({ wheels: { drive: [5], d: 8 } }), 'loco.wheels.d');
+  has(locoTrain({ wheels: { drive: [] } }), 'loco.wheels.drive');
+  has(locoTrain({ wheels: undefined }), 'loco.wheels: falta');
+  has(locoTrain({ smoke: 3, rows: locoRows().map((r) => r.replace(/^(...)n/, '$1.')) }), 'loco.smoke: la columna 3 está vacía');
+  has(locoTrain({ chimenea: 3 }), 'loco: clave desconocida "chimenea"');
+  has({ pal: { body: '#888' } }, 'o usa "loco"');
+});
+
+test('un tren con locomotora se dibuja en la escena con humo animado', () => {
+  const m = parseCustomModel(vapor());
+  for (const state of ['idle', 'slow', 'fast']) {
+    const svg = renderScene({ tracks: [{ model: m, cars: 3, stripe: '#f1e05a', streak: 5, state, dir: -1 }] });
+    assert.ok(svg.startsWith('<svg') && !/undefined|NaN|null/.test(svg), state);
+    assert.match(svg, /class="sm pa0"/);
+    assert.match(svg, /\.pa0\{animation:sa [\d.]+s step-end infinite\}/);
+    assert.ok(!svg.includes('c-wire'), 'sin catenaria');
+  }
+  const metro = renderScene({ tracks: [{ model: 'metro-gris', cars: 3, stripe: '#fff', state: 'normal' }] });
+  assert.ok(!metro.includes('class="sm'));
 });
 
 test('un tren personalizado va en la vía principal; en multi las demás siguen el catálogo', () => {
