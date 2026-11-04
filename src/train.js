@@ -12,6 +12,17 @@ export const LED_W = 39;
 export const DOOR_W = 11;
 export const MAX_CARS = 6;
 
+// Locomotora (opcional, para trenes de vapor): un dibujo completo que va al frente
+// en lugar de la cabina, con sus ruedas motrices unidas por la biela. Los vagones
+// van detrás y el último termina en una cola plana con luz roja.
+export const LOCO_ROWS = 30; // 5 sobre el techo de los coches + 20 de la caja + 5 de ruedas
+export const LOCO_UP = 5; // filas del dibujo por encima del techo de los coches
+export const LOCO_MIN_W = 16;
+export const LOCO_MAX_W = 60;
+export const LOCO_WHEELS = [7, 9, 11]; // diámetros de las ruedas motrices
+export const LOCO_SMALL = 5; // diámetro de las ruedas chicas (guía o arrastre)
+const COUPLER = 2; // enganche entre el primer vagón y la locomotora
+
 // Costado de un coche intermedio: ventanas ('w', ancho) y puertas ('d'), de atrás
 // hacia adelante. Con 3 puertas por lado (los metros) las puertas son más angostas.
 const LAYOUTS = {
@@ -22,6 +33,7 @@ const layoutOf = (model) => LAYOUTS[model.doors ?? 2];
 
 // La trompa de cola es la misma plantilla espejada; ahí las luces van en rojo.
 const TAIL_LIGHT = { l: 'r', y: 'r', q: 'r' };
+const TAIL_LAMP = '#ff4a4a';
 
 const LED_X = 3;
 const DOOR_Y0 = 3;
@@ -72,8 +84,11 @@ export function cabWidth(model) {
 }
 
 // Coches intermedios + coche cabeza + la trompa de cola (cabina en ambos extremos).
+// Con locomotora: los vagones, el enganche y la locomotora.
 export function trainWidth(model, cars) {
-  return (clamp(cars, 1, MAX_CARS) - 1) * MID_W + cabWidth(model) + model.nose.w;
+  const n = clamp(cars, 1, MAX_CARS);
+  if (model.loco) return n * MID_W + COUPLER + model.loco.w;
+  return (n - 1) * MID_W + cabWidth(model) + model.nose.w;
 }
 
 function symbolColor(model, s, stripe) {
@@ -92,13 +107,15 @@ function symbolColor(model, s, stripe) {
 
 const NOSE_DARK = '#26242b';
 
-// Color de un símbolo de la plantilla de trompa (ver noses.js).
-function noseColor(model, sym, y, stripe) {
+// Color de un símbolo de la trompa o de la locomotora (ver noses.js). `part` es
+// model.nose o model.loco: de ahí salen la pintura (n), el panel (f) y, en la
+// locomotora, los tonos claro y oscuro de su pintura (h, m).
+function partColor(model, part, sym, y, stripe) {
   const p = model.pal;
   switch (sym) {
     case 's': return rowColor(model, y, stripe);
-    case 'n': return model.nose.color ?? rowColor(model, y, stripe);
-    case 'f': return model.nose.face ?? p.dark;
+    case 'n': return part.color ?? rowColor(model, y, stripe);
+    case 'f': return part.face ?? p.dark;
     case 'o': return p.outline;
     case 'g': return p.glass;
     case 'G': return p.glassHi;
@@ -109,18 +126,19 @@ function noseColor(model, sym, y, stripe) {
     case 'i': return LED_ON;
     case 'r': return '#ff4a4a';
     case 'q': return '#7d2b30';
-    case 'm': return p.bodyLo;
-    case 'h': return p.bodyHi;
+    case 'm': return part.lo ?? p.bodyLo;
+    case 'h': return part.hi ?? p.bodyHi;
     case 't': return p.trim;
     case 'd': return p.dark;
     default: return rowColor(model, y, stripe);
   }
 }
 
+// Color del costado en la fila y de la caja (0 techo .. 19 faldón). Arriba del
+// techo sigue el brillo del techo y abajo del faldón, el faldón.
 function rowColor(model, y, stripe) {
   const p = model.pal;
-  if (y === 0) return p.roofHi;
-  if (y === 1) return p.roofHi;
+  if (y <= 1) return p.roofHi;
   if (y === 2) return p.roof;
   if (y === 3) return symbolColor(model, model.row3, stripe);
   if (y <= 10) return p.upper;
@@ -137,7 +155,7 @@ export function buildTrain(model, opts = {}) {
     dir = 1,
   } = opts;
   const n = clamp(Math.round(cars), 1, MAX_CARS);
-  const cabW = cabWidth(model);
+  const cabW = model.loco ? 0 : cabWidth(model);
   const width = trainWidth(model, n);
 
   const layers = {
@@ -148,22 +166,34 @@ export function buildTrain(model, opts = {}) {
     wb: new Grid(width, TRAIN_H), // marcas del disco de rueda, fotograma B
     sa: new Grid(width, TRAIN_H), // chispas A
     sb: new Grid(width, TRAIN_H), // chispas B
+    pa: new Grid(width, TRAIN_H), // humo de la locomotora A
+    pb: new Grid(width, TRAIN_H), // humo de la locomotora B
     led: new Grid(width, TRAIN_H),
   };
   const ctx = { layers, model, stripe, panes: [], led: null, pantAnchor: null, shoeAnchor: null };
 
   let x = 0;
-  for (let i = 0; i < n; i++) {
-    const isCab = i === n - 1;
-    const isTail = i === 0;
-    const w = (isCab ? cabW : MID_W) + (isTail ? model.nose.w : 0);
-    // Modelos articulados: los coches van en pares (desde la cabeza) que comparten
-    // el bogie de la unión.
-    const f = n - 1 - i;
-    const artFront = !!model.articulated && f % 2 === 1;
-    const artRear = !!model.articulated && f % 2 === 0 && !isTail;
-    drawCar(ctx, { ox: x, w, isCab, isTail, artFront, artRear, frontIndex: f });
-    x += w;
+  if (model.loco) {
+    // Vagones (el de adelante lleva el letrero), enganche y locomotora.
+    for (let i = 0; i < n; i++) {
+      drawCar(ctx, { ox: x, w: MID_W, isCab: false, isTail: i === 0, isLed: i === n - 1, frontIndex: n - 1 - i });
+      x += MID_W;
+    }
+    layers.body.rect(x, TOP + 15, COUPLER, 2, NOSE_DARK);
+    drawLoco(ctx, x + COUPLER);
+  } else {
+    for (let i = 0; i < n; i++) {
+      const isCab = i === n - 1;
+      const isTail = i === 0;
+      const w = (isCab ? cabW : MID_W) + (isTail ? model.nose.w : 0);
+      // Modelos articulados: los coches van en pares (desde la cabeza) que comparten
+      // el bogie de la unión.
+      const f = n - 1 - i;
+      const artFront = !!model.articulated && f % 2 === 1;
+      const artRear = !!model.articulated && f % 2 === 0 && !isTail;
+      drawCar(ctx, { ox: x, w, isCab, isTail, artFront, artRear, frontIndex: f });
+      x += w;
+    }
   }
 
   // Ventanas iluminadas: crecen con la racha (30 días = todas), de adelante hacia atrás.
@@ -193,12 +223,13 @@ function drawCar(ctx, car) {
   const { layers: L, model, stripe } = ctx;
   const P = model.pal;
   const B = L.body;
-  const { ox, w, isCab, isTail, artFront, artRear } = car;
+  const { ox, w, isCab, isTail, isLed, artFront, artRear } = car;
   const layout = layoutOf(model);
   // Las trompas vienen de una plantilla: la delantera en el coche cabeza y la misma,
-  // espejada, en el de cola. El resto es un rectángulo.
+  // espejada, en el de cola. El resto es un rectángulo. Detrás de una locomotora
+  // no hay cabinas: la cola es plana.
   const art = isCab ? model.nose : null;
-  const tail = isTail ? model.nose : null;
+  const tail = isTail && !model.loco ? model.nose : null;
   const nx0 = art ? w - art.w : w; // columna donde empieza la trompa delantera
   const lx = tail ? tail.w : 0; // columna donde empieza la caja, tras la trompa de cola
   const cell = (x, y) => {
@@ -222,7 +253,7 @@ function drawCar(ctx, car) {
     for (let x = 0; x < w; x++) {
       const sym = cell(x, y);
       if (sym === '.') continue;
-      px(x, y, inNose(x) ? noseColor(model, sym, y, stripe) : rowColor(model, y, stripe));
+      px(x, y, inNose(x) ? partColor(model, model.nose, sym, y, stripe) : rowColor(model, y, stripe));
     }
   }
 
@@ -237,6 +268,8 @@ function drawCar(ctx, car) {
       if (leftOpen || !inCar(x + 1, y) || !inCar(x, y - 1) || !inCar(x, y + 1)) px(x, y, P.outline);
     }
   }
+  // Cola plana del último vagón (tren con locomotora): luz roja junto al borde.
+  if (isTail && model.loco) for (const y of [14, 15]) px(1, y, TAIL_LAMP);
 
   // 5. Detalles de techo: unidades hundidas.
   if (model.roofBoxes) {
@@ -293,14 +326,22 @@ function drawCar(ctx, car) {
     return x + dw;
   };
 
-  if (isCab) {
-    // Letrero LED (fondo; el texto va en la capa led).
+  // Letrero LED (fondo; el texto va en la capa led). Devuelve dónde sigue el costado.
+  const ledSign = () => {
     B.rect(ox + lx + LED_X, TOP + 4, LED_W, 7, LED_BG);
     B.frame(ox + lx + LED_X, TOP + 4, LED_W, 7, P.outline);
     ctx.led = { x: ox + lx + LED_X, y: TOP + 4 };
-    let x = lx + LED_X + LED_W + 2;
-    x = door(x) + 2;
+    return lx + LED_X + LED_W + 2;
+  };
+
+  if (isCab) {
+    let x = door(ledSign()) + 2;
     if (model.cabWindows) x = windows(x, model.cabWindows) + 2;
+  } else if (isLed) {
+    // Primer vagón detrás de la locomotora: letrero, una puerta y una ventana con
+    // el espacio que queda.
+    const x = door(ledSign()) + 2;
+    windows(x, w - 2 - x);
   } else {
     let x = lx + 3;
     for (const [kind, ww] of layout.items) x = (kind === 'd' ? door(x) : windows(x, ww)) + 2;
@@ -312,7 +353,7 @@ function drawCar(ctx, car) {
   //    coches comparten un bogie centrado en la unión; lo dibuja el de adelante.
   const cabOff = model.cabBogieOff ?? 18;
   const bogies = [
-    artRear ? 0 : isTail ? cabOff - 1 : BOGIE_IN,
+    artRear ? 0 : tail ? cabOff - 1 : BOGIE_IN,
     artFront ? w : w - (isCab ? cabOff : BOGIE_IN + 1),
   ];
   for (const bx of artFront ? bogies.slice(0, 1) : bogies) drawBogie(ctx, ox + bx);
@@ -401,6 +442,136 @@ function drawBogie(ctx, bx) {
     for (const [layer, pts] of Object.entries(WHEEL_MARKS)) {
       for (const [dx, dy] of pts) L[layer].set(cx + dx, TOP + 21 + dy, wheel.mark);
     }
+  }
+}
+
+// --- Locomotora --------------------------------------------------------------
+
+const ROD = '#c9cdd4';
+const ROD_PIN = '#7c828c';
+const STEAM = { '#': '#f4f5f8', '%': '#cfd4dc', o: '#8f98a5' };
+
+// Bocanadas de humo: [máscara, dx, dy] con la máscara centrada en la chimenea + dx
+// y su fila de abajo en la boca de la chimenea + dy. "#" humo, "%" sombra, "o"
+// contorno. Dos fotogramas: la bocanada sale y la anterior se queda atrás (el tren
+// avanza). Arriba de la chimenea quedan pocas filas, así que el humo se tiende.
+const PUFF_S = ['.oo.', 'o##o', 'o#%o', '.oo.'];
+const PUFF_M = ['.ooo.', 'o###o', 'o#%%o', '.ooo.'];
+const PUFF_L = ['..ooo..', '.o###oo', 'o######o', 'o##%%%%o', '.oooooo.'];
+const PUFFS = {
+  pa: [[PUFF_S, 0, -1], [PUFF_L, -10, -1]],
+  pb: [[PUFF_M, -1, -1], [PUFF_L, -17, -2]],
+};
+
+// Píxeles de una rueda de radio r: [dx, dy, ¿llanta?].
+function wheelPixels(r) {
+  const lim = (r + 0.5) ** 2;
+  const inside = (dx, dy) => dx * dx + dy * dy <= lim;
+  const out = [];
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (!inside(dx, dy)) continue;
+      const rim = !inside(dx - 1, dy) || !inside(dx + 1, dy) || !inside(dx, dy - 1) || !inside(dx, dy + 1);
+      out.push([dx, dy, rim]);
+    }
+  }
+  return out;
+}
+
+// Redondeo simétrico (Math.round(-1.5) da -1).
+const sround = (v) => Math.sign(v) * Math.round(Math.abs(v));
+
+// Rueda de locomotora con centro (cx, cy). Las marcas del disco giran 60° entre
+// las capas wa y wb, igual que en los bogies.
+function drawWheel(ctx, cx, cy, r, colors) {
+  const { layers: L } = ctx;
+  for (const [dx, dy, rim] of wheelPixels(r)) {
+    L.body.set(cx + dx, cy + dy, rim ? colors.rim : dy < 0 ? colors.hi : colors.lo);
+  }
+  L.body.set(cx, cy, colors.hub);
+  if (r >= 4) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) L.body.set(cx + dx, cy + dy, colors.hubLo);
+  const rm = r - 1;
+  const marks = { wa: [-90, 30, 150], wb: [-30, 90, 210] };
+  for (const [layer, angles] of Object.entries(marks)) {
+    for (const a of angles) {
+      const t = (a * Math.PI) / 180;
+      L[layer].set(cx + sround(rm * Math.cos(t)), cy + sround(rm * Math.sin(t)), colors.mark);
+    }
+  }
+}
+
+// Locomotora con su esquina de arriba a la izquierda en la columna ox del tren.
+function drawLoco(ctx, ox) {
+  const { layers: L, model, stripe } = ctx;
+  const P = model.pal;
+  const loco = model.loco;
+  const y0 = TOP - LOCO_UP; // fila del tren donde empieza el dibujo
+  const at = (x, y) => (y >= 0 && y < LOCO_ROWS && x >= 0 && x < loco.w ? loco.rows[y][x] : '.');
+  const filled = (x, y) => at(x, y) !== '.';
+
+  // 1. Dibujo y contorno automático en los bordes de la silueta.
+  for (let y = 0; y < LOCO_ROWS; y++) {
+    for (let x = 0; x < loco.w; x++) {
+      const sym = at(x, y);
+      if (sym === '.') continue;
+      const edge = !filled(x - 1, y) || !filled(x + 1, y) || !filled(x, y - 1) || !filled(x, y + 1);
+      L.body.set(ox + x, y0 + y, edge ? P.outline : partColor(model, loco, sym, y - LOCO_UP, stripe));
+    }
+  }
+
+  // 2. Ruedas: las motrices unidas por la biela y las chicas sueltas. Todas tocan
+  //    el riel en la última fila del dibujo.
+  const { wheels } = loco;
+  const U = underColors(P);
+  const disc = wheels.color ?? U.disc;
+  const colors = {
+    rim: P.outline,
+    hi: mix(disc, '#ffffff', 0.1),
+    lo: disc,
+    hub: mix(disc, '#ffffff', 0.45),
+    hubLo: mix(disc, '#ffffff', 0.2),
+    mark: mix(disc, '#ffffff', 0.3),
+  };
+  const bottom = TOP + 24;
+  const r = (wheels.d - 1) / 2;
+  const rs = (LOCO_SMALL - 1) / 2;
+  for (const x of wheels.small) drawWheel(ctx, ox + x, bottom - rs, rs, colors);
+  for (const x of wheels.drive) drawWheel(ctx, ox + x, bottom - r, r, colors);
+
+  // La biela va en las capas wa/wb: baja y adelante en un fotograma, sube y atrás
+  // en el otro, como el muñón girando con la rueda.
+  if (wheels.rod && wheels.drive.length >= 2) {
+    const q = Math.max(1, Math.round(Math.max(1, r - 2) * 0.7));
+    const cy = bottom - r;
+    const x0 = Math.min(...wheels.drive);
+    const x1 = Math.max(...wheels.drive);
+    for (const [layer, d] of [['wa', q], ['wb', -q]]) {
+      L[layer].hline(ox + x0 + d, cy + d, x1 - x0 + 1, ROD);
+      for (const x of wheels.drive) L[layer].set(ox + x + d, cy + d, ROD_PIN);
+    }
+  }
+
+  // 3. Humo sobre la chimenea; las chispas (tren rápido) salen de ahí mismo. Sin
+  //    chimenea, saltan del riel bajo la rueda motriz de adelante.
+  if (loco.smoke !== undefined) {
+    const sx = ox + loco.smoke;
+    let top = 0;
+    while (!filled(loco.smoke, top)) top++;
+    const mouth = y0 + top;
+    for (const [layer, puffs] of Object.entries(PUFFS)) {
+      for (const [mask, dx, dy] of puffs) {
+        const left = sx + dx - Math.floor(mask[0].length / 2);
+        const yTop = mouth + dy - mask.length + 1;
+        mask.forEach((row, j) => {
+          for (let i = 0; i < row.length; i++) {
+            if (row[i] !== '.') L[layer].set(left + i, yTop + j, STEAM[row[i]]);
+          }
+        });
+      }
+    }
+    ctx.shoeAnchor = { x: sx, y: mouth - 1 };
+  } else {
+    ctx.shoeAnchor = { x: ox + Math.max(...wheels.drive) + r, y: bottom };
   }
 }
 

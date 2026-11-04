@@ -13,6 +13,8 @@ No dibujas el tren completo: el programa ya sabe dibujar el chasis (coches de 64
 - detalles como puertas, ventanas, pantógrafo o llantas,
 - y la **trompa**: el frente del coche cabeza visto de lado, dibujado píxel por píxel.
 
+Si el tren lleva **locomotora** (un tren de vapor, por ejemplo), en vez de la trompa dibujas la locomotora completa: ver [Trenes con locomotora](#trenes-con-locomotora-loco).
+
 Responde con **un solo bloque `json`** con el tren completo y, como mucho, dos líneas de explicación. Si la persona te pega errores del validador, corrígelos todos y devuelve otra vez el JSON completo.
 
 ## Reglas
@@ -59,7 +61,8 @@ Símbolos de `bands` y `row3`:
 | `win` | no | `{ "y0": 3..6, "y1": 8..12 }`, filas del marco de las ventanas (por defecto `{ "y0": 4, "y1": 10 }`) |
 | `winBand` | no | color de una banda continua detrás de las ventanas (como muchos metros modernos) |
 | `doors` | no | puertas por lado en cada coche: `2` (por defecto) o `3` |
-| `nose` | **sí** | la trompa (ver abajo) |
+| `nose` | **sí** (o `loco`) | la trompa (ver abajo) |
+| `loco` | no | en vez de `nose`: una locomotora al frente (ver [Trenes con locomotora](#trenes-con-locomotora-loco)) |
 | `pant` | no | `"lead"` pantógrafo en la cabina, `"alt"` uno cada dos coches, `null` tercer riel (por defecto) |
 | `pantX` | no | con `"lead"`: columna del pantógrafo en el techo de la cabina (por defecto 24) |
 | `roofBoxes` | no | equipos hundidos en el techo (`true` por defecto) |
@@ -135,7 +138,7 @@ Reglas de `rows`:
 
 ## Límites
 
-- Con 6 vagones el tren entero debe caber en 448 px: una trompa de hasta ~30 columnas cabe; con `cabWindows`, menos.
+- Con 6 vagones el tren entero debe caber en 448 px: una trompa de hasta ~30 columnas cabe; con `cabWindows`, menos. Una locomotora (`loco`), hasta 60.
 - Claves desconocidas son error (para atrapar errores de dedo); las que empiezan con `_` se ignoran.
 
 ## Ejemplo completo
@@ -195,6 +198,133 @@ Un tren mínimo también vale:
 
 ```json
 { "name": "Mi tren verde", "pal": { "body": "#1a7f37" }, "nose": "metro-blanco" }
+```
+
+## Trenes con locomotora (`loco`)
+
+Para un tren de vapor (o cualquier tren con una locomotora al frente), usa `loco` **en vez de** `nose`. La locomotora va adelante; detrás van los vagones (el primero lleva el letrero LED) y el último termina en una cola plana con luz roja. Los vagones se pintan como siempre, con `pal`, `bands`, `row3`, `win`, `doors`...; la locomotora es un dibujo aparte.
+
+Con `loco` no se usan `nose`, `cabWindows`, `cabBogieOff` ni `pantX`; `pant` va en `null` y `articulated` en `false`.
+
+| campo | obligatorio | qué es |
+| --- | --- | --- |
+| `loco.rows` | **sí** | el dibujo de la locomotora: 30 textos, de 16 a 60 columnas (ver abajo) |
+| `loco.wheels` | **sí** | sus ruedas (ver abajo) |
+| `loco.color` | no | pintura principal (`n`); si falta, `pal.body` |
+| `loco.face` | no | segundo color (`f`): caja de humo, chasis...; si falta, `pal.dark` |
+| `loco.smoke` | no | columna de la chimenea: de ahí sale el humo, que se anima con la velocidad |
+
+### El dibujo (`loco.rows`)
+
+La locomotora completa vista de lado, mirando a la derecha: la columna 0 es la parte de atrás (se engancha al primer vagón) y la última es el frente. Exactamente **30 filas**, de arriba abajo:
+
+```
+filas 0-4    por encima del techo de los vagones: chimenea, domo, techo de la cabina
+filas 5-24   a la altura de la caja de los vagones (la 5 es su techo; la 23 y 24, su faldón)
+filas 25-29  zona de ruedas: la 29 toca el riel
+```
+
+Los símbolos son los de la trompa (tabla de arriba), con tres diferencias: `n` es `loco.color`, `f` es `loco.face`, y `h` / `m` son la versión clara / oscura de `loco.color`. El vacío `.` puede ir en cualquier parte, también al principio de una fila (sobre la caldera solo asoman la chimenea y el domo). Las filas cortas se rellenan con `.` a la derecha, y una fila vacía es `""`.
+
+- El **contorno se dibuja solo** en todo el borde de la silueta: deja los detalles (faro, ventanas, filetes) al menos a un píxel del borde.
+- Pon un faro (`l`) al frente.
+- Usa `a`, el color del lenguaje, en algún filete o en el estribo de la locomotora, además de en `bands`.
+
+### Ruedas (`loco.wheels`)
+
+El programa dibuja las ruedas **encima** del dibujo, todas apoyadas en el riel, y las hace girar:
+
+| campo | qué es |
+| --- | --- |
+| `drive` | columnas del centro de cada rueda motriz (de 1 a 6), por ejemplo `[11, 21, 31]` |
+| `d` | diámetro de las motrices: `7`, `9` (por defecto) u `11` |
+| `rod` | `true` (por defecto): una biela une las motrices y se mueve con ellas; `false`, sin biela |
+| `small` | columnas de ruedas chicas de guía o de arrastre (5 px de diámetro), hasta 4 |
+| `color` | color de las ruedas; si falta, gris oscuro |
+
+- Una rueda de diámetro `d` ocupa de la fila `30 - d` a la 29. El estribo (el piso de la locomotora, sobre las ruedas) va justo arriba: en la fila `29 - d` o más arriba.
+- En las filas de las ruedas, dibuja entre ellas el bastidor oscuro (`k`) y los cilindros; lo que quede detrás de una rueda no se ve.
+- Las ruedas no se pueden encimar: los centros de dos motrices de 9 van al menos a 9 columnas.
+
+### Medidas
+
+Con 6 vagones el tren mide 6 × 64 + 2 + el ancho de la locomotora, así que una locomotora de hasta 60 columnas cabe. Una locomotora tanque mide unas 40 a 50; una con ténder, de 55 a 60.
+
+### Ejemplo con locomotora
+
+Locomotora tanque de vapor genérica, de tres ejes motrices: verde con filetes rojos, caja de humo negra, domo y chimenea de latón y el estribo con el color del lenguaje. Arrastra vagones granate y crema.
+
+```json
+{
+  "id": "vapor-tanque",
+  "name": "Locomotora tanque de vapor",
+  "description": "Locomotora tanque genérica de tres ejes motrices: verde con filetes rojos, caja de humo negra, domo y chimenea de latón; arrastra coches granate y crema.",
+  "pal": {
+    "body": "#7b2d26",
+    "upper": "#e6d8b8",
+    "roof": "#5b5f66",
+    "trim": "#c8372d",
+    "dark": "#24262c",
+    "glass": "#2a2f38",
+    "door": "#7b2d26",
+    "skirt": "#2e2f35"
+  },
+  "bands": "bbaabll",
+  "row3": "l",
+  "win": {
+    "y0": 5,
+    "y1": 9
+  },
+  "doors": 2,
+  "pant": null,
+  "roofBoxes": false,
+  "loco": {
+    "color": "#2f6b3a",
+    "face": "#23262c",
+    "rows": [
+      "",
+      ".....................................yyyyyy",
+      ".....................................yyyyyy",
+      "......................................dddd",
+      ".dddddddddddddddd.........yyy.........dddd",
+      ".dddddddddddddddd........yyyyy........dddd",
+      "..nnnnnnnnnnnnnn...yy....yyyyy........dddd",
+      "..nnnnnnnnnnnnnn...yy....yyyyy......fdddddf",
+      "..nnmmmnngGGggnnhhhhhhhhhhhhhhhhhhhhfffffff",
+      "..nnmmmnngGgggnnnnnnnnnnnnnnnnnnnnnnfffffff",
+      "..nnmmmnngggggnnnnnnnnnnnnnnnnnnnnnnfffffff",
+      "ddnnmmmnngggggnnnnnnnnnnnnnnnnnnnnnnfffffff",
+      "nnnnmmmnnnnnnnnnnhhhhhhhhhhhhhhhhhhnfffffff",
+      "nnnnmmmnnnnnnnnnnttttttttttttttttttnfffffff",
+      "nnnnmmmnnnnnnnnnntnnnnnnnnnnnnnnnntnfffffffddd",
+      "nnnnmmmnnnnnnnnnntnnnnnnnnnnnnnnnntnfffffffdld",
+      "nnnnnnnnnnnnnnnnntnnnnnnnnnnnnnnnntnfffffffddd",
+      "nnnnnnnnnnnnnnnnntnnnnnnnnnnnnnnnntnfffffffttt",
+      "nnnnnnnnnnnnnnnnnttttttttttttttttttnffffffftttkk",
+      "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnffffffftttkk",
+      "naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaatttkk",
+      "....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkdhhhhhhttt",
+      "....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkdddddddttt",
+      "....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkddddddddk",
+      "....................................dkkkkkkd",
+      "....................................dddddddd",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "wheels": {
+      "drive": [
+        11,
+        21,
+        31
+      ],
+      "d": 9,
+      "color": "#2f6b3a"
+    },
+    "smoke": 39
+  }
+}
 ```
 
 ---

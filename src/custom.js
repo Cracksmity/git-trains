@@ -8,7 +8,10 @@
 
 import { MODELS } from './models.js';
 import { buildNose } from './noses.js';
-import { buildTrain, trainWidth, mix, MAX_CARS, LED_W, DOOR_W } from './train.js';
+import {
+  buildTrain, trainWidth, mix, MAX_CARS, LED_W, DOOR_W,
+  LOCO_ROWS, LOCO_UP, LOCO_MIN_W, LOCO_MAX_W, LOCO_WHEELS, LOCO_SMALL,
+} from './train.js';
 import { SCENE_W } from './scenery.js';
 import { CustomError, isInt, isObj, normColor, unknownKeys } from './validate.js';
 
@@ -40,8 +43,10 @@ const NOSE_OPS = { r: 5, p: 3, f: 5, e: 5, ep: 3 };
 
 const KEYS = [
   'id', 'name', 'pal', 'bands', 'row3', 'win', 'winBand', 'doors', 'nose',
-  'pant', 'pantX', 'roofBoxes', 'articulated', 'tyres', 'cabWindows', 'cabBogieOff',
+  'pant', 'pantX', 'roofBoxes', 'articulated', 'tyres', 'cabWindows', 'cabBogieOff', 'loco',
 ];
+// Claves de la cabina que no aplican cuando el tren lleva locomotora.
+const CAB_KEYS = ['nose', 'cabWindows', 'cabBogieOff', 'pantX'];
 // Claves que se aceptan pero no se usan (notas de quien hizo el tren).
 const NOTE_KEYS = ['description', 'descripcion', 'author', 'autor', 'source', 'fuente', 'inspiration', 'inspiracion'];
 
@@ -148,6 +153,98 @@ function noseFromOps(raw, errors) {
   return buildNose(w, edge, ops);
 }
 
+// Locomotora: un dibujo de 30 filas (5 sobre el techo de los coches, 20 a la altura
+// de la caja y 5 de ruedas; la última toca el riel) mirando a la derecha, más sus
+// ruedas. Las ruedas las dibuja el programa encima del dibujo.
+function parseLoco(raw, errors) {
+  if (!isObj(raw)) {
+    errors.push('loco: debe ser un objeto { "rows": [...], "wheels": { "drive": [...] } }');
+    return null;
+  }
+  unknownKeys(raw, ['rows', 'color', 'face', 'wheels', 'smoke'], 'loco', errors);
+  const before = errors.length;
+
+  const { rows } = raw;
+  if (!Array.isArray(rows) || rows.length !== LOCO_ROWS || !rows.every((r) => typeof r === 'string')) {
+    errors.push(
+      `loco.rows: deben ser ${LOCO_ROWS} textos (${LOCO_UP} sobre el techo de los coches, 20 de la caja y 5 de ruedas); ` +
+      `llegaron ${Array.isArray(rows) ? rows.length : typeof rows}`,
+    );
+    return null;
+  }
+  const w = Math.max(...rows.map((r) => r.length));
+  if (w < LOCO_MIN_W || w > LOCO_MAX_W) {
+    errors.push(`loco.rows: la fila más larga mide ${w} columnas; la locomotora debe medir de ${LOCO_MIN_W} a ${LOCO_MAX_W}`);
+  }
+  rows.forEach((r, y) => {
+    const bad = [...r].filter((c) => c !== '.' && !NOSE_SYMBOLS.includes(c));
+    if (bad.length) errors.push(`loco.rows[${y}]: símbolos desconocidos "${[...new Set(bad)].join('')}" (válidos: ${NOSE_SYMBOLS} y ".")`);
+  });
+  const loco = { w, rows: rows.map((r) => r.padEnd(w, '.')) };
+  if (!loco.rows.some((r) => /[^.]/.test(r))) errors.push('loco.rows: el dibujo está vacío');
+
+  for (const k of ['color', 'face']) {
+    if (raw[k] === undefined) continue;
+    const c = normColor(raw[k]);
+    if (c) loco[k] = c;
+    else errors.push(`loco.${k}: "${raw[k]}" no es un color hexadecimal (#rrggbb)`);
+  }
+  if (loco.color) {
+    loco.hi = mix(loco.color, '#ffffff', 0.18);
+    loco.lo = mix(loco.color, '#000000', 0.2);
+  }
+
+  // Ruedas.
+  const wh = raw.wheels;
+  if (!isObj(wh)) {
+    errors.push('loco.wheels: falta; por ejemplo { "drive": [10, 20, 30], "d": 9 } (centros de las ruedas motrices)');
+  } else {
+    unknownKeys(wh, ['drive', 'd', 'small', 'rod', 'color'], 'loco.wheels', errors);
+    const wheels = { d: wh.d ?? 9, small: wh.small ?? [], rod: wh.rod ?? true, drive: wh.drive };
+    if (!LOCO_WHEELS.includes(wheels.d)) errors.push(`loco.wheels.d: diámetro de las motrices ${LOCO_WHEELS.join(', ')} (llegó ${wh.d})`);
+    if (typeof wheels.rod !== 'boolean') errors.push('loco.wheels.rod: debe ser true (biela entre las motrices) o false');
+    const list = (v, key, lo, hi) => {
+      if (!Array.isArray(v) || v.length < lo || v.length > hi || !v.every(isInt)) {
+        errors.push(`loco.wheels.${key}: una lista de ${lo} a ${hi} columnas enteras (el centro de cada rueda)`);
+        return false;
+      }
+      return true;
+    };
+    const okDrive = list(wheels.drive, 'drive', 1, 6);
+    const okSmall = list(wheels.small, 'small', 0, 4);
+    if (wh.color !== undefined) {
+      const c = normColor(wh.color);
+      if (c) wheels.color = c;
+      else errors.push(`loco.wheels.color: "${wh.color}" no es un color hexadecimal (#rrggbb)`);
+    }
+    if (okDrive && okSmall && LOCO_WHEELS.includes(wheels.d) && w >= LOCO_MIN_W) {
+      const all = [
+        ...wheels.drive.map((x) => ({ x, r: (wheels.d - 1) / 2, key: 'drive' })),
+        ...wheels.small.map((x) => ({ x, r: (LOCO_SMALL - 1) / 2, key: 'small' })),
+      ];
+      for (const { x, r, key } of all) {
+        if (x < r || x > w - 1 - r) errors.push(`loco.wheels.${key}: la rueda en la columna ${x} se sale de la locomotora (va de ${r} a ${w - 1 - r})`);
+      }
+      all.sort((a, b) => a.x - b.x);
+      for (let i = 1; i < all.length; i++) {
+        const [a, b] = [all[i - 1], all[i]];
+        if (b.x - a.x < a.r + b.r + 1) {
+          errors.push(`loco.wheels: las ruedas de las columnas ${a.x} y ${b.x} se enciman; sepáralas al menos ${a.r + b.r + 1} columnas`);
+        }
+      }
+    }
+    loco.wheels = wheels;
+  }
+
+  // Chimenea: columna de donde sale el humo.
+  if (raw.smoke !== undefined) {
+    if (!isInt(raw.smoke) || raw.smoke < 0 || raw.smoke >= w) errors.push(`loco.smoke: la columna de la chimenea, un entero de 0 a ${w - 1}`);
+    else if (!loco.rows.some((r) => r[raw.smoke] !== '.')) errors.push(`loco.smoke: la columna ${raw.smoke} está vacía; pon ahí la chimenea`);
+    else loco.smoke = raw.smoke;
+  }
+  return errors.length > before ? null : loco;
+}
+
 // Devuelve un modelo listo para buildTrain, o lanza CustomError con la lista de problemas.
 export function parseCustomModel(raw) {
   const errors = [];
@@ -214,10 +311,25 @@ export function parseCustomModel(raw) {
     } else m.cabWindows = raw.cabWindows;
   }
 
+  // Locomotora: reemplaza la cabina (y su trompa) en ambos extremos.
+  const hasLoco = raw.loco !== undefined && raw.loco !== null;
+  if (hasLoco) {
+    const loco = parseLoco(raw.loco, errors);
+    if (loco) m.loco = loco;
+    for (const k of CAB_KEYS) {
+      if (raw[k] !== undefined) errors.push(`${k}: con "loco" no hay cabina; quítalo (la locomotora va al frente y la cola es plana)`);
+    }
+    if (m.articulated) errors.push('articulated: con "loco" los vagones van sueltos; quítalo o ponlo en false');
+  }
+
   // Trompa (y, si viene del catálogo, la distancia del bogie a la punta).
-  const parsedNose = raw.nose === undefined ? (errors.push('nose: falta la trompa'), null) : parseNose(raw.nose, errors);
+  const parsedNose = hasLoco
+    ? null
+    : raw.nose === undefined
+      ? (errors.push('nose: falta la trompa (o usa "loco" para un tren con locomotora)'), null)
+      : parseNose(raw.nose, errors);
   if (parsedNose) m.nose = parsedNose.nose;
-  const bogieOff = raw.cabBogieOff ?? parsedNose?.bogieOff;
+  const bogieOff = hasLoco ? undefined : raw.cabBogieOff ?? parsedNose?.bogieOff;
   if (bogieOff !== undefined) {
     if (!isInt(bogieOff) || bogieOff < 14 || bogieOff > 30) errors.push('cabBogieOff: un entero entre 14 y 30');
     else m.cabBogieOff = bogieOff;
@@ -226,7 +338,8 @@ export function parseCustomModel(raw) {
   // Pantógrafo.
   m.pant = raw.pant ?? null;
   if (m.pant !== null && m.pant !== 'lead' && m.pant !== 'alt') errors.push('pant: "lead" (en la cabina), "alt" (cada dos coches) o null (tercer riel)');
-  if (m.pant === 'lead') {
+  else if (hasLoco && m.pant !== null) errors.push('pant: con "loco" debe ser null (la locomotora no lleva pantógrafo)');
+  if (m.pant === 'lead' && !hasLoco) {
     m.pantX = raw.pantX ?? 24;
     const doorW = m.doors === 3 ? 9 : DOOR_W;
     const room = 3 + LED_W + 2 + doorW + 2 + (m.cabWindows ? m.cabWindows + 2 : 0) - 9;
@@ -238,7 +351,9 @@ export function parseCustomModel(raw) {
   const width = trainWidth(m, MAX_CARS);
   if (width > SCENE_W) {
     throw new CustomError('El tren', [
-      `con ${MAX_CARS} vagones mide ${width} px y la escena mide ${SCENE_W}: angosta la trompa (nose) o quita cabWindows`,
+      m.loco
+        ? `con ${MAX_CARS} vagones mide ${width} px y la escena mide ${SCENE_W}: angosta la locomotora (loco)`
+        : `con ${MAX_CARS} vagones mide ${width} px y la escena mide ${SCENE_W}: angosta la trompa (nose) o quita cabWindows`,
     ]);
   }
   // Última red: si algo se nos escapó, que falle aquí con un mensaje y no en la Action.

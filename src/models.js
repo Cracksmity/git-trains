@@ -11,6 +11,8 @@
 //   pant     pantógrafo: 'lead' (solo cabeza), 'alt' (cada dos coches) o null (tercer riel)
 //   articulated  los coches van en pares que comparten el bogie de la unión
 //   tyres    rodadura neumática (llantas de goma)
+//   loco     (solo trenes personalizados, por ahora) locomotora dibujada completa que
+//            reemplaza la cabina y la trompa; ver parseLoco en custom.js
 // Las referencias vienen de /reference (los PNG/WEBP originales) y de fotos de los
 // trenes reales que inspiran cada modelo.
 

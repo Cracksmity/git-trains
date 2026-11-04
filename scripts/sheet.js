@@ -14,6 +14,7 @@ const scale = Number(scaleArg);
 const cars = Number(carsArg);
 const open = openArg === '1';
 const wheelLayer = frameArg === 'b' ? 'wb' : 'wa';
+const smokeLayer = frameArg === 'b' ? 'pb' : 'pa'; // humo de la locomotora (si tiene)
 const ids = modelsArg ? modelsArg.split(',') : MODEL_ORDER;
 const stripeColors = ['#3178c6', '#3572A5', '#dea584', '#f1e05a', '#41b883', '#e34c26'];
 
@@ -44,7 +45,7 @@ trains.forEach((t, k) => {
       }
     }
   }
-  for (const name of ['body', 'lit', wheelLayer, ...(open ? ['open'] : []), 'led']) {
+  for (const name of ['body', 'lit', wheelLayer, ...(open ? ['open'] : []), 'led', smokeLayer]) {
     const g = t.layers[name];
     for (let y = 0; y < g.h; y++) {
       for (let x = 0; x < g.w; x++) {
