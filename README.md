@@ -94,7 +94,7 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 
 | Input | Default | What it does |
 | --- | --- | --- |
-| `train` | `auto` | `auto` evolves with your cars; or pick a [model](#models); or the path to [your own train](#make-your-own-train-with-ai) in JSON |
+| `train` | `auto` | `auto` evolves with your cars; or pick a [model](#models); or the path to [your own train](#make-your-own-train-by-hand-or-with-ai) in JSON |
 | `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka` or the path to [your own skyline](#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
 | `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
@@ -133,9 +133,13 @@ Every train has a cab at both ends (white headlights in front, red lights at the
 
 ![Three tracks](docs/example-multi.svg)
 
-## Make your own train (with AI)
+## Make your own train (by hand or with AI)
 
-Any train fits in a small JSON file: colors, stripes, doors, and the front drawn row by row. You don't need to code; an AI writes it from a photo or a description:
+Any train fits in a small JSON file: colors, stripes, doors, and the front drawn row by row. You don't need to code.
+
+**By hand, in the [studio](https://cracksmity.github.io/git-trains/studio/):** start from any model, change every color and stripe in a form, draw the nose (or a whole steam locomotive) pixel by pixel, over a photo if you like, and watch the scene and the calendar mini update as you go. Download the JSON, or copy a link that carries the whole train to share it.
+
+**With AI:** an AI writes it from a photo or a description:
 
 1. Paste [docs/ai/train.md](docs/ai/train.md) into your AI chat (Claude, ChatGPT, Gemini...) and, at the end, describe your train or attach a photo.
 2. Save the JSON it gives you in your profile repository, for example as `.github/train.json`.

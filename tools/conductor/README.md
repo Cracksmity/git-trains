@@ -76,6 +76,7 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | playground-style | design (custom ladder) | GPT-6.1-Terra (xhigh) restyled the playground on the first attempt in 158 s; the restyle-only gate kept its script byte for byte. One `·` came out as `?` and was fixed by hand. |
 | tunnels-art | design | GPT-6-Astra (xhigh) drew the calendar's hills and stone portals on the first attempt in 314 s. Its opaque backdrop matched only GitHub's default backgrounds, so on review the train layer was clipped instead and the backdrop dropped. |
 | calendar-docs | mechanical | GPT-6.1-Terra wrote the calendar sections of both READMEs, the changelog entry and five edge-case tests on the first attempt in 127 s. |
+| skyline-editor | design | GPT-6-Astra (xhigh) built the studio's skyline editor (580 lines: scene canvas with drag and guides, buildings list, stacked tops, pixel grid for drawn landmarks, share links) on the first attempt in 508 s, from the train editor as the model to follow. |
 
 ## Antigravity in headless mode
 
