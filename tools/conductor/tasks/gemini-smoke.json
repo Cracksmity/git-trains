@@ -1,0 +1,18 @@
+{
+  "name": "gemini-smoke",
+  "route": "bulk",
+  "ladder": [
+    {
+      "backend": "gemini",
+      "model": "gemini-3.8-flash-low",
+      "why": "the cheapest Gemini: this only checks that headless Antigravity can read, list, write and run its gate"
+    }
+  ],
+  "promptFile": "gemini-smoke.md",
+  "allow": ["smoke/**"],
+  "gates": [
+    "node -e \"const fs=require('fs'); const n=fs.readdirSync('examples/trains').filter((f)=>f.endsWith('.json')).length; const t=fs.readFileSync('smoke/report.md','utf8'); if(!t.includes('git-trains')||!t.includes(String(n))){console.log('expected git-trains and '+n+' in: '+t);process.exit(1)}\""
+  ],
+  "attempts": 2,
+  "timeoutMin": 10
+}
