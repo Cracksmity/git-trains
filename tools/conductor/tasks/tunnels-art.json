@@ -1,0 +1,13 @@
+{
+  "name": "tunnels-art",
+  "route": "design",
+  "promptFile": "tunnels-art.md",
+  "allow": ["src/tunnels.js", "src/calendar.js"],
+  "gates": [
+    "node --test test/calendar.test.js",
+    "node -e \"const {execSync}=require('child_process'); const fs=require('fs'); const strip=(t)=>t.replace(/export const CALENDAR_THEMES = \\{[\\s\\S]*?\\n\\};/,''); const a=strip(execSync('git show HEAD:src/calendar.js',{encoding:'utf8'})); const b=strip(fs.readFileSync('src/calendar.js','utf8')); if(a!==b){console.log('src/calendar.js changed outside CALENDAR_THEMES');process.exit(1)}\"",
+    "node -e \"const t=require('fs').readFileSync('src/tunnels.js','utf8'); const hex=t.match(/'#[0-9a-fA-F]{3,6}'/g); if(hex){console.log('fixed colors in tunnels.js: '+hex.join(', '));process.exit(1)}\""
+  ],
+  "attempts": 2,
+  "timeoutMin": 30
+}

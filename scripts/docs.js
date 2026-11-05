@@ -8,6 +8,7 @@ import { sampleStats, sampleProfile } from '../src/sample.js';
 import { renderStatsCard, renderLangsCard } from '../src/cards.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
+import { renderCalendar } from '../src/calendar.js';
 
 const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/trains/${name}.json`, 'utf8')));
 const newYork = example('new-york');
@@ -36,6 +37,17 @@ const scenes = [
 
 for (const [name, stats, opts] of scenes) {
   const svg = renderScene(buildSpec(stats, opts));
+  writeFileSync(`docs/${name}.svg`, svg);
+  console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
+}
+
+// Calendar mode: the sample year with the white metro and with the steam engine.
+const calendars = [
+  ['example-calendar', sampleStats({ total: 1400, streak: 12, yesterday: 6 }), { model: 'metro-white', stripe: '#3178c6', theme: 'auto' }],
+  ['example-calendar-steam', sampleStats({ total: 900, streak: 30, yesterday: 3 }), { model: steam, stripe: '#f1e05a', theme: 'auto' }],
+];
+for (const [name, stats, opts] of calendars) {
+  const svg = renderCalendar(stats, opts);
   writeFileSync(`docs/${name}.svg`, svg);
   console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }

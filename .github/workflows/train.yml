@@ -27,6 +27,7 @@ jobs:
         with:
           output-dir: out
           cards: both
+          calendar: true
       - name: Publish to the output branch
         working-directory: out
         run: |

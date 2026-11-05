@@ -11,8 +11,12 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-dark.svg">
   <img alt="El tren del autor hoy, dibujado por el workflow de este repositorio" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-light.svg">
 </picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-dark.svg">
+  <img alt="El calendario de contribuciones del autor hoy, recorrido por el mismo tren" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-light.svg">
+</picture>
 
-<sub>Ese es el tren del autor hoy; [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
+<sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
 
 ## Qué significa cada parte
 
@@ -26,6 +30,29 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
 | Tu usuario | El **letrero de la estación** y una **ciudad propia** generada a partir de tu nombre: no hay dos iguales |
 
 Tu racha no se rompe a primera hora: si hoy todavía no hay actividad, cuenta desde ayer.
+
+## Modo calendario
+
+Con `calendar: true` la Action también escribe un calendario de contribuciones junto al tren. Una versión mini de tu tren recorre las semanas en zigzag, come las celdas con contribuciones y crece hasta tener el mismo largo que el tren de la escena. También funciona con trenes propios y de vapor. La franja, las ventanas y la velocidad siguen tu actividad; el texto muestra tus contribuciones y tu racha. También se aplican `language` y `label`. El calendario sigue el tema elegido y deja el tren estacionado si se prefiere reducir el movimiento.
+
+![Calendario de contribuciones con un metro blanco](docs/example-calendar.svg)
+
+```yaml
+      - uses: Cracksmity/git-trains@v1
+        with:
+          calendar: true
+```
+
+Con `theme: both` (el valor por defecto), agrega esto a tu README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="dist/train-calendar-dark.svg">
+  <img alt="Mi calendario de contribuciones y mi tren" src="dist/train-calendar-light.svg">
+</picture>
+```
+
+La Action también escribe `train-calendar.svg`. Con un solo tema, escribe únicamente ese archivo de calendario. Mira también el [ejemplo de vapor](docs/example-calendar-steam.svg).
 
 ## Uso rápido
 
@@ -72,6 +99,7 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `train` | `auto` | `auto` evoluciona con tus vagones; o elige un [modelo](#modelos); o la ruta a [tu propio tren](#haz-tu-propio-tren-con-ia) en JSON |
 | `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
+| `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
