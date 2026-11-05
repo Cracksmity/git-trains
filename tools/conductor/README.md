@@ -65,7 +65,7 @@ The ones in [tasks/](tasks) are real: they did the 1.0 migration to English.
 
 Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-line `node -e` check.
 
-## First runs (the 1.0 migration)
+## First runs
 
 | Task | Route | What happened |
 | --- | --- | --- |
@@ -73,6 +73,9 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | guides-en | mechanical | GPT-6.1-Terra passed on the first attempt: 153 s, 6.1k output tokens |
 | benchmark-en | bulk | Gemini 3.8 Flash changed nothing twice (headless Antigravity denied its shell commands); the ladder moved to GPT-6.1-Terra, which passed in 125 s. Reviewing the patch caught a CSS class renamed in the stylesheet but not in the HTML, which no gate checked. |
 | regions-research | research | Gemini 4 Argon was denied a shell command and stopped; GPT-6.1-Sol wrote [docs/research/regions.md](../../docs/research/regions.md) in 389 s. |
+| playground-style | design (custom ladder) | GPT-6.1-Terra (xhigh) restyled the playground on the first attempt in 158 s; the restyle-only gate kept its script byte for byte. One `·` came out as `?` and was fixed by hand. |
+| tunnels-art | design | GPT-6-Astra (xhigh) drew the calendar's hills and stone portals on the first attempt in 314 s. Its opaque backdrop matched only GitHub's default backgrounds, so on review the train layer was clipped instead and the backdrop dropped. |
+| calendar-docs | mechanical | GPT-6.1-Terra wrote the calendar sections of both READMEs, the changelog entry and five edge-case tests on the first attempt in 127 s. |
 
 ## Antigravity in headless mode
 
