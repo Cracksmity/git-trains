@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · studio</title>
+<meta name="description" content="Design your own pixel-art train or city skyline for git-trains: every field as a form, the nose drawn pixel by pixel, a live preview, and a link to share it.">
+<meta property="og:title" content="git-trains · studio">
+<meta property="og:description" content="Design your own pixel-art train or city skyline for your GitHub profile, and share it with a link.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
+    --green: #1b8638; --yellow: #c98f00; --chip: #e7ece8;
+    --good: #1b7a35; --bad: #a33a2c; --button-ink: #ffffff;
+    --display: "Pixelify Sans", "Courier New", monospace;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+      --green: #47c06a; --yellow: #f0c23a; --chip: #222b25;
+      --good: #5fd07e; --bad: #f08a7a; --button-ink: #101412; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25;
+    --good: #5fd07e; --bad: #f08a7a; --button-ink: #101412; color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 16px 64px; }
+  a { color: var(--green); text-underline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); margin-bottom: 14px; }
+  .eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  h1, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; }
+  h1 { font-size: clamp(30px, 5vw, 46px); margin: 10px 0 6px; }
+  h3 { font-size: 18px; margin: 0 0 10px; }
+  .te-preview h3 { font: 500 12px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 16px 0 6px; }
+  p.sub { margin: 0; max-width: 72ch; font-size: 17px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 4px 0 10px; }
+  code { font: 12px var(--mono); }
+
+  .tabs { display: flex; gap: 6px; margin: 24px 0 16px; border-bottom: 1px solid var(--line); }
+  .tabs button { font: 600 18px var(--display); padding: 8px 14px; border: 1px solid transparent; border-bottom: 0; border-radius: 8px 8px 0 0; background: none; color: var(--muted); cursor: pointer; margin-bottom: -1px; }
+  .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); border-color: var(--line); }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 14px; min-width: 0; }
+  .field { display: grid; gap: 4px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
+  .field small { font-size: 12px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+  .inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 13px var(--mono);
+  }
+  .inline select { width: auto; flex: 1; }
+  input[type=range] { width: 100%; accent-color: var(--green); }
+  .inline input[type=range] { width: auto; flex: 1; }
+  output { font: 500 13px var(--mono); min-width: 2.5ch; }
+  input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+  input[type=checkbox] { accent-color: var(--green); }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; margin: 6px 0; }
+  .check.small { font-size: 12px; color: var(--muted); margin: 0; }
+
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg button, .btns button, .inline > button, .pg-trace button {
+    padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 12px/1.4 var(--mono); cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .btns button.main { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+  .syms button { display: inline-flex; gap: 5px; align-items: center; padding: 4px 7px; }
+  .syms i, .pg-swatch, .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.25); }
+
+  .pal { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 14px; }
+  .pal-row { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+  .pal-row span { flex: 1; }
+  .pal-row small { color: var(--muted); font-size: 11px; }
+  .bands { display: grid; gap: 6px; margin-bottom: 12px; }
+  .band { display: grid; grid-template-columns: 130px 1fr; gap: 8px; align-items: center; font: 12px var(--mono); color: var(--muted); }
+
+  .te { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 20px; align-items: start; }
+  .te-preview { position: sticky; top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .stage { background: var(--bg); border-radius: 6px; overflow: hidden; }
+  .stage img, .te-scene { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+  .te-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; margin-top: 12px; }
+  .zoomwrap { background: repeating-conic-gradient(var(--chip) 0 25%, transparent 0 50%) 0 0 / 16px 16px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+  .zoomwrap canvas { display: block; image-rendering: pixelated; }
+  .status { font-size: 13px; margin-top: 12px; color: var(--muted); }
+  .status.ok { color: var(--good); }
+  .status.bad { color: var(--bad); }
+  .status ul { margin: 4px 0 0; padding-left: 18px; }
+  .te-json { min-height: 260px; resize: vertical; font: 12px/1.4 var(--mono); margin-top: 8px; }
+  details summary { cursor: pointer; font: 500 12px var(--mono); color: var(--muted); }
+
+  .pg { display: grid; gap: 10px; margin-top: 8px; }
+  .pg-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pg-palette { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pg-sym { display: inline-flex; gap: 4px; align-items: center; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .pg-sym[aria-checked="true"] { outline: 2px solid var(--green); outline-offset: 1px; }
+  .pg-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: var(--bg); }
+  .pg-canvas { display: block; image-rendering: pixelated; cursor: crosshair; touch-action: none; }
+  .pg-legend { display: flex; gap: 14px; flex-wrap: wrap; font: 12px var(--mono); color: var(--muted); }
+  .pg-legend i { display: inline-block; width: 8px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .pg-trace { border: 1px dashed var(--line); border-radius: 8px; padding: 8px 10px; }
+  .pg-trace[open] { display: grid; gap: 8px; }
+  .pg-range { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+  .pg-check { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+
+  .placeholder { color: var(--muted); }
+  @media (max-width: 960px) {
+    .te { grid-template-columns: minmax(0, 1fr); }
+    .te-preview { position: static; order: -1; }
+  }
+  @media (max-width: 560px) {
+    .grid2, .te-controls { grid-template-columns: minmax(0, 1fr); }
+    .band { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="stripe" aria-hidden="true"></div>
+  <nav class="eyebrow"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+  <h1>git-trains · studio</h1>
+  <p class="sub">Design your own train or city by hand, pixel by pixel, with the same checks as the Action. Save the JSON in your profile repository, or share it with a link.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-train" aria-selected="true" aria-controls="panel-train">Train</button>
+    <button role="tab" id="tab-skyline" aria-selected="false" aria-controls="panel-skyline">Skyline</button>
+  </div>
+  <div id="share-error" class="status bad" hidden></div>
+  <section id="panel-train" role="tabpanel" aria-labelledby="tab-train"></section>
+  <section id="panel-skyline" role="tabpanel" aria-labelledby="tab-skyline" hidden>
+    <p class="placeholder">Loading the skyline editor…</p>
+  </section>
+</main>
+
+<script type="module">
+import { mountTrainEditor } from './train-editor.js';
+import { decodeShare } from './share.js';
+
+const $ = (id) => document.getElementById(id);
+let shared = null;
+try {
+  shared = await decodeShare(location.hash);
+} catch (err) {
+  $('share-error').hidden = false;
+  $('share-error').textContent = err.message;
+}
+
+function show(kind) {
+  for (const k of ['train', 'skyline']) {
+    $(`tab-${k}`).setAttribute('aria-selected', String(k === kind));
+    $(`panel-${k}`).hidden = k !== kind;
+  }
+}
+$('tab-train').addEventListener('click', () => show('train'));
+$('tab-skyline').addEventListener('click', () => show('skyline'));
+
+mountTrainEditor($('panel-train'), { initialText: shared?.kind === 'train' ? shared.text : undefined });
+
+try {
+  const { mountSkylineEditor } = await import('./skyline-editor.js');
+  $('panel-skyline').replaceChildren();
+  mountSkylineEditor($('panel-skyline'), { initialText: shared?.kind === 'skyline' ? shared.text : undefined });
+} catch {
+  $('panel-skyline').querySelector('.placeholder').textContent = 'The skyline editor is coming soon. Meanwhile, the playground checks skyline JSON.';
+}
+if (shared?.kind === 'skyline') show('skyline');
+</script>
+</body>
+</html>

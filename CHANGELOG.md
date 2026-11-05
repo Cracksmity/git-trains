@@ -4,6 +4,7 @@
 
 ### Added
 
+- The [studio](https://cracksmity.github.io/git-trains/studio/): design a train by hand, with every field as a form, the nose or locomotive drawn pixel by pixel (over a photo if you like), a live preview with the calendar mini, and share links that carry the whole train in the URL (`studio/#train=...`).
 - `calendar: true` writes an animated contribution calendar with a mini version of your train, including custom and steam models. It follows the scene's themes and reduced-motion setting.
 
 ## 1.0.0 (2026-11-04)

@@ -96,7 +96,7 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 
 | Input | Por defecto | Qué hace |
 | --- | --- | --- |
-| `train` | `auto` | `auto` evoluciona con tus vagones; o elige un [modelo](#modelos); o la ruta a [tu propio tren](#haz-tu-propio-tren-con-ia) en JSON |
+| `train` | `auto` | `auto` evoluciona con tus vagones; o elige un [modelo](#modelos); o la ruta a [tu propio tren](#haz-tu-propio-tren-a-mano-o-con-ia) en JSON |
 | `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
@@ -135,9 +135,13 @@ Cada tren tiene cabina en ambos extremos (faros blancos adelante, luces rojas at
 
 ![Tres vías](docs/example-multi.svg)
 
-## Haz tu propio tren (con IA)
+## Haz tu propio tren (a mano o con IA)
 
-Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente dibujado fila por fila. No necesitas programar; una IA lo escribe a partir de una foto o una descripción:
+Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente dibujado fila por fila. No necesitas programar.
+
+**A mano, en el [estudio](https://cracksmity.github.io/git-trains/studio/):** parte de cualquier modelo, cambia cada color y franja en un formulario, dibuja la trompa (o una locomotora de vapor completa) píxel por píxel, sobre una foto si quieres, y mira cómo se actualizan la escena y la miniatura del calendario. Descarga el JSON o copia un link que lleva el tren completo para compartirlo.
+
+**Con IA:** una IA lo escribe a partir de una foto o una descripción:
 
 1. Pega [docs/ai/train.md](docs/ai/train.md) en el chat de tu IA (Claude, ChatGPT, Gemini...) y, al final, describe tu tren o adjunta una foto. Las instrucciones están en inglés, pero puedes hablarle en español.
 2. Guarda el JSON que te dé en tu repositorio de perfil, por ejemplo como `.github/train.json`.
