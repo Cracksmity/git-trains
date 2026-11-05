@@ -84,7 +84,7 @@ The first Gemini runs all ended in a denied `RunCommand`. `agy -p` can't ask for
 
 The hook keeps the agent on task, but `node` can run any code, so the sandbox is the real boundary. A hook that answers `allow`, even with `permissionOverrides`, doesn't get past headless mode by itself, and `--dangerously-skip-permissions` is still not used.
 
-[gemini-smoke](tasks/gemini-smoke.json) checks the whole path: Gemini 3.8 Flash read `package.json`, counted the trains with `node -e`, wrote `smoke/report.md`, ran its gate and `git status`, and passed on the first attempt in 22 s.
+[gemini-smoke](tasks/gemini-smoke.json) checks the whole path: Gemini 3.8 Flash read `package.json`, counted the trains with `node -e`, wrote `smoke/report.md`, ran its gate and `git status`, and passed on the first attempt in 22 s. Rerun on Gemini 4 Argon alone, regions-research passed on the first attempt in 484 s (30k output tokens), and all 8 of its commands ran (listings, `git log`, both gates).
 
 ```bash
 node tools/conductor/conductor.js run tools/conductor/tasks/gemini-smoke.json
