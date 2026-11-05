@@ -1,0 +1,16 @@
+name: Idea
+description: A new model, city, mode or anything that would make the train better.
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What you'd like to see, and where (profile README, repo README, cards, playground...).
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: For a train or a city, a photo or a link helps. Logos and lettering are never drawn, only colors and shapes.

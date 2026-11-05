@@ -1,4 +1,4 @@
-// Fuente de píxeles 3x5 para el letrero LED y los rótulos.
+// 3x5 pixel font for the LED sign and labels.
 
 const GLYPHS = {
   A: ['.#.', '#.#', '###', '#.#', '#.#'],
@@ -51,7 +51,7 @@ const GLYPHS = {
 const SPACE = 2;
 export const GLYPH_H = 5;
 
-// Quita acentos y deja solo lo que la fuente sabe dibujar.
+// Remove accents and keep only what the font can draw.
 export function clean(text) {
   return String(text)
     .normalize('NFD')
@@ -68,7 +68,7 @@ export function textWidth(text) {
   return w - 1;
 }
 
-// Dibuja el texto y devuelve el ancho usado.
+// Draw the text and return the width used.
 export function drawText(grid, text, x, y, color) {
   const t = clean(text);
   let cx = x;

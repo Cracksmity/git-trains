@@ -1,20 +1,20 @@
-// Herramienta de desarrollo: dibuja una hoja PNG con los trenes ampliados.
-// node scripts/sheet.js salida.png [escala] [vagones] [abiertas] [modelo,modelo...]
-// Cada modelo puede ser un id del catálogo o la ruta a un tren personalizado (.json):
-// node scripts/sheet.js mi-tren.png 5 2 0 examples/tren-nueva-york.json
+// Dev tool: draws a PNG sheet with the trains zoomed in.
+// node scripts/sheet.js out.png [scale] [cars] [open] [model,model...]
+// Each model can be a catalog id or the path to a custom train (.json):
+// node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { buildTrain, TRAIN_H } from '../src/train.js';
-import { MODELS, MODEL_ORDER } from '../src/models.js';
+import { MODEL_ORDER, getModel } from '../src/models.js';
 import { parseCustomModel } from '../src/custom.js';
 
-const [out = 'hoja.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a'] = process.argv.slice(2);
+const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a'] = process.argv.slice(2);
 const scale = Number(scaleArg);
 const cars = Number(carsArg);
 const open = openArg === '1';
 const wheelLayer = frameArg === 'b' ? 'wb' : 'wa';
-const smokeLayer = frameArg === 'b' ? 'pb' : 'pa'; // humo de la locomotora (si tiene)
+const smokeLayer = frameArg === 'b' ? 'pb' : 'pa'; // locomotive smoke (if any)
 const ids = modelsArg ? modelsArg.split(',') : MODEL_ORDER;
 const stripeColors = ['#3178c6', '#3572A5', '#dea584', '#f1e05a', '#41b883', '#e34c26'];
 
@@ -25,9 +25,9 @@ function hex(c) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-const load = (id) => (id.endsWith('.json') ? parseCustomModel(JSON.parse(readFileSync(id, 'utf8'))) : MODELS[id]);
+const load = (id) => (id.endsWith('.json') ? parseCustomModel(JSON.parse(readFileSync(id, 'utf8'))) : getModel(id));
 const trains = ids.map((id, i) =>
-  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'RACHA' }),
+  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'STREAK' }),
 );
 const gap = 6;
 const W = Math.max(...trains.map((t) => t.width)) * scale + 16;
@@ -37,7 +37,7 @@ for (let i = 0; i < W * H; i++) px.set([232, 236, 242, 255], i * 4);
 
 trains.forEach((t, k) => {
   const oy = (k * (TRAIN_H + gap) + 2) * scale;
-  // Riel bajo el tren, para juzgar el contraste de las ruedas.
+  // Rail under the train, to judge the wheel contrast.
   for (let x = 0; x < t.width; x++) {
     for (let dy = 0; dy < scale; dy++) {
       for (let dx = 0; dx < scale; dx++) {

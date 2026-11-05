@@ -1,5 +1,5 @@
-// Colores oficiales de GitHub (linguist) para los lenguajes más comunes.
-// Se usan cuando la API no devuelve color.
+// Official GitHub (linguist) colors for the most common languages.
+// Used when the API does not return a color.
 
 export const DEFAULT_COLOR = '#8b949e';
 

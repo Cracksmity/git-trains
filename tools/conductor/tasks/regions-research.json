@@ -1,0 +1,12 @@
+{
+  "name": "regions-research",
+  "route": "research",
+  "promptFile": "regions-research.md",
+  "allow": ["docs/research/**"],
+  "gates": [
+    "node -e \"const t=require('fs').readFileSync('docs/research/regions.md','utf8'); const n=['Kansai','Jalisco','Valley of Mexico','Antioquia','Hudson','Sweden','Andalusia','Paulo'].filter(r=>!t.includes(r)); if(n.length){console.log('missing regions: '+n.join(', '));process.exit(1)} if(!/#[0-9a-fA-F]{6}/.test(t)){console.log('no hex colors');process.exit(1)}\"",
+    "node tools/conductor/gates/no-spanish.js --max 6 docs/research"
+  ],
+  "attempts": 1,
+  "timeoutMin": 30
+}

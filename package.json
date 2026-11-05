@@ -1,15 +1,16 @@
 {
-  "name": "git-trenes",
-  "version": "0.1.0",
-  "description": "Un tren en pixel art que crece, cambia de color y acelera según tu actividad en GitHub.",
+  "name": "git-trains",
+  "version": "1.0.0",
+  "description": "A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.",
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "preview": "node scripts/serve.js",
-    "muestra": "node src/index.js --sample",
+    "sample": "node src/index.js --sample",
+    "docs": "node scripts/docs.js",
     "test": "node --test"
   },
   "repository": {

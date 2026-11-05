@@ -1,0 +1,137 @@
+{
+  "$comment": "Who gets each kind of task. Each route is a ladder: the conductor starts on the first rung and climbs when a rung keeps failing its gates. The order comes from benchmarks/medellin (Nov 2026): one run per model, so treat it as a prior, not a law, and re-order when runs.jsonl says otherwise. Model names change often; edit them here.",
+  "backends": {
+    "codex": {
+      "bin": "codex",
+      "args": [
+        "exec",
+        "--json",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "-s",
+        "workspace-write",
+        "-m",
+        "{model}",
+        "-c",
+        "model_reasoning_effort=\"{effort}\"",
+        "-C",
+        "{dir}",
+        "{images}",
+        "-"
+      ],
+      "image": [
+        "-i",
+        "{image}"
+      ],
+      "stdin": "prompt",
+      "usage": "codex"
+    },
+    "gemini": {
+      "bin": "agy",
+      "args": [
+        "--output-format",
+        "json",
+        "--model",
+        "{model}",
+        "--mode",
+        "accept-edits",
+        "--sandbox",
+        "--settings",
+        "{settings}",
+        "-p",
+        "{prompt}"
+      ],
+      "rules": "You run headless: nobody can approve anything. Read, list and write files with your file tools, not the shell. If you must run a command, run one plain command per call: no `;`, `&&`, `||`, pipes or redirections, or it will be denied and your turn will end.",
+      "$settings": "Headless mode cannot ask for permission, so any command not granted here is denied. Grants are command prefixes, without wildcards (command(node) allows \"node ...\"). The list stays narrow: reading files and running the gates.",
+      "settings": {
+        "permissions": {
+          "allow": [
+            "command(node)",
+            "command(npm test)",
+            "command(git status)",
+            "command(git diff)",
+            "command(git log)",
+            "command(ls)",
+            "command(dir)",
+            "command(cat)",
+            "command(type)",
+            "command(head)",
+            "command(Get-Content)",
+            "command(Get-ChildItem)",
+            "command(rg)",
+            "command(findstr)"
+          ]
+        }
+      },
+      "usage": "agy"
+    }
+  },
+  "routes": {
+    "mechanical": {
+      "about": "Renames, translations, comment passes, tests for existing code, docs. The checks decide, not taste.",
+      "ladder": [
+        {
+          "backend": "codex",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "why": "4/4 train in 2 min 13 s with 3.6k output tokens"
+        },
+        {
+          "backend": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "why": "4/4 train and a recognizable skyline with 14k output tokens"
+        }
+      ]
+    },
+    "design": {
+      "about": "Pixel art from a photo or description: trains, locomotives, skylines.",
+      "ladder": [
+        {
+          "backend": "codex",
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "why": "4/4 train, every landmark drawn, 4 min 48 s"
+        },
+        {
+          "backend": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "xhigh",
+          "why": "4/4 train, recognizable skyline"
+        }
+      ]
+    },
+    "research": {
+      "about": "Real-world knowledge: landmarks, vernacular houses, native plants of a region.",
+      "ladder": [
+        {
+          "backend": "gemini",
+          "model": "gemini-4-argon-high",
+          "why": "named eight real Medellín landmarks and drew seven"
+        },
+        {
+          "backend": "codex",
+          "model": "gpt-6.1-sol",
+          "effort": "xhigh",
+          "why": "fallback with a recognizable skyline"
+        }
+      ]
+    },
+    "bulk": {
+      "about": "Long files, many files, or long text that needs to stay faithful (page translations, sweeping reads).",
+      "ladder": [
+        {
+          "backend": "gemini",
+          "model": "gemini-3.8-flash-high",
+          "why": "handled the largest input of the benchmark (3.9M tokens)"
+        },
+        {
+          "backend": "codex",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "why": "fast and cheap fallback"
+        }
+      ]
+    }
+  }
+}

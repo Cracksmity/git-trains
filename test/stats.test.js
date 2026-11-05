@@ -4,7 +4,7 @@ import { carsFor, stateFor, streakFrom, summarize } from '../src/stats.js';
 
 const day = (date, count) => ({ date, count });
 
-test('vagones crecen con las contribuciones del año', () => {
+test('cars grow with the year of contributions', () => {
   assert.equal(carsFor(0), 1);
   assert.equal(carsFor(49), 1);
   assert.equal(carsFor(50), 2);
@@ -13,7 +13,7 @@ test('vagones crecen con las contribuciones del año', () => {
   assert.equal(carsFor(99999), 6);
 });
 
-test('el estado depende de la actividad de ayer', () => {
+test('the state depends on yesterday', () => {
   assert.equal(stateFor(0), 'idle');
   assert.equal(stateFor(1), 'slow');
   assert.equal(stateFor(3), 'slow');
@@ -22,23 +22,23 @@ test('el estado depende de la actividad de ayer', () => {
   assert.equal(stateFor(10), 'fast');
 });
 
-test('la racha sigue viva si hoy todavía no hay actividad', () => {
+test('the streak stays alive when there is nothing yet today', () => {
   const days = [day('d1', 0), day('d2', 2), day('d3', 1), day('d4', 0)];
   assert.equal(streakFrom(days), 2);
 });
 
-test('la racha cuenta hoy cuando ya hay actividad', () => {
+test('the streak counts today once there is activity', () => {
   const days = [day('d1', 0), day('d2', 2), day('d3', 1), day('d4', 5)];
   assert.equal(streakFrom(days), 3);
 });
 
-test('un día en cero rompe la racha', () => {
+test('a day at zero breaks the streak', () => {
   const days = [day('d1', 4), day('d2', 0), day('d3', 1), day('d4', 1)];
   assert.equal(streakFrom(days), 2);
   assert.equal(streakFrom([]), 0);
 });
 
-test('summarize une lenguajes repetidos y los ordena por tamaño', () => {
+test('summarize merges repeated languages and sorts them by size', () => {
   const s = summarize({
     user: 'ana',
     days: [day('a', 3), day('b', 5), day('c', 0)],
@@ -56,11 +56,28 @@ test('summarize une lenguajes repetidos y los ordena por tamaño', () => {
   assert.ok(Math.abs(s.languages.reduce((a, l) => a + l.share, 0) - 1) < 1e-9);
 });
 
-test('sin color de la API se usa el oficial del lenguaje', () => {
+test('without a color from the API the official language color is used', () => {
   const s = summarize({
     user: 'ana',
     days: [day('a', 1), day('b', 1)],
     languages: [{ name: 'Python', color: null, bytes: 10 }],
   });
   assert.equal(s.languages[0].color, '#3572A5');
+});
+
+test('excluded languages are left out, in any case, and the shares add up again', () => {
+  const s = summarize(
+    {
+      user: 'ana',
+      days: [day('a', 1)],
+      languages: [
+        { name: 'HTML', color: '#e34c26', bytes: 900 },
+        { name: 'Jupyter Notebook', color: '#DA5B0B', bytes: 500 },
+        { name: 'Go', color: '#00ADD8', bytes: 100 },
+      ],
+    },
+    { exclude: ['html', ' jupyter notebook '] },
+  );
+  assert.deepEqual(s.languages.map((l) => l.name), ['Go']);
+  assert.equal(s.languages[0].share, 1);
 });

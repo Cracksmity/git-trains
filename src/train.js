@@ -1,37 +1,37 @@
-// Construye un tren como capas de píxeles (mirando a la derecha) y, si hace
-// falta, lo espeja. Las capas se animan por separado en scene.js.
+// Build a train as pixel layers (facing right) and, if needed,
+// mirror it. The layers are animated separately in scene.js.
 
 import { Grid } from './pixel.js';
 import { drawText, textWidth } from './font.js';
 
-export const TOP = 9; // filas libres sobre el techo (pantógrafo y chispas)
-export const BODY_ROWS = 20; // techo .. faldón
-export const TRAIN_H = TOP + 25; // + zona de ruedas
+export const TOP = 9; // free rows above the roof (pantograph and sparks)
+export const BODY_ROWS = 20; // roof .. skirt
+export const TRAIN_H = TOP + 25; // + wheel area
 export const MID_W = 64;
 export const LED_W = 39;
 export const DOOR_W = 11;
 export const MAX_CARS = 6;
 
-// Locomotora (opcional, para trenes de vapor): un dibujo completo que va al frente
-// en lugar de la cabina, con sus ruedas motrices unidas por la biela. Los vagones
-// van detrás y el último termina en una cola plana con luz roja.
-export const LOCO_ROWS = 30; // 5 sobre el techo de los coches + 20 de la caja + 5 de ruedas
-export const LOCO_UP = 5; // filas del dibujo por encima del techo de los coches
+// Locomotive (optional, for steam trains): a complete drawing at the front
+// instead of the cab, with its driving wheels joined by a connecting rod. The cars
+// follow behind and the last ends in a flat tail with a red light.
+export const LOCO_ROWS = 30; // 5 above the car roofs + 20 for the body + 5 for wheels
+export const LOCO_UP = 5; // drawing rows above the car roofs
 export const LOCO_MIN_W = 16;
 export const LOCO_MAX_W = 60;
-export const LOCO_WHEELS = [7, 9, 11]; // diámetros de las ruedas motrices
-export const LOCO_SMALL = 5; // diámetro de las ruedas chicas (guía o arrastre)
-const COUPLER = 2; // enganche entre el primer vagón y la locomotora
+export const LOCO_WHEELS = [7, 9, 11]; // driving wheel diameters
+export const LOCO_SMALL = 5; // small wheel diameter (leading or trailing)
+const COUPLER = 2; // coupler between the first car and the locomotive
 
-// Costado de un coche intermedio: ventanas ('w', ancho) y puertas ('d'), de atrás
-// hacia adelante. Con 3 puertas por lado (los metros) las puertas son más angostas.
+// Side of an intermediate car: windows ('w', width) and doors ('d'), from back
+// to front. With 3 doors per side (metro trains), the doors are narrower.
 const LAYOUTS = {
   2: { doorW: DOOR_W, items: [['w', 7], ['d'], ['w', 14], ['d'], ['w', 7]] },
   3: { doorW: 9, items: [['w', 4], ['d'], ['w', 6], ['d'], ['w', 6], ['d'], ['w', 4]] },
 };
 const layoutOf = (model) => LAYOUTS[model.doors ?? 2];
 
-// La trompa de cola es la misma plantilla espejada; ahí las luces van en rojo.
+// The tail nose is the same mirrored template; its lights are red.
 const TAIL_LIGHT = { l: 'r', y: 'r', q: 'r' };
 const TAIL_LAMP = '#ff4a4a';
 
@@ -43,11 +43,11 @@ const INTERIOR_FLOOR = '#b9a064';
 const LED_BG = '#0a0a10';
 export const LED_ON = '#ffb02e';
 
-// Bogie visto de lado (filas 18..24: las ruedas asoman bajo el faldón), centrado en
-// su eje. Dos ruedas de disco de 7 px unidas por el bastidor, que pasa POR DELANTE
-// de ellas y termina en las cajas de grasa de cada eje.
-// Luz desde arriba, igual que la carrocería.
-//   o llanta (contorno)  v/w disco (luz/sombra)  F/f bastidor  x/X caja de grasa
+// Bogie viewed from the side (rows 18..24: wheels protrude below the skirt), centered on
+// its axle. Two 7 px disc wheels joined by the frame, which passes IN FRONT
+// of them and ends at the axle boxes on each axle.
+// Light from above, as on the body.
+//   o tire (outline)  v/w disc (light/shadow)  F/f frame  x/X axle box
 const BOGIE = [
   '...ooo...........ooo...',
   '..ovvvo.........ovvvo..',
@@ -58,9 +58,9 @@ const BOGIE = [
   '...ooo...........ooo...',
 ];
 const BOGIE_HALF = 11;
-const BOGIE_IN = 13; // del extremo del coche al centro del bogie
-// Marcas del disco: tres a 120° que giran 60° entre fotogramas (las que caen
-// bajo el bastidor no se ven).
+const BOGIE_IN = 13; // from the car end to the bogie center
+// Disc marks: three at 120? rotating 60? between frames (those that fall
+// under the frame are not visible).
 const WHEEL_MARKS = {
   wa: [[0, -2], [-2, 1], [2, 1]],
   wb: [[0, 2], [-2, -1], [2, -1]],
@@ -83,8 +83,8 @@ export function cabWidth(model) {
   return 3 + LED_W + 2 + layoutOf(model).doorW + 2 + (model.cabWindows ? model.cabWindows + 2 : 0) + model.nose.w;
 }
 
-// Coches intermedios + coche cabeza + la trompa de cola (cabina en ambos extremos).
-// Con locomotora: los vagones, el enganche y la locomotora.
+// Intermediate cars + lead car + tail nose (cab at both ends).
+// With a locomotive: the cars, coupler, and locomotive.
 export function trainWidth(model, cars) {
   const n = clamp(cars, 1, MAX_CARS);
   if (model.loco) return n * MID_W + COUPLER + model.loco.w;
@@ -107,9 +107,9 @@ function symbolColor(model, s, stripe) {
 
 const NOSE_DARK = '#26242b';
 
-// Color de un símbolo de la trompa o de la locomotora (ver noses.js). `part` es
-// model.nose o model.loco: de ahí salen la pintura (n), el panel (f) y, en la
-// locomotora, los tonos claro y oscuro de su pintura (h, m).
+// Color of a nose or locomotive symbol (see noses.js). `part` is
+// model.nose or model.loco: it supplies the paint (n), panel (f), and, for the
+// locomotive, the light and dark shades of its paint (h, m).
 function partColor(model, part, sym, y, stripe) {
   const p = model.pal;
   switch (sym) {
@@ -134,8 +134,8 @@ function partColor(model, part, sym, y, stripe) {
   }
 }
 
-// Color del costado en la fila y de la caja (0 techo .. 19 faldón). Arriba del
-// techo sigue el brillo del techo y abajo del faldón, el faldón.
+// Side color at body row y (0 roof .. 19 skirt). Above the
+// roof the roof highlight continues, and below the skirt, the skirt continues.
 function rowColor(model, y, stripe) {
   const p = model.pal;
   if (y <= 1) return p.roofHi;
@@ -160,21 +160,21 @@ export function buildTrain(model, opts = {}) {
 
   const layers = {
     body: new Grid(width, TRAIN_H),
-    open: new Grid(width, TRAIN_H), // puertas abiertas (se superpone)
-    lit: new Grid(width, TRAIN_H), // ventanas iluminadas
-    wa: new Grid(width, TRAIN_H), // marcas del disco de rueda, fotograma A
-    wb: new Grid(width, TRAIN_H), // marcas del disco de rueda, fotograma B
-    sa: new Grid(width, TRAIN_H), // chispas A
-    sb: new Grid(width, TRAIN_H), // chispas B
-    pa: new Grid(width, TRAIN_H), // humo de la locomotora A
-    pb: new Grid(width, TRAIN_H), // humo de la locomotora B
+    open: new Grid(width, TRAIN_H), // open doors (overlay)
+    lit: new Grid(width, TRAIN_H), // lit windows
+    wa: new Grid(width, TRAIN_H), // wheel disc marks, frame A
+    wb: new Grid(width, TRAIN_H), // wheel disc marks, frame B
+    sa: new Grid(width, TRAIN_H), // sparks A
+    sb: new Grid(width, TRAIN_H), // sparks B
+    pa: new Grid(width, TRAIN_H), // locomotive smoke A
+    pb: new Grid(width, TRAIN_H), // locomotive smoke B
     led: new Grid(width, TRAIN_H),
   };
   const ctx = { layers, model, stripe, panes: [], led: null, pantAnchor: null, shoeAnchor: null };
 
   let x = 0;
   if (model.loco) {
-    // Vagones (el de adelante lleva el letrero), enganche y locomotora.
+    // Cars (the front one carries the sign), coupler, and locomotive.
     for (let i = 0; i < n; i++) {
       drawCar(ctx, { ox: x, w: MID_W, isCab: false, isTail: i === 0, isLed: i === n - 1, frontIndex: n - 1 - i });
       x += MID_W;
@@ -186,8 +186,8 @@ export function buildTrain(model, opts = {}) {
       const isCab = i === n - 1;
       const isTail = i === 0;
       const w = (isCab ? cabW : MID_W) + (isTail ? model.nose.w : 0);
-      // Modelos articulados: los coches van en pares (desde la cabeza) que comparten
-      // el bogie de la unión.
+      // Articulated models: cars run in pairs (from the head) sharing
+      // the bogie at the joint.
       const f = n - 1 - i;
       const artFront = !!model.articulated && f % 2 === 1;
       const artRear = !!model.articulated && f % 2 === 0 && !isTail;
@@ -196,7 +196,7 @@ export function buildTrain(model, opts = {}) {
     }
   }
 
-  // Ventanas iluminadas: crecen con la racha (30 días = todas), de adelante hacia atrás.
+  // Lit windows: increase with the streak (30 days = all), from front to back.
   const panes = [...ctx.panes].sort((a, b) => b.x - a.x);
   const litCount =
     streak > 0 ? clamp(Math.round(panes.length * Math.min(1, streak / 30)), 1, panes.length) : 0;
@@ -204,7 +204,7 @@ export function buildTrain(model, opts = {}) {
 
   drawSparks(ctx);
 
-  // Letrero LED: el texto se dibuja DESPUÉS de espejar para que no salga invertido.
+  // LED sign: the text is drawn AFTER mirroring so it is not reversed.
   const text = `${label} ${streak}`;
   let ledBox = { ...ctx.led, w: LED_W, h: 7 };
   let out = layers;
@@ -225,13 +225,13 @@ function drawCar(ctx, car) {
   const B = L.body;
   const { ox, w, isCab, isTail, isLed, artFront, artRear } = car;
   const layout = layoutOf(model);
-  // Las trompas vienen de una plantilla: la delantera en el coche cabeza y la misma,
-  // espejada, en el de cola. El resto es un rectángulo. Detrás de una locomotora
-  // no hay cabinas: la cola es plana.
+  // The noses come from a template: the front one on the lead car and the same one,
+  // mirrored, on the tail car. The rest is a rectangle. Behind a locomotive
+  // there are no cabs: the tail is flat.
   const art = isCab ? model.nose : null;
   const tail = isTail && !model.loco ? model.nose : null;
-  const nx0 = art ? w - art.w : w; // columna donde empieza la trompa delantera
-  const lx = tail ? tail.w : 0; // columna donde empieza la caja, tras la trompa de cola
+  const nx0 = art ? w - art.w : w; // column where the front nose begins
+  const lx = tail ? tail.w : 0; // column where the body begins, after the tail nose
   const cell = (x, y) => {
     if (x < lx) {
       const s = tail.rows[y]?.[lx - 1 - x] ?? '.';
@@ -248,7 +248,7 @@ function drawCar(ctx, car) {
   };
   const px = (x, y, c, g = B) => g.set(ox + x, TOP + y, c);
 
-  // 1. Silueta, franjas y trompa.
+  // 1. Silhouette, stripes, and nose.
   for (let y = 0; y < BODY_ROWS; y++) {
     for (let x = 0; x < w; x++) {
       const sym = cell(x, y);
@@ -257,10 +257,10 @@ function drawCar(ctx, car) {
     }
   }
 
-  // 3. Fuelle entre coches.
+  // 3. Gangway between cars.
   if (!isTail) for (let y = 2; y <= 17; y++) for (let x = 0; x < 2; x++) px(x, y, P.gangway);
 
-  // 4. Contorno automático (bordes de la silueta).
+  // 4. Automatic outline (silhouette edges).
   for (let y = 0; y < BODY_ROWS; y++) {
     for (let x = 0; x <= right(y); x++) {
       if (!inCar(x, y)) continue;
@@ -268,10 +268,10 @@ function drawCar(ctx, car) {
       if (leftOpen || !inCar(x + 1, y) || !inCar(x, y - 1) || !inCar(x, y + 1)) px(x, y, P.outline);
     }
   }
-  // Cola plana del último vagón (tren con locomotora): luz roja junto al borde.
+  // Flat tail of the last car (train with locomotive): red light by the edge.
   if (isTail && model.loco) for (const y of [14, 15]) px(1, y, TAIL_LAMP);
 
-  // 5. Detalles de techo: unidades hundidas.
+  // 5. Roof details: recessed units.
   if (model.roofBoxes) {
     const boxes = isCab ? [[8, 18]] : [[8, 18], [38, 18]];
     for (const [bx, bw] of boxes) {
@@ -282,8 +282,8 @@ function drawCar(ctx, car) {
     }
   }
 
-  // 6. Ventanas, puertas y letrero. Algunos modelos llevan las ventanas sobre una
-  //    banda oscura continua; se pinta primero y lo demás va encima.
+  // 6. Windows, doors, and sign. Some models have windows on a
+  //    continuous dark band; it is painted first and the rest goes on top.
   if (model.winBand) {
     const { y0, y1 } = model.win;
     for (let y = y0; y <= y1; y++) for (let x = isTail ? lx : 2; x < nx0 - 1; x++) px(x, y, model.winBand);
@@ -308,7 +308,7 @@ function drawCar(ctx, car) {
     const half = (dw - 1) / 2;
     const dx = ox + x;
     const dy = TOP + DOOR_Y0;
-    // cerrada: dos hojas, cada una con su brillo y su ventanilla
+    // closed: two leaves, each with its own highlight and window
     B.rect(dx, dy, dw, DOOR_H, P.door);
     for (const leaf of [1, half + 1]) {
       B.vline(dx + leaf, dy + 1, DOOR_H - 2, P.doorHi);
@@ -316,7 +316,7 @@ function drawCar(ctx, car) {
     }
     B.vline(dx + half, dy, DOOR_H, P.outline);
     B.frame(dx, dy, dw, DOOR_H, P.outline);
-    // abierta: interior iluminado y hojas recogidas a los lados
+    // open: lit interior and leaves retracted to the sides
     const O = L.open;
     O.rect(dx, dy, dw, DOOR_H, P.outline);
     O.rect(dx + 2, dy + 1, dw - 4, DOOR_H - 2, INTERIOR);
@@ -326,7 +326,7 @@ function drawCar(ctx, car) {
     return x + dw;
   };
 
-  // Letrero LED (fondo; el texto va en la capa led). Devuelve dónde sigue el costado.
+  // LED sign (background; text goes on the led layer). Returns where the side continues.
   const ledSign = () => {
     B.rect(ox + lx + LED_X, TOP + 4, LED_W, 7, LED_BG);
     B.frame(ox + lx + LED_X, TOP + 4, LED_W, 7, P.outline);
@@ -338,8 +338,8 @@ function drawCar(ctx, car) {
     let x = door(ledSign()) + 2;
     if (model.cabWindows) x = windows(x, model.cabWindows) + 2;
   } else if (isLed) {
-    // Primer vagón detrás de la locomotora: letrero, una puerta y una ventana con
-    // el espacio que queda.
+    // First car behind the locomotive: sign, one door, and one window in
+    // the remaining space.
     const x = door(ledSign()) + 2;
     windows(x, w - 2 - x);
   } else {
@@ -347,17 +347,17 @@ function drawCar(ctx, car) {
     for (const [kind, ww] of layout.items) x = (kind === 'd' ? door(x) : windows(x, ww)) + 2;
   }
 
-  // 7. Bogies. El cuerpo es estático; las marcas del disco alternan entre las
-  //    capas wa y wb para dar sensación de giro. Bajo las cabinas el bogie queda a
-  //    la misma distancia de la punta en ambos extremos. En una articulación los dos
-  //    coches comparten un bogie centrado en la unión; lo dibuja el de adelante.
+  // 7. Bogies. The body is static; disc marks alternate between the
+  //    wa and wb layers to suggest rotation. Under the cabs the bogie is at
+  //    the same distance from the tip at both ends. At an articulation the two
+  //    cars share a bogie centered on the joint; the front car draws it.
   const cabOff = model.cabBogieOff ?? 18;
   const bogies = [
     artRear ? 0 : tail ? cabOff - 1 : BOGIE_IN,
     artFront ? w : w - (isCab ? cabOff : BOGIE_IN + 1),
   ];
   for (const bx of artFront ? bogies.slice(0, 1) : bogies) drawBogie(ctx, ox + bx);
-  // Cajas de equipo bajo el piso, entre bogies.
+  // Equipment boxes under the floor, between bogies.
   const U = underColors(model.pal);
   const eEnd = bogies[1] - BOGIE_HALF - 2;
   for (let x = bogies[0] + BOGIE_HALF + 2; x <= eEnd; ) {
@@ -371,7 +371,7 @@ function drawCar(ctx, car) {
   }
   if (isCab) ctx.shoeAnchor = { x: ox + bogies[1] + BOGIE_HALF + 1, y: TOP + 23 };
 
-  // 8. Pantógrafo.
+  // 8. Pantograph.
   if (shouldHavePantograph(model, car)) {
     const pxo = lx + (model.pant === 'lead' ? model.pantX ?? 24 : 28);
     const top = TOP - PANTOGRAPH.length;
@@ -384,7 +384,7 @@ function drawCar(ctx, car) {
   }
 }
 
-// Mezcla dos colores #rrggbb (t = 0 devuelve a, t = 1 devuelve b).
+// Blend two #rrggbb colors (t = 0 returns a, t = 1 returns b).
 export function mix(a, b, t) {
   const ca = parseInt(a.slice(1), 16);
   const cb = parseInt(b.slice(1), 16);
@@ -396,9 +396,9 @@ export function mix(a, b, t) {
   return out;
 }
 
-// Colores del bajo del coche (bogies y cajas de equipo). Salen de la paleta del
-// modelo: el gris del faldón con un toque del color de la caja, para que el tren
-// y sus ruedas compartan tono en vez de llevar todos el mismo gris.
+// Colors underneath the car (bogies and equipment boxes). They come from the
+// model palette: skirt gray with a touch of body color, so the train
+// and its wheels share a tone instead of all using the same gray.
 function underColors(P) {
   const frame = mix(P.skirt, P.body, 0.06);
   const disc = mix(mix(P.wheel, P.skirt, 0.5), P.body, 0.05);
@@ -417,12 +417,12 @@ function underColors(P) {
 
 const TYRE = { hi: '#2a2a30', lo: '#141417', mark: '#4a4a52', hub: '#a3a6ad', hubLo: '#7c7f87' };
 
-// Bogie con centro en la columna bx (coordenadas del tren).
+// Bogie centered at column bx (train coordinates).
 function drawBogie(ctx, bx) {
   const { layers: L, model } = ctx;
   const U = underColors(model.pal);
-  // Rodadura neumática: llantas de goma negra con el cubo metálico a la vista, en
-  // vez de ruedas de acero con caja de grasa.
+  // Rubber-tired running gear: black rubber tires with exposed metal hubs,
+  // instead of steel wheels with axle boxes.
   const wheel = model.tyres ? TYRE : { hi: U.discHi, lo: U.disc, mark: U.mark, hub: U.axle, hubLo: U.axleLo };
   const colors = {
     o: model.pal.outline,
@@ -445,16 +445,16 @@ function drawBogie(ctx, bx) {
   }
 }
 
-// --- Locomotora --------------------------------------------------------------
+// --- Locomotive --------------------------------------------------------------
 
 const ROD = '#c9cdd4';
 const ROD_PIN = '#7c828c';
 const STEAM = { '#': '#f4f5f8', '%': '#cfd4dc', o: '#8f98a5' };
 
-// Bocanadas de humo: [máscara, dx, dy] con la máscara centrada en la chimenea + dx
-// y su fila de abajo en la boca de la chimenea + dy. "#" humo, "%" sombra, "o"
-// contorno. Dos fotogramas: la bocanada sale y la anterior se queda atrás (el tren
-// avanza). Arriba de la chimenea quedan pocas filas, así que el humo se tiende.
+// Smoke puffs: [mask, dx, dy] with the mask centered on the chimney + dx
+// and its bottom row at the chimney mouth + dy. "#" smoke, "%" shadow, "o"
+// outline. Two frames: the puff emerges and the previous one stays behind (the train
+// moves forward). Few rows remain above the chimney, so the smoke spreads out.
 const PUFF_S = ['.oo.', 'o##o', 'o#%o', '.oo.'];
 const PUFF_M = ['.ooo.', 'o###o', 'o#%%o', '.ooo.'];
 const PUFF_L = ['..ooo..', '.o###oo', 'o######o', 'o##%%%%o', '.oooooo.'];
@@ -463,7 +463,7 @@ const PUFFS = {
   pb: [[PUFF_M, -1, -1], [PUFF_L, -17, -2]],
 };
 
-// Píxeles de una rueda de radio r: [dx, dy, ¿llanta?].
+// Pixels of a wheel with radius r: [dx, dy, tire?].
 function wheelPixels(r) {
   const lim = (r + 0.5) ** 2;
   const inside = (dx, dy) => dx * dx + dy * dy <= lim;
@@ -478,11 +478,11 @@ function wheelPixels(r) {
   return out;
 }
 
-// Redondeo simétrico (Math.round(-1.5) da -1).
+// Symmetric rounding (Math.round(-1.5) gives -1).
 const sround = (v) => Math.sign(v) * Math.round(Math.abs(v));
 
-// Rueda de locomotora con centro (cx, cy). Las marcas del disco giran 60° entre
-// las capas wa y wb, igual que en los bogies.
+// Locomotive wheel centered at (cx, cy). Disc marks rotate 60? between
+// the wa and wb layers, as on the bogies.
 function drawWheel(ctx, cx, cy, r, colors) {
   const { layers: L } = ctx;
   for (const [dx, dy, rim] of wheelPixels(r)) {
@@ -500,16 +500,16 @@ function drawWheel(ctx, cx, cy, r, colors) {
   }
 }
 
-// Locomotora con su esquina de arriba a la izquierda en la columna ox del tren.
+// Locomotive with its top-left corner at column ox of the train.
 function drawLoco(ctx, ox) {
   const { layers: L, model, stripe } = ctx;
   const P = model.pal;
   const loco = model.loco;
-  const y0 = TOP - LOCO_UP; // fila del tren donde empieza el dibujo
+  const y0 = TOP - LOCO_UP; // train row where the drawing begins
   const at = (x, y) => (y >= 0 && y < LOCO_ROWS && x >= 0 && x < loco.w ? loco.rows[y][x] : '.');
   const filled = (x, y) => at(x, y) !== '.';
 
-  // 1. Dibujo y contorno automático en los bordes de la silueta.
+  // 1. Drawing and automatic outline on the silhouette edges.
   for (let y = 0; y < LOCO_ROWS; y++) {
     for (let x = 0; x < loco.w; x++) {
       const sym = at(x, y);
@@ -519,8 +519,8 @@ function drawLoco(ctx, ox) {
     }
   }
 
-  // 2. Ruedas: las motrices unidas por la biela y las chicas sueltas. Todas tocan
-  //    el riel en la última fila del dibujo.
+  // 2. Wheels: driving wheels joined by the connecting rod and separate small wheels. All touch
+  //    the rail on the last row of the drawing.
   const { wheels } = loco;
   const U = underColors(P);
   const disc = wheels.color ?? U.disc;
@@ -538,8 +538,8 @@ function drawLoco(ctx, ox) {
   for (const x of wheels.small) drawWheel(ctx, ox + x, bottom - rs, rs, colors);
   for (const x of wheels.drive) drawWheel(ctx, ox + x, bottom - r, r, colors);
 
-  // La biela va en las capas wa/wb: baja y adelante en un fotograma, sube y atrás
-  // en el otro, como el muñón girando con la rueda.
+  // The connecting rod goes on the wa/wb layers: down and forward in one frame, up and back
+  // in the other, like the crankpin turning with the wheel.
   if (wheels.rod && wheels.drive.length >= 2) {
     const q = Math.max(1, Math.round(Math.max(1, r - 2) * 0.7));
     const cy = bottom - r;
@@ -551,8 +551,8 @@ function drawLoco(ctx, ox) {
     }
   }
 
-  // 3. Humo sobre la chimenea; las chispas (tren rápido) salen de ahí mismo. Sin
-  //    chimenea, saltan del riel bajo la rueda motriz de adelante.
+  // 3. Smoke above the chimney; sparks (fast train) emerge from there too. Without
+  //    a chimney, they jump from the rail under the front driving wheel.
   if (loco.smoke !== undefined) {
     const sx = ox + loco.smoke;
     let top = 0;

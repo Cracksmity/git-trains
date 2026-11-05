@@ -1,0 +1,14 @@
+{
+  "name": "guides-en",
+  "route": "mechanical",
+  "promptFile": "guides-en.md",
+  "allow": ["docs/ai/**", "docs/ia/**"],
+  "gates": [
+    "node --test test/custom.test.js",
+    "node tools/conductor/gates/guide-json.js docs/ai/train.md docs/ai/skyline.md",
+    "node tools/conductor/gates/links.js docs/ai",
+    "node tools/conductor/gates/no-spanish.js --max 3 docs/ai"
+  ],
+  "attempts": 2,
+  "timeoutMin": 25
+}

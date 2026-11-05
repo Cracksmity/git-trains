@@ -1,0 +1,12 @@
+{
+  "name": "benchmark-en",
+  "route": "bulk",
+  "promptFile": "benchmark-en.md",
+  "allow": ["benchmarks/medellin/index.html"],
+  "gates": [
+    "node tools/conductor/gates/links.js benchmarks/medellin/index.html",
+    "node tools/conductor/gates/no-spanish.js --max 4 benchmarks/medellin/index.html"
+  ],
+  "attempts": 2,
+  "timeoutMin": 30
+}

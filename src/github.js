@@ -1,4 +1,4 @@
-// Lectura de la actividad pública de un usuario con la API GraphQL de GitHub.
+// Reads a user's public activity through the GitHub GraphQL API.
 
 const ENDPOINT = 'https://api.github.com/graphql';
 
@@ -44,30 +44,51 @@ query($login: String!) {
   }
 }`;
 
-async function graphql({ token, query, user, fetchImpl }) {
-  const res = await fetchImpl(ENDPOINT, {
-    method: 'POST',
-    headers: {
-      authorization: `bearer ${token}`,
-      'content-type': 'application/json',
-      'user-agent': 'git-trenes',
-    },
-    body: JSON.stringify({ query, variables: { login: user } }),
-  });
-  if (!res.ok) {
-    const detail = (await res.text()).slice(0, 200);
-    throw new Error(`GitHub respondió ${res.status}: ${detail}`);
+// GraphQL answers 502/503/504 now and then on heavy queries, and the network can
+// blip: those are retried with backoff. Anything else (bad token, unknown user)
+// fails right away.
+const RETRIES = 3;
+const RETRY_STATUS = new Set([500, 502, 503, 504]);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function graphql({ token, query, user, fetchImpl, retryDelay = 1500 }) {
+  for (let attempt = 0; ; attempt++) {
+    const last = attempt === RETRIES;
+    let res;
+    try {
+      res = await fetchImpl(ENDPOINT, {
+        method: 'POST',
+        headers: {
+          authorization: `bearer ${token}`,
+          'content-type': 'application/json',
+          'user-agent': 'git-trains',
+        },
+        body: JSON.stringify({ query, variables: { login: user } }),
+      });
+    } catch (err) {
+      if (last) throw new Error(`Could not reach GitHub: ${err.message}`);
+      await sleep(retryDelay * 2 ** attempt);
+      continue;
+    }
+    if (!res.ok) {
+      if (RETRY_STATUS.has(res.status) && !last) {
+        await sleep(retryDelay * 2 ** attempt);
+        continue;
+      }
+      const detail = (await res.text()).slice(0, 200);
+      throw new Error(`GitHub answered ${res.status}: ${detail}`);
+    }
+    const json = await res.json();
+    if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join('; '));
+    const u = json.data?.user;
+    if (!u) throw new Error(`User "${user}" not found`);
+    return u;
   }
-  const json = await res.json();
-  if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join('; '));
-  const u = json.data?.user;
-  if (!u) throw new Error(`No encontré al usuario "${user}"`);
-  return u;
 }
 
-// Devuelve { user, days: [{date, count}] ascendente hasta hoy, languages: [{name, color, bytes}] }.
-export async function fetchActivity({ token, user, today = new Date(), fetchImpl = fetch }) {
-  const u = await graphql({ token, query: ACTIVITY_QUERY, user, fetchImpl });
+// Returns { user, days: [{date, count}] ascending up to today, languages: [{name, color, bytes}] }.
+export async function fetchActivity({ token, user, today = new Date(), fetchImpl = fetch, retryDelay }) {
+  const u = await graphql({ token, query: ACTIVITY_QUERY, user, fetchImpl, retryDelay });
 
   const limit = today.toISOString().slice(0, 10);
   const days = u.contributionsCollection.contributionCalendar.weeks
@@ -83,10 +104,10 @@ export async function fetchActivity({ token, user, today = new Date(), fetchImpl
   return { user: u.login, days, languages };
 }
 
-// Cifras para la tarjeta de estadísticas.
-// Devuelve { login, name, followers, stars, commits, prs, issues, contributed, reviews }.
-export async function fetchProfile({ token, user, fetchImpl = fetch }) {
-  const u = await graphql({ token, query: PROFILE_QUERY, user, fetchImpl });
+// Numbers for the stats card.
+// Returns { login, name, followers, stars, commits, prs, issues, contributed, reviews }.
+export async function fetchProfile({ token, user, fetchImpl = fetch, retryDelay }) {
+  const u = await graphql({ token, query: PROFILE_QUERY, user, fetchImpl, retryDelay });
   return {
     login: u.login,
     name: u.name || u.login,

@@ -1,0 +1,29 @@
+name: Bug report
+description: The train looks wrong, the Action fails, or the playground misbehaves.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected and what you got. A screenshot helps a lot with pixel art.
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Your workflow step
+      description: The `uses:` line and its `with:` inputs.
+      render: yaml
+  - type: textarea
+    id: log
+    attributes:
+      label: Action log
+      description: The lines from the run log, especially any `::error::` or `::warning::`.
+      render: text
+  - type: textarea
+    id: json
+    attributes:
+      label: Custom train or skyline (if any)
+      description: Paste the JSON, or a link to it.
+      render: json

@@ -22,7 +22,7 @@ const sample = {
             ] },
             { contributionDays: [
               { date: '2026-11-02', contributionCount: 4 },
-              { date: '2026-11-03', contributionCount: 0 }, // futuro: debe descartarse
+              { date: '2026-11-03', contributionCount: 0 }, // future: must be dropped
             ] },
           ],
         },
@@ -37,7 +37,7 @@ const sample = {
   },
 };
 
-test('aplana el calendario, descarta días futuros y lee lenguajes', async () => {
+test('flattens the calendar, drops future days and reads languages', async () => {
   const r = await fetchActivity({
     token: 't',
     user: 'ana',
@@ -49,10 +49,10 @@ test('aplana el calendario, descarta días futuros y lee lenguajes', async () =>
   assert.deepEqual(r.languages, [{ name: 'Go', color: '#00ADD8', bytes: 900 }]);
 });
 
-test('manda el token como bearer y el usuario como variable', async () => {
+test('sends the token as bearer and the user as a variable', async () => {
   let seen;
   await fetchActivity({
-    token: 'secreto',
+    token: 'secret',
     user: 'ana',
     today: new Date('2026-11-02T10:00:00Z'),
     fetchImpl: async (url, init) => {
@@ -61,24 +61,54 @@ test('manda el token como bearer y el usuario como variable', async () => {
     },
   });
   assert.equal(seen.url, 'https://api.github.com/graphql');
-  assert.equal(seen.init.headers.authorization, 'bearer secreto');
+  assert.equal(seen.init.headers.authorization, 'bearer secret');
   assert.equal(JSON.parse(seen.init.body).variables.login, 'ana');
 });
 
-test('usuario inexistente da un error claro', async () => {
+test('an unknown user gives a clear error', async () => {
   await assert.rejects(
-    fetchActivity({ token: 't', user: 'nadie', fetchImpl: reply({ data: { user: null } }) }),
-    /No encontré al usuario "nadie"/,
+    fetchActivity({ token: 't', user: 'nobody', fetchImpl: reply({ data: { user: null } }) }),
+    /User "nobody" not found/,
   );
 });
 
-test('errores de GraphQL y HTTP se propagan sin exponer el token', async () => {
+test('GraphQL and HTTP errors come through without exposing the token', async () => {
   await assert.rejects(
-    fetchActivity({ token: 'secreto', user: 'a', fetchImpl: reply({ errors: [{ message: 'Bad credentials' }] }) }),
+    fetchActivity({ token: 'secret', user: 'a', fetchImpl: reply({ errors: [{ message: 'Bad credentials' }] }) }),
     /Bad credentials/,
   );
   await assert.rejects(
-    fetchActivity({ token: 'secreto', user: 'a', fetchImpl: reply({ message: 'nope' }, false, 401) }),
-    (e) => /401/.test(e.message) && !e.message.includes('secreto'),
+    fetchActivity({ token: 'secret', user: 'a', fetchImpl: reply({ message: 'nope' }, false, 401) }),
+    (e) => /401/.test(e.message) && !e.message.includes('secret'),
   );
+});
+
+test('502s and network blips are retried; a 401 is not', async () => {
+  const today = new Date('2026-11-02T10:00:00Z');
+  let calls = 0;
+  const flaky = async () => {
+    calls++;
+    if (calls === 1) throw new Error('socket hang up');
+    if (calls === 2) return reply({ message: 'bad gateway' }, false, 502)();
+    return reply(sample)();
+  };
+  const r = await fetchActivity({ token: 't', user: 'ana', today, fetchImpl: flaky, retryDelay: 1 });
+  assert.equal(r.user, 'ana');
+  assert.equal(calls, 3);
+
+  calls = 0;
+  const denied = async () => {
+    calls++;
+    return reply({ message: 'nope' }, false, 401)();
+  };
+  await assert.rejects(fetchActivity({ token: 't', user: 'a', fetchImpl: denied, retryDelay: 1 }), /401/);
+  assert.equal(calls, 1);
+
+  calls = 0;
+  const down = async () => {
+    calls++;
+    return reply({ message: 'bad gateway' }, false, 502)();
+  };
+  await assert.rejects(fetchActivity({ token: 't', user: 'a', fetchImpl: down, retryDelay: 1 }), /502/);
+  assert.equal(calls, 4);
 });

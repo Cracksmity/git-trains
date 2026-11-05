@@ -1,0 +1,13 @@
+{
+  "name": "comments-en",
+  "route": "mechanical",
+  "promptFile": "comments-en.md",
+  "allow": ["src/**", "scripts/**"],
+  "gates": [
+    "node tools/conductor/gates/comments-only.js",
+    "node --test --test-skip-pattern=guide",
+    "node tools/conductor/gates/no-spanish.js src/cards.js src/train.js src/noses.js src/pixel.js src/font.js src/languages.js src/sample.js src/scene.js src/scenery.js src/models.js src/skyline.js src/github.js scripts/sheet.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 25
+}
