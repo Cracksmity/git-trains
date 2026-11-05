@@ -384,7 +384,7 @@ export function reportMarkdown(report, { sheet, zip, site, readme = 'community/R
       : 'light and dark scenes, behind a catalog train';
     const sheetLink = sheet ? `**[${report.sheet}](${sheet})**` : `\`${report.sheet}\``;
     const zipLink = zip ? `[every image on its own (zip)](${zip})` : 'every image on its own';
-    lines.push(`Previews: ${sheetLink} (${what}) and ${zipLink}, with the animated calendar SVGs. Drawn with ${report.sample.train.total} contributions for trains and ${report.sample.skyline.total} for skylines, a ${report.sample.train.streak}-day streak.`, '');
+    lines.push(`Previews: ${sheetLink} (${what}) and ${zipLink}, with the animated calendar SVGs. Drawn with sample stats: ${report.sample.train.total.toLocaleString('en')} contributions for trains and ${report.sample.skyline.total.toLocaleString('en')} for skylines, a ${report.sample.train.streak}-day streak.`, '');
   } else if (!report.changed.length) {
     lines.push('No train or skyline file changed in this pull request, so there is nothing to preview.', '');
   }
