@@ -139,6 +139,9 @@
     </section>
   </div>
 
+  <h2 id="calendar-mode">Calendar mode (calendar: true)</h2>
+  <div class="stage"><img id="calendar" alt="Contribution calendar with the train running through it"></div>
+
   <h2 id="yours">Make your own train or skyline with AI</h2>
   <div class="editors">
     <div class="panel editor">
@@ -197,6 +200,7 @@ import { buildSpec } from '../src/compose.js';
 import { sampleDays, SAMPLE_LANGUAGES } from '../src/sample.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline, SKYLINES } from '../src/skyline.js';
+import { renderCalendar } from '../src/calendar.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { mode: 'single', theme: 'light', language: 'en', doors: 'closed' };
@@ -332,6 +336,7 @@ function pickedSkyline() {
 }
 
 let url;
+let calUrl;
 function render() {
   $('o-total').textContent = $('total').value;
   $('o-streak').textContent = $('streak').value;
@@ -344,7 +349,11 @@ function render() {
   $('scene').src = url;
   $('scene').alt = spec.title;
   const t = spec.tracks[0];
-  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span>`;
+  const cal = renderCalendar(s, { model: t.model, stripe: t.stripe, label: t.label, language: state.language, theme: state.theme });
+  if (calUrl) URL.revokeObjectURL(calUrl);
+  calUrl = URL.createObjectURL(new Blob([cal], { type: 'image/svg+xml' }));
+  $('calendar').src = calUrl;
+  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span>`;
   zoom(t);
   document.querySelectorAll('.card').forEach((c) => c.classList.toggle('pick', c.dataset.id === t.model));
 }

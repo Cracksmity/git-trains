@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.0.0 (unreleased)
+## Unreleased
+
+### Added
+
+- `calendar: true` writes an animated contribution calendar with a mini version of your train, including custom and steam models. It follows the scene's themes and reduced-motion setting.
+
+## 1.0.0 (2026-11-04)
 
 The project is **git-trains** everywhere now, and it speaks English first. Everything from 0.x keeps working, with deprecation warnings, except the output file names.
 

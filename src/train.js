@@ -91,7 +91,7 @@ export function trainWidth(model, cars) {
   return (n - 1) * MID_W + cabWidth(model) + model.nose.w;
 }
 
-function symbolColor(model, s, stripe) {
+export function symbolColor(model, s, stripe) {
   const p = model.pal;
   switch (s) {
     case 'b': return p.body;
@@ -110,7 +110,7 @@ const NOSE_DARK = '#26242b';
 // Color of a nose or locomotive symbol (see noses.js). `part` is
 // model.nose or model.loco: it supplies the paint (n), panel (f), and, for the
 // locomotive, the light and dark shades of its paint (h, m).
-function partColor(model, part, sym, y, stripe) {
+export function partColor(model, part, sym, y, stripe) {
   const p = model.pal;
   switch (sym) {
     case 's': return rowColor(model, y, stripe);
@@ -136,7 +136,7 @@ function partColor(model, part, sym, y, stripe) {
 
 // Side color at body row y (0 roof .. 19 skirt). Above the
 // roof the roof highlight continues, and below the skirt, the skirt continues.
-function rowColor(model, y, stripe) {
+export function rowColor(model, y, stripe) {
   const p = model.pal;
   if (y <= 1) return p.roofHi;
   if (y === 2) return p.roof;

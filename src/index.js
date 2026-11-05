@@ -9,6 +9,7 @@ import { sampleStats, sampleProfile } from './sample.js';
 import { buildSpec, LANGUAGES } from './compose.js';
 import { renderScene } from './scene.js';
 import { renderStatsCard, renderLangsCard } from './cards.js';
+import { renderCalendar } from './calendar.js';
 import { parseCustomModel } from './custom.js';
 import { parseSkyline } from './skyline.js';
 
@@ -112,6 +113,7 @@ async function main() {
     ring: input('color-ring'),
   };
   const exclude = list(input('exclude-languages'));
+  const calendar = input('calendar', 'false') === 'true';
 
   let stats;
   let loadProfile;
@@ -140,6 +142,15 @@ async function main() {
     console.log(`${path} (${(svg.length / 1024).toFixed(1)} KB)`);
   };
   for (const [t, name] of variants) write(name, renderScene(buildSpec(stats, { ...options, theme: t })));
+
+  // Calendar mode: the same train running through the contribution calendar.
+  if (calendar) {
+    const lead = buildSpec(stats, options).tracks[0];
+    for (const [t, name] of variants) {
+      const file = name.replace('train', 'train-calendar');
+      write(file, renderCalendar(stats, { model: lead.model, stripe: lead.stripe, label: lead.label, language, theme: t }));
+    }
+  }
 
   // Profile cards. If they fail the scene still stands: warn and carry on.
   if (cards !== 'none') {

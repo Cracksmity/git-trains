@@ -62,5 +62,6 @@ export function summarize({ user, days, languages }, { exclude = [] } = {}) {
     cars: carsFor(total),
     state: stateFor(yesterday),
     languages: langs,
+    days,
   };
 }

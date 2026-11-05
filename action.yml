@@ -39,6 +39,9 @@ inputs:
   exclude-languages:
     description: "Comma-separated languages to leave out of the stripe and the cards, for example: HTML, Jupyter Notebook."
     default: ""
+  calendar:
+    description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."
+    default: "false"
   cards:
     description: "Profile cards to generate: none, stats, languages or both."
     default: none

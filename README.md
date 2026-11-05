@@ -11,8 +11,12 @@ Your GitHub activity as a **pixel-art train**: it gets longer with your contribu
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-dark.svg">
   <img alt="The author's train today, drawn by this repository's own workflow" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-light.svg">
 </picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-dark.svg">
+  <img alt="The author's contribution calendar today, with the same train running through it" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-light.svg">
+</picture>
 
-<sub>That's the author's train today, redrawn every morning by [this repo's own workflow](.github/workflows/train.yml). Try every option in the **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
+<sub>That's the author's train and [calendar](#calendar-mode) today, redrawn every morning by [this repo's own workflow](.github/workflows/train.yml). Try every option in the **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
 
 ## What each part means
 
@@ -26,6 +30,29 @@ Your GitHub activity as a **pixel-art train**: it gets longer with your contribu
 | Your username | The **station sign**, and a procedural **city of your own**: no two users get the same skyline |
 
 Your streak doesn't break first thing in the morning: if there's no activity yet today, it counts from yesterday.
+
+## Calendar mode
+
+Set `calendar: true` to write a contribution calendar alongside the train. A mini version of your train snakes through the weeks, eating contribution cells and growing to the same length as the scene train. It works with custom and steam trains too. Its stripe, windows and speed follow your activity; the caption shows your contributions and streak. `language` and `label` also apply. The calendar follows the selected theme and parks the train when reduced motion is requested.
+
+![Contribution calendar with a white metro](docs/example-calendar.svg)
+
+```yaml
+      - uses: Cracksmity/git-trains@v1
+        with:
+          calendar: true
+```
+
+With the default `theme: both`, add this to your README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="dist/train-calendar-dark.svg">
+  <img alt="My contribution calendar and train" src="dist/train-calendar-light.svg">
+</picture>
+```
+
+The Action also writes `train-calendar.svg`. With a single theme, it writes only that calendar file. See also the [steam example](docs/example-calendar-steam.svg).
 
 ## Quick start
 
@@ -70,6 +97,7 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `train` | `auto` | `auto` evolves with your cars; or pick a [model](#models); or the path to [your own train](#make-your-own-train-with-ai) in JSON |
 | `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka` or the path to [your own skyline](#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
+| `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto` |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
