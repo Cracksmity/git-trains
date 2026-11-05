@@ -1,6 +1,6 @@
-// Decorado de la escena: cielo, astros, nubes, ciudad, paisaje entre vías, catenaria
-// y semáforos. Todo se dibuja sobre rejillas de píxeles (ver pixel.js). Los colores
-// con "@" son variables de tema (THEMES) y cambian entre claro y oscuro.
+// Scene scenery: sky, celestial bodies, clouds, city, landscape between tracks, overhead wires
+// and signals. Everything is drawn on pixel grids (see pixel.js). Colors
+// with "@" are theme variables (THEMES) and change between light and dark.
 
 import { Grid, rng } from './pixel.js';
 import { TRAIN_H } from './train.js';
@@ -10,8 +10,8 @@ import { paintSkyline, skylineColumns } from './skyline.js';
 export { rng };
 
 export const SCENE_W = 448;
-export const GY0 = 88; // fila del riel de la primera vía
-export const PITCH = 52; // distancia entre vías
+export const GY0 = 88; // rail row of the first track
+export const PITCH = 52; // distance between tracks
 export const BALLAST = 12;
 
 export const THEMES = {
@@ -45,10 +45,10 @@ export function sceneHeight(nTracks) {
 
 const SUN = { x: SCENE_W - 56, y: 20 };
 
-// --- Cielo ----------------------------------------------------------------
+// --- Sky ----------------------------------------------------------------
 
-// 4 bandas sólidas y, entre ellas, 3 filas tramadas (25 %, 50 % y 75 %) hechas con
-// líneas punteadas. Va siempre al fondo; lo demás se pinta encima.
+// 4 solid bands and, between them, 3 dithered rows (25%, 50%, and 75%) made with
+// dotted lines. Always in the background; everything else is painted over it.
 export function skyLayer(W, used) {
   const bh = GY0 / 4;
   let out = '';
@@ -70,7 +70,7 @@ export function skyLayer(W, used) {
   return out;
 }
 
-// Sol (con rayos) o luna (con cráteres): el tema decide qué se ve.
+// Sun (with rays) or moon (with craters): the theme determines what is visible.
 export function celestialLayer(W, used) {
   const g = new Grid(W, 40);
   const { x: sx, y: sy } = SUN;
@@ -86,7 +86,7 @@ export function celestialLayer(W, used) {
   return g.paths(used);
 }
 
-// Estrellas en dos mitades que titilan alternadas (solo se ven en el tema oscuro).
+// Stars in two halves that twinkle alternately (visible only in the dark theme).
 export function starsLayers(W, used) {
   const rand = rng(4242);
   const a = new Grid(W, 52);
@@ -102,7 +102,7 @@ export function starsLayers(W, used) {
 
 function cloud(g, x, y, w, seed) {
   const rand = rng(seed);
-  const baseY = y + 6; // fila inferior plana
+  const baseY = y + 6; // flat bottom row
   const n = Math.max(3, Math.round(w / 6));
   for (let i = 0; i < n; i++) {
     const cx = x + 3 + Math.round((i * (w - 6)) / (n - 1));
@@ -117,7 +117,7 @@ function cloud(g, x, y, w, seed) {
   g.rect(x + 1, baseY - 1, w - 2, 2, '@cloud');
 }
 
-// Dos periodos seguidos de nubes: al desplazar la capa W píxeles el bucle es continuo.
+// Two consecutive cloud periods: shifting the layer W pixels makes a continuous loop.
 export function cloudsLayer(W, used) {
   const g = new Grid(W * 2, 52);
   const clouds = [[20, 6, 30], [112, 22, 22], [196, 8, 34], [276, 28, 24], [352, 12, 28], [418, 32, 20]];
@@ -127,7 +127,7 @@ export function cloudsLayer(W, used) {
   return g.paths(used);
 }
 
-// --- Paisaje ---------------------------------------------------------------
+// --- Landscape ---------------------------------------------------------------
 
 function bush(g, x, bottomY, w, h, color) {
   for (let r = 0; r < h; r++) {
@@ -167,7 +167,7 @@ const NEAR = [7, 3, 23, 2, 9];
 const hillH = (x, [base, a1, f1, a2, f2], ph) =>
   Math.round(base + a1 * Math.sin(x / f1 + ph) + a2 * Math.sin(x / f2 + ph * 2));
 
-// Una colina como un único trazo con escalones de 1 px (mucho más corto que un rect por columna).
+// A hill as a single path with 1 px steps (much shorter than one rect per column).
 function hillPath(W, y1, heightAt, cls, used) {
   used.add(cls);
   const bottom = y1 + 1;
@@ -182,8 +182,8 @@ function hillPath(W, y1, heightAt, cls, used) {
   return `<path class="c-${cls}" d="${d}H${W}V${bottom}z"/>`;
 }
 
-// Fondo de las franjas entre vías (vías 2, 3...): neblina y dos planos de colinas.
-// Va como SVG suelto, debajo del resto del decorado.
+// Background of the strips between tracks (tracks 2, 3...): haze and two layers of hills.
+// Rendered as separate SVG, beneath the rest of the scenery.
 export function bandsLayer(W, tracks, used) {
   let out = '';
   tracks.forEach((_, k) => {
@@ -199,7 +199,7 @@ export function bandsLayer(W, tracks, used) {
   return out;
 }
 
-// Primer plano de esas franjas: pueblo (k impar) o bosque (k par).
+// Foreground of those strips: village (odd k) or forest (even k).
 function paintBandFront(g, W, y1, k, rand) {
   const top = (x) => y1 - hillH(x, NEAR, k * 1.7) + 1;
 
@@ -220,9 +220,9 @@ function paintBandFront(g, W, y1, k, rand) {
   }
 }
 
-// Vías: riel, balasto y durmientes (línea punteada gruesa, un solo elemento por vía).
-// Los trenes sin pantógrafo llevan además un tercer riel (o barra guía) sobre
-// aisladores. Va como SVG suelto, debajo del resto del decorado.
+// Tracks: rail, ballast, and sleepers (thick dashed line, one element per track).
+// Trains without a pantograph also have a third rail (or guide bar) on
+// insulators. Rendered as separate SVG, beneath the rest of the scenery.
 export function railsLayer(W, tracks, used) {
   let out = '';
   tracks.forEach((t, k) => {
@@ -242,7 +242,7 @@ export function railsLayer(W, tracks, used) {
   return out;
 }
 
-// Semáforo: rojo si ayer no hubo actividad, ámbar si fue poca, verde si fue normal o mucha.
+// Signal: red if there was no activity yesterday, amber if low, green if normal or high.
 function signal(g, x, gy, state) {
   const on = state === 'idle' ? 0 : state === 'slow' ? 1 : 2;
   const lights = [['#ff4a3d', '#3b1f20'], ['#ffb02e', '#3b3020'], ['#4dff7c', '#16372a']];
@@ -251,10 +251,10 @@ function signal(g, x, gy, state) {
   lights.forEach(([lit, dim], i) => g.rect(x + 1, gy - 31 + i * 4, 3, 3, i === on ? lit : dim));
 }
 
-// --- Decorado principal -----------------------------------------------------
+// --- Main scenery -----------------------------------------------------
 
-// Ciudad aleatoria en dos planos (el fondo de siempre): el lejano en `far` y el
-// cercano, con ventanas, en `near` (pueden ser la misma rejilla).
+// Random city in two layers (the usual background): the distant one in `far` and the
+// near one, with windows, in `near` (they can be the same grid).
 function randomCity(far, near, W, rand) {
   for (const [g, color, minH, maxH, win] of [[far, '@city2', 16, 44, false], [near, '@city', 8, 26, true]]) {
     let x = -4;
@@ -272,16 +272,26 @@ function randomCity(far, near, W, rand) {
   }
 }
 
-// skyline: el fondo ya validado (ver skyline.js) o null para la ciudad aleatoria.
+// Each user gets their own procedural city (and bushes, villages, ballast): the
+// random numbers are seeded with the username, so it stays the same every day.
+export function seedFor(user) {
+  const name = String(user ?? '').trim().toLowerCase();
+  if (!name) return 20261102;
+  let h = 0x811c9dc5; // FNV-1a
+  for (const ch of name) h = Math.imul(h ^ ch.codePointAt(0), 0x01000193) >>> 0;
+  return h;
+}
+
+// skyline: the skyline already validated (see skyline.js) or null for the procedural city.
 export function paintBackdrop(W, H, tracks, user, skyline = null) {
   const g = new Grid(W, H);
-  const rand = rng(20261102);
+  const rand = rng(seedFor(user));
 
-  // Ciudad. Con un skyline propio la ciudad aleatoria se calcula igual, en rejillas
-  // aparte, para que consuma los mismos números al azar y el resto del decorado
-  // (arbustos, balasto, pueblos) no cambie. Con `fill` se usa solo su plano cercano
-  // (edificios bajos con ventanas) como relleno: delante de los edificios lejanos,
-  // detrás de los cercanos y sin tocar las columnas de estos.
+  // City. With a custom skyline the random city is still calculated, on separate
+  // grids, so it consumes the same random numbers and the rest of the scenery
+  // (bushes, ballast, villages) does not change. With `fill` only its near layer
+  // (low buildings with windows) is used as filler: in front of distant buildings,
+  // behind nearby ones and without touching their columns.
   if (!skyline) randomCity(g, g, W, rand);
   else {
     const scratch = new Grid(W, H);
@@ -300,7 +310,7 @@ export function paintBackdrop(W, H, tracks, user, skyline = null) {
     paintSkyline(g, skyline, GY0, 'near');
   }
 
-  // Talud con arbustos delante de la ciudad.
+  // Slope with bushes in front of the city.
   g.rect(0, GY0 - 3, W, 3, '@hill');
   for (let x = 2; x < W; x += 5 + Math.floor(rand() * 9)) {
     bush(g, x, GY0 - 2, 4 + Math.floor(rand() * 5), 3 + Math.floor(rand() * 3), rand() < 0.5 ? '@tree' : '@tree2');
@@ -310,15 +320,15 @@ export function paintBackdrop(W, H, tracks, user, skyline = null) {
     const gy = GY0 + PITCH * k;
     if (k > 0) paintBandFront(g, W, gy - 1, k, rand);
 
-    // Motas de balasto (el balasto y los durmientes van en railsLayer).
+    // Ballast specks (ballast and sleepers are in railsLayer).
     for (let x = 0; x < W; x++) {
       if (rand() < 0.08) g.set(x, gy + 6 + Math.floor(rand() * 5), '@ballast2');
     }
 
-    // Semáforo delante del tren según su sentido de marcha.
+    // Signal in front of the train according to its direction of travel.
     signal(g, t.dir === -1 ? 8 : W - 17, gy, t.state);
 
-    // Catenaria, solo si el tren de esta vía tiene pantógrafo.
+    // Overhead wires, only if the train on this track has a pantograph.
     if (t.overhead) {
       const wireY = gy - TRAIN_H;
       g.hline(0, wireY, W, '@wire');
@@ -330,7 +340,7 @@ export function paintBackdrop(W, H, tracks, user, skyline = null) {
     }
   });
 
-  // Rótulo de estación con el usuario.
+  // Station sign with the user.
   const name = clean(user).replace(/ /g, '').slice(0, 16);
   if (name) {
     const tw = textWidth(name);
@@ -341,7 +351,7 @@ export function paintBackdrop(W, H, tracks, user, skyline = null) {
     drawText(g, name, 14 + 4, 14, '#ffffff');
   }
 
-  // Leyenda sobre el balasto.
+  // Legend on the ballast.
   tracks.forEach((t, k) => {
     if (!t.caption) return;
     const gy = GY0 + PITCH * k;

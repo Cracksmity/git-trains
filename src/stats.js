@@ -1,15 +1,15 @@
-// Convierte la actividad cruda de GitHub en lo que necesita el tren.
+// Turns raw GitHub activity into what the train needs.
 
 import { languageColor } from './languages.js';
 
-// Contribuciones del último año necesarias para el vagón 2..6.
+// Contributions in the last year needed for cars 2..6.
 export const CAR_THRESHOLDS = [50, 200, 500, 1000, 2000];
 
 export function carsFor(total) {
   return 1 + CAR_THRESHOLDS.filter((t) => total >= t).length;
 }
 
-// Actividad de ayer -> comportamiento del tren.
+// Yesterday's activity -> how the train behaves.
 export function stateFor(yesterday) {
   if (yesterday <= 0) return 'idle';
   if (yesterday <= 3) return 'slow';
@@ -17,8 +17,8 @@ export function stateFor(yesterday) {
   return 'fast';
 }
 
-// Días consecutivos con actividad. Si hoy aún no hay nada, la racha sigue viva
-// desde ayer (para no "romperla" a las 6 de la mañana).
+// Consecutive days with activity. If there is nothing yet today, the streak is
+// still alive from yesterday (so it doesn't "break" at 6 in the morning).
 export function streakFrom(days) {
   let i = days.length - 1;
   if (i >= 0 && days[i].count === 0) i--;
@@ -30,13 +30,16 @@ export function streakFrom(days) {
   return streak;
 }
 
-// days: [{ date, count }] ordenados ascendente; languages: [{ name, color, bytes }]
-export function summarize({ user, days, languages }) {
+// days: [{ date, count }] in ascending order; languages: [{ name, color, bytes }].
+// exclude: language names to leave out (any case), e.g. ['HTML', 'Jupyter Notebook'].
+export function summarize({ user, days, languages }, { exclude = [] } = {}) {
   const total = days.reduce((a, d) => a + d.count, 0);
   const yesterday = days.length >= 2 ? days[days.length - 2].count : 0;
+  const skip = new Set(exclude.map((n) => n.trim().toLowerCase()).filter(Boolean));
 
   const merged = new Map();
   for (const l of languages) {
+    if (skip.has(l.name.toLowerCase())) continue;
     const cur = merged.get(l.name) ?? { name: l.name, color: l.color, bytes: 0 };
     cur.bytes += l.bytes;
     cur.color ||= l.color;

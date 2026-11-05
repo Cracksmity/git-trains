@@ -6,7 +6,7 @@ import { renderScene, STATES, SCENE_W } from '../src/scene.js';
 import { buildSpec } from '../src/compose.js';
 import { sampleStats } from '../src/sample.js';
 
-test('todos los modelos se construyen con 1 a 6 vagones y ambos sentidos', () => {
+test('every model builds with 1 to 6 cars in both directions', () => {
   for (const id of MODEL_ORDER) {
     for (let cars = 1; cars <= 6; cars++) {
       for (const dir of [1, -1]) {
@@ -18,12 +18,12 @@ test('todos los modelos se construyen con 1 a 6 vagones y ambos sentidos', () =>
   }
 });
 
-test('el tren más largo cabe en la escena', () => {
+test('the longest train fits in the scene', () => {
   for (const id of MODEL_ORDER) assert.ok(trainWidth(MODELS[id], 6) <= SCENE_W, id);
 });
 
-test('el texto del letrero no se espeja al ir hacia la izquierda', () => {
-  const model = MODELS['metro-naranja'];
+test('the sign text is not mirrored when the train runs left', () => {
+  const model = MODELS['metro-orange'];
   const right = buildTrain(model, { cars: 1, dir: 1, streak: 12 });
   const left = buildTrain(model, { cars: 1, dir: -1, streak: 12 });
   const crop = (t, x0) => {
@@ -36,12 +36,12 @@ test('el texto del letrero no se espeja al ir hacia la izquierda', () => {
     }
     return rows.join('\n');
   };
-  // Espejado, el letrero queda en la posición simétrica.
+  // Mirrored, the sign sits in the symmetric position.
   assert.equal(left.led.x, left.width - right.led.x - LED_W);
   assert.equal(crop(left, left.led.x), crop(right, right.led.x));
 });
 
-test('cada tren tiene cabina en ambos extremos: faros adelante, luces rojas atrás', () => {
+test('every train has a cab at both ends: headlights in front, red lights at the back', () => {
   const HEAD = '#fff4b0';
   const TAIL = '#ff4a4a';
   for (const id of MODEL_ORDER) {
@@ -54,22 +54,22 @@ test('cada tren tiene cabina en ambos extremos: faros adelante, luces rojas atr�
     };
     const rear = colorsIn(0, model.nose.w);
     const front = colorsIn(t.width - model.nose.w, t.width);
-    assert.ok(rear.has(TAIL) && !rear.has(HEAD), `${id}: cola`);
-    assert.ok(front.has(HEAD) && !front.has(TAIL), `${id}: cabeza`);
+    assert.ok(rear.has(TAIL) && !rear.has(HEAD), `${id}: tail`);
+    assert.ok(front.has(HEAD) && !front.has(TAIL), `${id}: head`);
   }
 });
 
-test('el tranvía articulado comparte un bogie en cada par de coches', () => {
-  // Cada bogie deja 6 marcas de disco (3 por rueda) en la capa wa.
+test('the articulated tram shares a bogie in each pair of cars', () => {
+  // Each bogie leaves 6 disc marks (3 per wheel) on the wa layer.
   const bogies = (id, cars) => buildTrain(MODELS[id], { cars }).layers.wa.cells.filter(Boolean).length / 6;
-  assert.equal(bogies('tranvia', 1), 2);
-  assert.equal(bogies('tranvia', 2), 3);
-  assert.equal(bogies('tranvia', 3), 5);
-  assert.equal(bogies('tranvia', 4), 6);
-  assert.equal(bogies('metro-naranja', 2), 4);
+  assert.equal(bogies('tram', 1), 2);
+  assert.equal(bogies('tram', 2), 3);
+  assert.equal(bogies('tram', 3), 5);
+  assert.equal(bogies('tram', 4), 6);
+  assert.equal(bogies('metro-orange', 2), 4);
 });
 
-test('la catenaria solo aparece sobre trenes con pantógrafo', () => {
+test('the overhead wire only shows up over trains with a pantograph', () => {
   const mk = (model) => renderScene({ tracks: [{ model, cars: 2, stripe: '#fff', state: 'idle' }] });
   for (const id of MODEL_ORDER) {
     const overhead = !!MODELS[id].pant;
@@ -78,57 +78,61 @@ test('la catenaria solo aparece sobre trenes con pantógrafo', () => {
   }
 });
 
-test('el nombre anterior "suburbano" sigue funcionando', () => {
-  assert.equal(buildSpec(sampleStats(), { tren: 'suburbano' }).tracks[0].model, 'metro-blanco');
+test('the earlier Spanish model ids still work', () => {
+  const pick = (train) => buildSpec(sampleStats(), { train }).tracks[0].model;
+  assert.equal(pick('suburbano'), 'metro-white');
+  assert.equal(pick('metro-blanco'), 'metro-white');
+  assert.equal(pick('tranvia'), 'tram');
+  assert.equal(pick('bala'), 'bullet');
 });
 
-test('las ventanas iluminadas crecen con la racha', () => {
+test('lit windows grow with the streak', () => {
   const count = (streak) =>
-    buildTrain(MODELS.tranvia, { cars: 3, streak }).layers.lit.cells.filter(Boolean).length;
+    buildTrain(MODELS.tram, { cars: 3, streak }).layers.lit.cells.filter(Boolean).length;
   assert.equal(count(0), 0);
   assert.ok(count(5) > 0);
   assert.ok(count(30) > count(5));
   assert.equal(count(30), count(90));
 });
 
-test('renderScene produce un SVG bien formado para cada estado y tema', () => {
+test('renderScene produces a well-formed SVG for every state and theme', () => {
   for (const state of Object.keys(STATES)) {
     for (const theme of ['light', 'dark', 'auto']) {
       const svg = renderScene({
         theme,
         user: 'octocat',
-        tracks: [{ model: 'bala', cars: 4, stripe: '#3178c6', streak: 12, state, caption: 'TYPESCRIPT - 12' }],
+        tracks: [{ model: 'bullet', cars: 4, stripe: '#3178c6', streak: 12, state, caption: 'TYPESCRIPT - 12' }],
       });
       assert.ok(svg.startsWith('<svg') && svg.endsWith('</svg>'));
       assert.equal((svg.match(/<g[ >]/g) ?? []).length, (svg.match(/<\/g>/g) ?? []).length);
-      assert.ok(!/undefined|NaN|null/.test(svg), `${state}/${theme} contiene valores inválidos`);
+      assert.ok(!/undefined|NaN|null/.test(svg), `${state}/${theme} has invalid values`);
     }
   }
 });
 
-test('el tema automático incluye prefers-color-scheme y los fijos no', () => {
-  const spec = { user: 'x', tracks: [{ model: 'tranvia', cars: 1, stripe: '#fff', state: 'idle' }] };
+test('the automatic theme includes prefers-color-scheme and the fixed ones do not', () => {
+  const spec = { user: 'x', tracks: [{ model: 'tram', cars: 1, stripe: '#fff', state: 'idle' }] };
   assert.match(renderScene({ ...spec, theme: 'auto' }), /prefers-color-scheme:dark/);
   assert.doesNotMatch(renderScene({ ...spec, theme: 'light' }), /prefers-color-scheme:dark/);
 });
 
-test('los trenes en movimiento avanzan de píxel en píxel', () => {
-  const svg = renderScene({ tracks: [{ model: 'metro-naranja', cars: 2, stripe: '#fff', state: 'normal' }] });
-  const w = trainWidth(MODELS['metro-naranja'], 2);
+test('moving trains advance one pixel at a time', () => {
+  const svg = renderScene({ tracks: [{ model: 'metro-orange', cars: 2, stripe: '#fff', state: 'normal' }] });
+  const w = trainWidth(MODELS['metro-orange'], 2);
   assert.match(svg, new RegExp(`steps\\(${SCENE_W + w}\\)`));
 });
 
-test('las chispas y líneas de velocidad solo aparecen a máxima velocidad', () => {
+test('sparks and speed lines only show up at top speed', () => {
   const mk = (state) =>
-    renderScene({ tracks: [{ model: 'bala', cars: 3, stripe: '#fff', state }] });
+    renderScene({ tracks: [{ model: 'bullet', cars: 3, stripe: '#fff', state }] });
   assert.match(mk('fast'), /class="sp sa0"/);
   assert.doesNotMatch(mk('normal'), /class="sp sa0"/);
   assert.match(mk('fast'), /c-speed/);
   assert.doesNotMatch(mk('slow'), /c-speed/);
 });
 
-test('el modo multi crea 3 vías con modelos distintos y sentidos alternos', () => {
-  const spec = buildSpec(sampleStats(), { modo: 'multi' });
+test('multi mode builds 3 tracks with different models running in alternate directions', () => {
+  const spec = buildSpec(sampleStats(), { mode: 'multi' });
   assert.equal(spec.tracks.length, 3);
   assert.equal(new Set(spec.tracks.map((t) => t.model)).size, 3);
   assert.deepEqual(spec.tracks.map((t) => t.dir), [1, -1, 1]);
@@ -136,42 +140,53 @@ test('el modo multi crea 3 vías con modelos distintos y sentidos alternos', () 
   assert.doesNotThrow(() => renderScene(spec));
 });
 
-test('un modelo desconocido da un error claro', () => {
-  assert.throws(() => buildSpec(sampleStats(), { tren: 'volador' }), /Modelo de tren desconocido/);
+test('an unknown model gives a clear error', () => {
+  assert.throws(() => buildSpec(sampleStats(), { train: 'flying' }), /Unknown train model/);
 });
 
-test('tren auto evoluciona con los vagones', () => {
+test('train auto evolves with the number of cars', () => {
   const s = sampleStats();
-  const first = buildSpec({ ...s, cars: 1 }, { tren: 'auto' }).tracks[0].model;
-  const last = buildSpec({ ...s, cars: 6 }, { tren: 'auto' }).tracks[0].model;
-  assert.equal(first, 'tranvia');
-  assert.equal(last, 'bala');
+  const first = buildSpec({ ...s, cars: 1 }, { train: 'auto' }).tracks[0].model;
+  const last = buildSpec({ ...s, cars: 6 }, { train: 'auto' }).tracks[0].model;
+  assert.equal(first, 'tram');
+  assert.equal(last, 'bullet');
 });
 
-test('el semáforo refleja la actividad de ayer: rojo parado, verde en marcha', () => {
-  const mk = (state) => renderScene({ tracks: [{ model: 'tranvia', cars: 1, stripe: '#fff', state }] });
+test('the sign word and the title follow the language', () => {
+  const s = sampleStats({ total: 600, streak: 4 });
+  const en = buildSpec(s, {});
+  const es = buildSpec(s, { language: 'es' });
+  assert.equal(en.tracks[0].label, 'STREAK');
+  assert.equal(es.tracks[0].label, 'RACHA');
+  assert.equal(buildSpec(s, { language: 'es', label: 'DIAS' }).tracks[0].label, 'DIAS');
+  assert.match(en.title, /^octocat's train: \d cars, 4-day streak$/);
+  assert.match(es.title, /^Tren de octocat: \d vagones, racha de 4 días$/);
+});
+
+test('the signal shows yesterday: red when stopped, green when moving', () => {
+  const mk = (state) => renderScene({ tracks: [{ model: 'tram', cars: 1, stripe: '#fff', state }] });
   assert.match(mk('idle'), /#ff4a3d/);
   assert.doesNotMatch(mk('idle'), /#4dff7c/);
   assert.match(mk('normal'), /#4dff7c/);
   assert.doesNotMatch(mk('normal'), /#ff4a3d/);
 });
 
-test('el paisaje de colinas solo aparece en las vías extra del modo multi', () => {
-  const single = renderScene(buildSpec(sampleStats(), { modo: 'single' }));
-  const multi = renderScene(buildSpec(sampleStats(), { modo: 'multi' }));
+test('the hills only appear on the extra tracks of multi mode', () => {
+  const single = renderScene(buildSpec(sampleStats(), { mode: 'single' }));
+  const multi = renderScene(buildSpec(sampleStats(), { mode: 'multi' }));
   assert.doesNotMatch(single, /c-haze/);
   assert.match(multi, /c-haze/);
   assert.match(multi, /c-hill2/);
 });
 
-test('las nubes avanzan un periodo completo de la escena en bucle', () => {
-  const svg = renderScene({ tracks: [{ model: 'tranvia', cars: 1, stripe: '#fff', state: 'idle' }] });
+test('the clouds drift a full scene width in a loop', () => {
+  const svg = renderScene({ tracks: [{ model: 'tram', cars: 1, stripe: '#fff', state: 'idle' }] });
   assert.ok(svg.includes(`.cl{animation:cl 240s steps(${SCENE_W}) infinite}`));
   assert.ok(svg.includes(`to{transform:translateX(-${SCENE_W}px)}`));
 });
 
-test('con prefers-reduced-motion las nubes y estrellas se quedan quietas', () => {
-  const svg = renderScene({ tracks: [{ model: 'tranvia', cars: 1, stripe: '#fff', state: 'normal' }] });
+test('with prefers-reduced-motion the clouds and stars stay still', () => {
+  const svg = renderScene({ tracks: [{ model: 'tram', cars: 1, stripe: '#fff', state: 'normal' }] });
   const reduced = svg.slice(svg.indexOf('prefers-reduced-motion'));
   assert.ok(reduced.includes('.cl,.tw{animation:none!important}'));
 });

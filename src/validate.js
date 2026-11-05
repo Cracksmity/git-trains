@@ -1,8 +1,8 @@
-// Ayudas para validar los JSON que llegan de fuera (trenes y fondos personalizados).
+// Helpers for validating JSON that comes from outside (custom trains and skylines).
 
 export class CustomError extends Error {
   constructor(what, errors) {
-    super(`${what} tiene ${errors.length} problema(s):\n- ${errors.join('\n- ')}`);
+    super(`${what} has ${errors.length} problem(s):\n- ${errors.join('\n- ')}`);
     this.name = 'CustomError';
     this.errors = errors;
   }
@@ -11,7 +11,7 @@ export class CustomError extends Error {
 export const isInt = (v) => Number.isInteger(v);
 export const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
-// Acepta #rgb, #rrggbb o rrggbb; devuelve #rrggbb en minúsculas o null.
+// Accepts #rgb, #rrggbb or rrggbb; returns lowercase #rrggbb, or null.
 export function normColor(v) {
   if (typeof v !== 'string') return null;
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(v.trim());
@@ -20,10 +20,14 @@ export function normColor(v) {
   return `#${h.toLowerCase()}`;
 }
 
-// Las claves que empiezan con "_" o "$" se ignoran (notas, $schema...).
+// Keys starting with "_" or "$" are ignored (notes, $schema...).
 export function unknownKeys(obj, known, where, errors) {
   for (const k of Object.keys(obj)) {
     if (known.includes(k) || k.startsWith('_') || k.startsWith('$')) continue;
-    errors.push(`${where}: clave desconocida "${k}" (válidas: ${known.join(', ')})`);
+    errors.push(`${where}: unknown key "${k}" (valid: ${known.join(', ')})`);
   }
 }
+
+// Keys accepted anywhere but never drawn: notes from whoever made the file.
+// The Spanish spellings stay accepted for files made with the earlier guides.
+export const NOTE_KEYS = ['description', 'author', 'source', 'inspiration', 'descripcion', 'autor', 'fuente', 'inspiracion'];

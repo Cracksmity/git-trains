@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>git-trenes</title>
-<meta name="description" content="Una GitHub Action que dibuja un tren en pixel art a partir de tu actividad pública en GitHub.">
+<title>git-trains</title>
+<meta name="description" content="A GitHub Action that draws a pixel-art train from your public GitHub activity.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Portada del sitio de GitHub Pages: el tren arriba y dos destinos. */
+/* Home of the GitHub Pages site: the train on top and two destinations. */
 :root {
   --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
   --green: #1b8638; --yellow: #c98f00;
@@ -45,31 +45,31 @@ footer a { color: var(--green); }
 <div class="wrap">
   <header>
     <div class="stripe" aria-hidden="true"></div>
-    <h1>git-trenes</h1>
-    <p>Una GitHub Action que dibuja un tren en pixel art a partir de tu actividad pública en GitHub: los vagones crecen con tus contribuciones, la franja toma el color de tu lenguaje principal y la velocidad depende de lo que hiciste ayer.</p>
+    <h1>git-trains</h1>
+    <p>A GitHub Action that draws a pixel-art train from your public GitHub activity: the cars grow with your contributions, the stripe takes the color of your top language and the speed depends on what you did yesterday.</p>
   </header>
   <div class="scene">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/ejemplo-oscuro.svg">
-      <img alt="Tren de ejemplo de git-trenes pasando frente a una ciudad" src="docs/ejemplo-claro.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="docs/example-dark.svg">
+      <img alt="An example git-trains train passing in front of a city" src="docs/example-light.svg">
     </picture>
   </div>
   <div class="places">
     <a class="place" href="preview/">
       <h2>Playground</h2>
-      <p>Prueba los trenes y los fondos con controles en vivo, y pega el JSON de tu propio tren o ciudad para verlo al instante, con los mismos errores que daría la Action.</p>
-      <span class="go">Abrir el playground</span>
+      <p>Try the trains and skylines with live controls, and paste the JSON of your own train or city to see it right away, with the same error messages the Action gives.</p>
+      <span class="go">Open the playground</span>
     </a>
-    <a class="place" href="comparativa/medellin/">
-      <h2>Metro de Medellín en diez corridas</h2>
-      <p>Diez modelos en Claude Code, Codex y Antigravity diseñan el mismo tren CAF y el mismo skyline, con sus tokens, tiempos y resultados lado a lado.</p>
-      <span class="go">Ver la comparativa</span>
+    <a class="place" href="benchmarks/medellin/">
+      <h2>Medellín Metro in ten runs</h2>
+      <p>Ten models in Claude Code, Codex and Antigravity design the same CAF train and the same skyline, with their tokens, times and results side by side.</p>
+      <span class="go">See the benchmark</span>
     </a>
   </div>
   <footer>
-    <a href="https://github.com/Cracksmity/git-trains">Código y cómo usarla</a>
+    <a href="https://github.com/Cracksmity/git-trains">Code and how to use it</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
     <a href="https://github.com/Cracksmity/git-trains/blob/main/README.es.md">README en español</a>
-    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README in English</a>
   </footer>
 </div>
 </body>

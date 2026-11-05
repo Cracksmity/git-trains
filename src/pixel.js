@@ -1,6 +1,6 @@
-// Rejilla de píxeles y conversión a rectángulos SVG.
-// Un color que empieza con "@" se emite como clase CSS (c-nombre) para poder
-// cambiarlo por tema; cualquier otro se emite como fill hexadecimal.
+// Pixel grid and conversion to SVG rectangles.
+// A color starting with "@" is emitted as a CSS class (c-name) so it can
+// change with the theme; any other is emitted as a hexadecimal fill.
 
 export class Grid {
   constructor(w, h) {
@@ -33,7 +33,7 @@ export class Grid {
     this.rect(x, y, 1, h, c);
   }
 
-  // Dibuja solo el contorno de un rectángulo.
+  // Draw only the outline of a rectangle.
   frame(x, y, w, h, c) {
     this.hline(x, y, w, c);
     this.hline(x, y + h - 1, w, c);
@@ -55,7 +55,7 @@ export class Grid {
     return this.cells.every((c) => c === null);
   }
 
-  // Agrupa por color y fusiona píxeles contiguos en rectángulos grandes.
+  // Group by color and merge adjacent pixels into large rectangles.
   paths(used = new Set()) {
     const colors = new Set(this.cells.filter(Boolean));
     let out = '';
@@ -108,7 +108,7 @@ function colorAttr(color, used) {
   return `fill="${color}"`;
 }
 
-// Generador pseudoaleatorio con semilla (mulberry32): el decorado sale igual siempre.
+// Seeded pseudorandom generator (mulberry32): the scenery always looks the same.
 export function rng(seed) {
   let s = seed >>> 0;
   return () => {

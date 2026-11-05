@@ -1,23 +1,23 @@
-// Plantillas de trompa. Cada una describe la parte delantera del coche cabeza como
-// una cuadrícula de 20 filas (techo .. faldón) y `w` columnas, mirando a la derecha.
+// Nose templates. Each describes the front of the lead car as
+// a grid of 20 rows (roof .. skirt) and `w` columns, facing right.
 //
-//   edge[y]  última columna ocupada en la fila y (la silueta base)
-//   ops      pinturas sobre esa silueta, en orden:
-//     ['r', x0, y0, x1, y1, c]   rectángulo (puede salirse de la silueta: defensas)
-//     ['p', x, y, c]             un píxel
-//     ['f', x0, y0, x1, y1, c]   marco de rectángulo
-//     ['e', y0, y1, a, b, c]     por fila, columnas edge-a .. edge-b (sigue la inclinación)
-//     ['ep', y, dx, c]           un píxel en edge[y] + dx
+//   edge[y]  last occupied column in row y (the base silhouette)
+//   ops      paint operations on that silhouette, in order:
+//     ['r', x0, y0, x1, y1, c]   rectangle (can extend beyond the silhouette: bumpers)
+//     ['p', x, y, c]             one pixel
+//     ['f', x0, y0, x1, y1, c]   rectangle frame
+//     ['e', y0, y1, a, b, c]     per row, columns edge-a .. edge-b (follows the slope)
+//     ['ep', y, dx, c]           one pixel at edge[y] + dx
 //
-// Símbolos de color (los resuelve train.js):
-//   s franja del modelo en esa fila   n pintura de trompa   f panel frontal
-//   g cristal  G reflejo   o contorno  k defensa oscura   m cuerpo oscuro
-//   l faro  y luz ámbar  r luz roja   q piloto rojo apagado   i letrero de destino
-//   a franja del lenguaje   t franja fija   d oscuro   h cuerpo claro
-// En la trompa de cola (la plantilla espejada) l, y y q se encienden en rojo.
+// Color symbols (resolved by train.js):
+//   s model stripe at that row   n nose paint   f front panel
+//   g glass  G reflection   o outline  k dark bumper   m dark body
+//   l headlight  y amber light  r red light   q unlit red marker light   i destination sign
+//   a language stripe   t fixed stripe   d dark   h light body
+// On the tail nose (the mirrored template), l, y and q light up red.
 
 export function buildNose(w, edge, ops) {
-  if (edge.length !== 20) throw new Error(`buildNose: se esperaban 20 filas y llegaron ${edge.length}`);
+  if (edge.length !== 20) throw new Error(`buildNose: expected 20 rows but got ${edge.length}`);
   const rows = edge.map((e) => Array.from({ length: w }, (_, x) => (x <= e ? 's' : '.')));
   const put = (x, y, c) => {
     if (y >= 0 && y < 20 && x >= 0 && x < w) rows[y][x] = c;

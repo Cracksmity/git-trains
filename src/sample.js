@@ -1,8 +1,8 @@
-// Datos de ejemplo para probar sin token ni red.
+// Sample data for testing without a token or network.
 
 import { summarize } from './stats.js';
 
-// Genera un año de actividad con un patrón reproducible.
+// Generate a year of activity with a reproducible pattern.
 export function sampleDays({ total = 1400, streak = 12, yesterday = 6 } = {}) {
   const days = [];
   const today = new Date('2026-11-02T00:00:00Z');
@@ -13,7 +13,7 @@ export function sampleDays({ total = 1400, streak = 12, yesterday = 6 } = {}) {
     const weekend = [0, 6].includes(d.getUTCDay());
     days.push({ date: d.toISOString().slice(0, 10), count: rand() < (weekend ? 0.3 : 0.75) ? 1 + Math.floor(rand() * 9) : 0 });
   }
-  // Ajusta el total aproximado, la racha y ayer.
+  // Adjust the approximate total, streak, and yesterday.
   const sum = days.reduce((a, d) => a + d.count, 0) || 1;
   for (const d of days) d.count = Math.round((d.count * total) / sum);
   for (let i = 0; i < streak; i++) days[days.length - 1 - i].count ||= 1;
@@ -31,14 +31,17 @@ export const SAMPLE_LANGUAGES = [
 ];
 
 export function sampleStats(overrides = {}) {
-  return summarize({
-    user: 'octocat',
-    days: sampleDays(overrides),
-    languages: SAMPLE_LANGUAGES,
-  });
+  return summarize(
+    {
+      user: 'octocat',
+      days: sampleDays(overrides),
+      languages: SAMPLE_LANGUAGES,
+    },
+    { exclude: overrides.exclude },
+  );
 }
 
-// Cifras de perfil de ejemplo para las tarjetas.
+// Sample profile figures for the cards.
 export function sampleProfile() {
   return {
     login: 'octocat',

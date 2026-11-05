@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medellín Metro in ten runs</title>
+<meta name="description" content="Ten runs in Claude Code, Codex and Antigravity design the same Medellín CAF train and skyline for git-trains: scenes, tokens and verdict.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* One reading column; each run is a "platform": scene above, details below. */
+:root {
+  --bg: #f2f4f1;
+  --surface: #ffffff;
+  --ink: #18201b;
+  --muted: #59645d;
+  --line: #d6ddd7;
+  --green: #1b8638;
+  --yellow: #c98f00;
+  --chip: #e7ece8;
+  --good: #1b7a35;
+  --mid: #9a6a00;
+  --low: #a33a2c;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --show-light: block;
+  --show-dark: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25;
+    --good: #5fd07e; --mid: #f0c23a; --low: #f08a7a;
+    --show-light: none; --show-dark: block; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+  --green: #47c06a; --yellow: #f0c23a; --chip: #222b25;
+  --good: #5fd07e; --mid: #f0c23a; --low: #f08a7a;
+  --show-light: none; --show-dark: block; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+img { max-width: 100%; }
+a { color: var(--green); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 64px;
+  display: grid; gap: 48px;
+}
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(30px, 5vw, 46px); }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+h4 { font-size: 19px; }
+p { margin: 0; max-width: 72ch; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
+header { display: grid; gap: 16px; }
+.lead { font-size: 17px; }
+code { font: 13px var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+
+.verdicts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.verdict .model { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.verdict h3 { font-size: 19px; }
+.verdict p { font-size: 14px; }
+
+section { display: grid; gap: 18px; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
+.chart svg { width: 100%; max-width: 760px; height: auto; display: block; }
+.chart .lbl { fill: var(--ink); font: 500 12px var(--mono); }
+.chart .grp { fill: var(--muted); font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.chart .tick { fill: var(--muted); font: 11px var(--mono); }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .think { fill: var(--green); }
+.chart .vis { fill: var(--yellow); }
+
+.table-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); vertical-align: top; }
+th:first-child, td:first-child { text-align: left; }
+th:nth-last-child(-n+2), td:nth-last-child(-n+2) { text-align: left; }
+thead th { font: 500 12px var(--mono); color: var(--muted); white-space: nowrap; }
+tr.grp td { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--chip); padding-block: 6px; }
+td:not(.score) { white-space: nowrap; }
+td .eff { display: block; font: 11px var(--mono); color: var(--muted); }
+td.score b { font-weight: 600; margin-right: 6px; }
+td.score span { display: block; font-size: 12px; color: var(--muted); }
+.na { font-size: 12px; color: var(--muted); }
+.good { color: var(--good); }
+.mid { color: var(--mid); }
+.low { color: var(--low); }
+.pill { font: 500 12px var(--mono); padding: 3px 7px; border-radius: 4px; background: var(--chip); white-space: nowrap; }
+
+.duel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.side { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+.side dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.side dt { font: 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.side dd { margin: 0; font: 600 15px var(--mono); font-variant-numeric: tabular-nums; }
+
+h3.tool { padding-top: 12px; }
+.run { display: grid; gap: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
+.run-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.scene img { width: 100%; image-rendering: pixelated; border-radius: 6px; }
+.scene .light { display: var(--show-light); }
+.scene .dark { display: var(--show-dark); }
+.detail { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; align-items: start; }
+.train { background: #e8ecf2; border-radius: 6px; padding: 8px; }
+.train img { width: 100%; image-rendering: pixelated; display: block; }
+.notes-box { display: grid; gap: 10px; min-width: 0; }
+.files { font-size: 13px; color: var(--muted); }
+.notes { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.notes li { min-width: 0; }
+.notes b { font-weight: 600; }
+.caption { font-size: 13px; color: var(--muted); }
+
+.takeaways { display: grid; gap: 10px; margin: 0; padding-left: 20px; max-width: 76ch; }
+footer { font-size: 13px; color: var(--muted); display: grid; gap: 8px; max-width: 82ch; }
+
+@media (max-width: 860px) {
+  .verdicts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .verdicts, .detail, .duel { grid-template-columns: minmax(0, 1fr); }
+  .side dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="stripe" aria-hidden="true"></div>
+    <nav class="eyebrow"><a href="../../">git-trains</a> · <a href="../../preview/">playground</a> · model test · Nov 3, 2026</nav>
+    <h1>Medellín Metro in ten runs</h1>
+    <p class="lead">Ten runs across three tools: Claude Code, Codex and Antigravity. All received the same brief, word for word: design the Medellín Metro CAF train and the city skyline using the <code>docs/ai/train.md</code> and <code>docs/ai/skyline.md</code> guides and the same two images. Each worked in its own folder from the same commit, free to validate and render as many times as it wanted.</p>
+  </header>
+  <div class="verdicts"><article class="verdict"><span class="model">GPT-6-Astra and GPT-6.1-Sol · Codex</span><h3>Most complete</h3><p>A train with all four CAF features and a skyline with every landmark drawn. Astra did it in 4 min 48 s with 10.6k output tokens.</p></article><article class="verdict"><span class="model">GPT-6.1-Terra · Codex</span><h3>Most efficient</h3><p>A 4/4 train in 2 min 13 s, with 3.6k output tokens and only 475 reasoning tokens, even at xhigh. Its skyline was incomplete.</p></article><article class="verdict"><span class="model">Sonnet 5.5 · two tools</span><h3>The tool matters</h3><p>With the same prompt, Sonnet scored 4/4 in Claude Code and 1/4 in Antigravity, where it finished in a minute and a half with one render.</p></article><article class="verdict"><span class="model">Haiku 5.5 · Claude Code</span><h3>Most tokens used</h3><p>81.8k output tokens, 70,000 for reasoning, for a train with no green, a flat front and no overhead wire.</p></article></div>
+  <section>
+    <h2>The ten runs</h2>
+    <p>Train: how many of the four Medellín CAF features it has (yellow stripe, green stripe, black face with a white cheek, overhead wire). Skyline: how recognizable the reference image is.</p>
+    <div class="table-box"><table>
+      <thead><tr><th>Model</th><th>Time</th><th>Output</th><th>Reasoning</th><th>Input</th><th>Valid. / renders</th><th>Train</th><th>Skyline</th></tr></thead>
+      <tbody><tr class="grp"><td colspan="8">Claude Code</td></tr><tr><td>Opus 5.5<span class="eff">xhigh</span></td><td>7 min 24 s</td><td>41,495</td><td>24,442</td><td>3.54 M</td><td>5 (1 with error) / 5</td><td class="score"><b class="mid">3/4</b><span>no yellow</span></td><td><span class="pill good">recognizable</span></td></tr><tr><td>Sonnet 5.5<span class="eff">xhigh</span></td><td>4 min 23 s</td><td>31,168</td><td>19,534</td><td>2.30 M</td><td>2 / 4</td><td class="score"><b class="good">4/4</b></td><td><span class="pill mid">incomplete</span></td></tr><tr><td>Haiku 5.5<span class="eff">xhigh</span></td><td>6 min 42 s</td><td>81,831</td><td>70,333</td><td>3.28 M</td><td>2 / 3</td><td class="score"><b class="low">1/4</b><span>no green, front unlike the CAF, no overhead wire</span></td><td><span class="pill low">generic</span></td></tr><tr class="grp"><td colspan="8">Codex</td></tr><tr><td>GPT-6.1-Sol<span class="eff">xhigh</span></td><td>6 min 07 s</td><td>14,187</td><td>6,847</td><td>760k</td><td>2 / 3</td><td class="score"><b class="good">4/4</b></td><td><span class="pill good">recognizable</span></td></tr><tr><td>GPT-6.1-Terra<span class="eff">xhigh</span></td><td>2 min 13 s</td><td>3,609</td><td>475</td><td>511k</td><td>3 / 2</td><td class="score"><b class="good">4/4</b></td><td><span class="pill mid">incomplete</span></td></tr><tr><td>GPT-6-Luna<span class="eff">xhigh</span></td><td>7 min 57 s</td><td>22,090</td><td>17,746</td><td>726k</td><td>5 / 1</td><td class="score"><b class="low">2/4</b><span>no green, front unlike the CAF</span></td><td><span class="pill mid">incomplete</span></td></tr><tr><td>GPT-6-Astra<span class="eff">xhigh</span></td><td>4 min 48 s</td><td>10,576</td><td>3,221</td><td>605k</td><td>2 / 4</td><td class="score"><b class="good">4/4</b></td><td><span class="pill good">recognizable</span></td></tr><tr class="grp"><td colspan="8">Antigravity</td></tr><tr><td>Gemini 4 Argon<span class="eff">high</span></td><td>14 min 17 s</td><td>66,630</td><td>54,162</td><td>1.44 M</td><td>2 / 2</td><td class="score"><b class="mid">3/4</b><span>no yellow</span></td><td><span class="pill good">recognizable</span></td></tr><tr><td>Gemini 3.8 Flash<span class="eff">high</span></td><td>12 min 00 s</td><td>45,262</td><td>34,964</td><td>3.92 M</td><td>3 / 5</td><td class="score"><b class="mid">3/4</b><span>no yellow</span></td><td><span class="pill low">generic</span></td></tr><tr><td>Sonnet 5.5<span class="eff">high</span></td><td>1 min 23 s</td><td>7,948</td><td><span class="na">not reported</span></td><td>252k</td><td>3 / 1</td><td class="score"><b class="low">1/4</b><span>no green, front unlike the CAF, no overhead wire</span></td><td><span class="pill low">generic</span></td></tr></tbody>
+    </table></div>
+  </section>
+  <section>
+    <h2>Tokens before delivery</h2>
+    <p>Tokens generated by each model before delivery. Reasoning is what it thought between steps; visible output is the code, JSON and text it wrote. Antigravity did not report reasoning for Sonnet, so its bar is entirely visible output.</p>
+    <div class="legend"><span><i style="background: var(--green)"></i>Reasoning</span><span><i style="background: var(--yellow)"></i>Visible output</span></div>
+    <div class="chart"><svg viewBox="0 0 680 368" role="img" aria-label="Output tokens per run"><line class="grid" x1="150" y1="0" x2="150" y2="344"/><text class="tick" x="150" y="360" text-anchor="middle">0</text><line class="grid" x1="303.33333333333337" y1="0" x2="303.33333333333337" y2="344"/><text class="tick" x="303.33333333333337" y="360" text-anchor="middle">30k</text><line class="grid" x1="456.6666666666667" y1="0" x2="456.6666666666667" y2="344"/><text class="tick" x="456.6666666666667" y="360" text-anchor="middle">60k</text><line class="grid" x1="610" y1="0" x2="610" y2="344"/><text class="tick" x="610" y="360" text-anchor="middle">90k</text><text class="grp" x="0" y="18">Claude Code</text><text class="lbl" x="0" y="39">Opus 5.5</text><rect class="think" x="150" y="26" width="124.9" height="18"/><rect class="vis" x="274.9" y="26" width="87.2" height="18"/><text class="lbl" x="368.1" y="39">41.5k</text><text class="lbl" x="0" y="65">Sonnet 5.5</text><rect class="think" x="150" y="52" width="99.8" height="18"/><rect class="vis" x="249.8" y="52" width="59.5" height="18"/><text class="lbl" x="315.3" y="65">31.2k</text><text class="lbl" x="0" y="91">Haiku 5.5</text><rect class="think" x="150" y="78" width="359.5" height="18"/><rect class="vis" x="509.5" y="78" width="58.8" height="18"/><text class="lbl" x="574.2" y="91">81.8k</text><text class="grp" x="0" y="122">Codex</text><text class="lbl" x="0" y="143">GPT-6.1-Sol</text><rect class="think" x="150" y="130" width="35.0" height="18"/><rect class="vis" x="185.0" y="130" width="37.5" height="18"/><text class="lbl" x="228.5" y="143">14.2k</text><text class="lbl" x="0" y="169">GPT-6.1-Terra</text><rect class="think" x="150" y="156" width="2.4" height="18"/><rect class="vis" x="152.4" y="156" width="16.0" height="18"/><text class="lbl" x="174.4" y="169">3.6k</text><text class="lbl" x="0" y="195">GPT-6-Luna</text><rect class="think" x="150" y="182" width="90.7" height="18"/><rect class="vis" x="240.7" y="182" width="22.2" height="18"/><text class="lbl" x="268.9" y="195">22.1k</text><text class="lbl" x="0" y="221">GPT-6-Astra</text><rect class="think" x="150" y="208" width="16.5" height="18"/><rect class="vis" x="166.5" y="208" width="37.6" height="18"/><text class="lbl" x="210.1" y="221">10.6k</text><text class="grp" x="0" y="252">Antigravity</text><text class="lbl" x="0" y="273">Gemini 4 Argon</text><rect class="think" x="150" y="260" width="276.8" height="18"/><rect class="vis" x="426.8" y="260" width="63.7" height="18"/><text class="lbl" x="496.6" y="273">66.6k</text><text class="lbl" x="0" y="299">Gemini 3.8 Flash</text><rect class="think" x="150" y="286" width="178.7" height="18"/><rect class="vis" x="328.7" y="286" width="52.6" height="18"/><text class="lbl" x="387.3" y="299">45.3k</text><text class="lbl" x="0" y="325">Sonnet 5.5</text><rect class="think" x="150" y="312" width="0.0" height="18"/><rect class="vis" x="150.0" y="312" width="40.6" height="18"/><text class="lbl" x="196.6" y="325">7.9k</text></svg></div>
+  </section>
+  <section>
+    <h2>Same model, different tool</h2>
+    <p>Sonnet 5.5 ran twice with the same prompt: in Claude Code at xhigh effort and in Antigravity at high, the maximum available there. In Claude Code it iterated, viewed the full scene and delivered a train with all four features. In Antigravity it finished in a minute and a half, rendered once and delivered a train with no green or overhead wire. Effort may account for some of the difference, but its way of working changed completely.</p>
+    <div class="duel"><div class="side">
+    <span class="eyebrow">Claude Code · xhigh</span>
+    <div class="train"><img alt="Sonnet 5.5 train in Claude Code" src="sonnet/train.png"></div>
+    <dl><div><dt>Time</dt><dd>4 min 23 s</dd></div><div><dt>Output</dt><dd>31,168</dd></div><div><dt>Renders</dt><dd>4</dd></div><div><dt>Train</dt><dd>4/4</dd></div></dl>
+  </div><div class="side">
+    <span class="eyebrow">Antigravity · high</span>
+    <div class="train"><img alt="Sonnet 5.5 train in Antigravity" src="agy-sonnet-5.5/train.png"></div>
+    <dl><div><dt>Time</dt><dd>1 min 23 s</dd></div><div><dt>Output</dt><dd>7,948</dd></div><div><dt>Renders</dt><dd>1</dd></div><div><dt>Train</dt><dd>1/4</dd></div></dl>
+  </div></div>
+  </section>
+  <section>
+    <h2>What each run delivered</h2>
+    <p class="caption">All were rendered afterward with the same sample data: 1,200 contributions, a 12-day streak, TypeScript (blue stripe). The scene follows your screen's light or dark theme.</p>
+    <h3 class="tool">Claude Code</h3><article class="run" id="opus">
+  <div class="run-head"><h4>Opus 5.5</h4><span class="eyebrow">xhigh · 7 min 24 s · 41.5k output · train 3/4 · skyline recognizable</span></div>
+  <div class="scene"><img class="light" alt="Opus 5.5 scene in Claude Code, light theme" src="opus/scene-light.svg"><img class="dark" alt="Opus 5.5 scene in Claude Code, dark theme" src="opus/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Opus 5.5 train enlarged" src="opus/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Green and language stripes curve down the nose, with a slanted black face and pantograph. No yellow.</li><li><b>Skyline.</b> Landmarks drawn pixel by pixel: a two-tower basilica with crosses, a clock palace, Coltejer with its spire; mountain ranges were added in the background.</li><li><b>Process.</b> The most corrections among the Claude runs: 5 validations (one failed and was fixed) and 5 renders, with the full scene in both themes.</li></ul><p class="files">JSON for this run: <a href="opus/train.json">train</a> · <a href="opus/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="sonnet">
+  <div class="run-head"><h4>Sonnet 5.5</h4><span class="eyebrow">xhigh · 4 min 23 s · 31.2k output · train 4/4 · skyline incomplete</span></div>
+  <div class="scene"><img class="light" alt="Sonnet 5.5 scene in Claude Code, light theme" src="sonnet/scene-light.svg"><img class="dark" alt="Sonnet 5.5 scene in Claude Code, dark theme" src="sonnet/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Sonnet 5.5 train enlarged" src="sonnet/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Two yellow rows, two green and the language stripe curving toward the black face; a pantograph every two cars.</li><li><b>Skyline.</b> Each landmark is made from 2 to 4 simple shapes (pyramid, spire, dome); the order is preserved but it reads as a continuous wall.</li><li><b>Process.</b> Direct: 2 validations and 4 renders, rasterizing the scene with its own script.</li></ul><p class="files">JSON for this run: <a href="sonnet/train.json">train</a> · <a href="sonnet/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="haiku">
+  <div class="run-head"><h4>Haiku 5.5</h4><span class="eyebrow">xhigh · 6 min 42 s · 81.8k output · train 1/4 · skyline generic</span></div>
+  <div class="scene"><img class="light" alt="Haiku 5.5 scene in Claude Code, light theme" src="haiku/scene-light.svg"><img class="dark" alt="Haiku 5.5 scene in Claude Code, dark theme" src="haiku/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Haiku 5.5 train enlarged" src="haiku/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow and two language rows, no green; vertical, square front; no pantograph (third rail).</li><li><b>Skyline.</b> Eight pieces; the domes look like blobs and almost nothing has windows at night.</li><li><b>Process.</b> The most reasoning in the test: 70,000 tokens for the simplest design.</li></ul><p class="files">JSON for this run: <a href="haiku/train.json">train</a> · <a href="haiku/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><h3 class="tool">Codex</h3><article class="run" id="gpt-6.1-sol">
+  <div class="run-head"><h4>GPT-6.1-Sol</h4><span class="eyebrow">xhigh · 6 min 07 s · 14.2k output · train 4/4 · skyline recognizable</span></div>
+  <div class="scene"><img class="light" alt="GPT-6.1-Sol scene in Codex, light theme" src="gpt-6.1-sol/scene-light.svg"><img class="dark" alt="GPT-6.1-Sol scene in Codex, dark theme" src="gpt-6.1-sol/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="GPT-6.1-Sol train enlarged" src="gpt-6.1-sol/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow, green and language stripes curve toward a slanted black face with a headlight on the cheek; pantograph. It used the "dark body" color for green.</li><li><b>Skyline.</b> Six drawn silhouettes: a cathedral with two bell towers, an arched building, a palace with a turret, Coltejer, a clock church. No filler, so gaps remain.</li><li><b>Process.</b> It wrote its own design and review scripts inside comparativa/: 2 validations and 3 renders.</li></ul><p class="files">JSON for this run: <a href="gpt-6.1-sol/train.json">train</a> · <a href="gpt-6.1-sol/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="gpt-6.1-terra">
+  <div class="run-head"><h4>GPT-6.1-Terra</h4><span class="eyebrow">xhigh · 2 min 13 s · 3.6k output · train 4/4 · skyline incomplete</span></div>
+  <div class="scene"><img class="light" alt="GPT-6.1-Terra scene in Codex, light theme" src="gpt-6.1-terra/scene-light.svg"><img class="dark" alt="GPT-6.1-Terra scene in Codex, dark theme" src="gpt-6.1-terra/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="GPT-6.1-Terra train enlarged" src="gpt-6.1-terra/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow, thin green and language stripes; dark face with a green diagonal down the nose; pantograph.</li><li><b>Skyline.</b> Eight pieces, three drawn; a pointed tower and two churches over generic filler.</li><li><b>Process.</b> The fastest of the ten: 2 min 13 s and only 475 reasoning tokens, even at xhigh. Accents in names became "?" (they are not drawn).</li></ul><p class="files">JSON for this run: <a href="gpt-6.1-terra/train.json">train</a> · <a href="gpt-6.1-terra/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="gpt-6-luna">
+  <div class="run-head"><h4>GPT-6-Luna</h4><span class="eyebrow">xhigh · 7 min 57 s · 22.1k output · train 2/4 · skyline incomplete</span></div>
+  <div class="scene"><img class="light" alt="GPT-6-Luna scene in Codex, light theme" src="gpt-6-luna/scene-light.svg"><img class="dark" alt="GPT-6-Luna scene in Codex, dark theme" src="gpt-6-luna/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="GPT-6-Luna train enlarged" src="gpt-6-luna/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow and two language rows, no green; dark roof and a black wedge-shaped nose; pantograph.</li><li><b>Skyline.</b> Eight pieces, four drawn: cathedral, basilica, palace and twin-towered church, plus Coltejer.</li><li><b>Process.</b> It validated 5 times but rendered only once: it decided almost everything through reasoning (17,746 tokens).</li></ul><p class="files">JSON for this run: <a href="gpt-6-luna/train.json">train</a> · <a href="gpt-6-luna/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="gpt-6-astra">
+  <div class="run-head"><h4>GPT-6-Astra</h4><span class="eyebrow">xhigh · 4 min 48 s · 10.6k output · train 4/4 · skyline recognizable</span></div>
+  <div class="scene"><img class="light" alt="GPT-6-Astra scene in Codex, light theme" src="gpt-6-astra/scene-light.svg"><img class="dark" alt="GPT-6-Astra scene in Codex, dark theme" src="gpt-6-astra/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="GPT-6-Astra train enlarged" src="gpt-6-astra/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow, green and language stripes, with a slanted black face and a green diagonal on the cheek; pantograph. It used the palette's "very dark" color for green.</li><li><b>Skyline.</b> All eight silhouettes drawn in the image's order: two-bell-tower church, pedimented facade, building with central tower, palace with a pavilion, Coltejer as the tallest, and a Gothic Revival church. No filler.</li><li><b>Process.</b> Four and a half minutes, 2 validations and 4 renders; it wrote its own script to generate the skyline.</li></ul><p class="files">JSON for this run: <a href="gpt-6-astra/train.json">train</a> · <a href="gpt-6-astra/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><h3 class="tool">Antigravity</h3><article class="run" id="agy-gemini-4-argon">
+  <div class="run-head"><h4>Gemini 4 Argon</h4><span class="eyebrow">high · 14 min 17 s · 66.6k output · train 3/4 · skyline recognizable</span></div>
+  <div class="scene"><img class="light" alt="Gemini 4 Argon scene in Antigravity, light theme" src="agy-gemini-4-argon/scene-light.svg"><img class="dark" alt="Gemini 4 Argon scene in Antigravity, dark theme" src="agy-gemini-4-argon/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Gemini 4 Argon train enlarged" src="agy-gemini-4-argon/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Green and language stripes, no yellow; the most elaborate nose in the test: 19 columns, slanted white pillar, trapezoidal window and green diagonal.</li><li><b>Skyline.</b> Eight named landmarks, seven drawn: Catedral Metropolitana, Edificio Vásquez, Veracruz, Torre del Café, Palacio de la Cultura, Coltejer, Jesús Nazareno.</li><li><b>Process.</b> The slowest: 14 min and 54,000 reasoning tokens for 2 validations and 2 renders.</li></ul><p class="files">JSON for this run: <a href="agy-gemini-4-argon/train.json">train</a> · <a href="agy-gemini-4-argon/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="agy-gemini-3.8-flash">
+  <div class="run-head"><h4>Gemini 3.8 Flash</h4><span class="eyebrow">high · 12 min 00 s · 45.3k output · train 3/4 · skyline generic</span></div>
+  <div class="scene"><img class="light" alt="Gemini 3.8 Flash scene in Antigravity, light theme" src="agy-gemini-3.8-flash/scene-light.svg"><img class="dark" alt="Gemini 3.8 Flash scene in Antigravity, dark theme" src="agy-gemini-3.8-flash/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Gemini 3.8 Flash train enlarged" src="agy-gemini-3.8-flash/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Double green and language stripes, no yellow; green diagonal on the nose; pantograph.</li><li><b>Skyline.</b> Ten pieces with real names (Carré, Torre del Café, Museo de Antioquia, cerro Pan de Azúcar), but only the cathedral is drawn; the rest are blocks.</li><li><b>Process.</b> Twelve minutes, 5 renders and the largest input processed of all: 3.9 million tokens.</li></ul><p class="files">JSON for this run: <a href="agy-gemini-3.8-flash/train.json">train</a> · <a href="agy-gemini-3.8-flash/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article><article class="run" id="agy-sonnet-5.5">
+  <div class="run-head"><h4>Sonnet 5.5</h4><span class="eyebrow">high · 1 min 23 s · 7.9k output · train 1/4 · skyline generic</span></div>
+  <div class="scene"><img class="light" alt="Sonnet 5.5 scene in Antigravity, light theme" src="agy-sonnet-5.5/scene-light.svg"><img class="dark" alt="Sonnet 5.5 scene in Antigravity, dark theme" src="agy-sonnet-5.5/scene-dark.svg"></div>
+  <div class="detail">
+    <div class="train"><img alt="Sonnet 5.5 train enlarged" src="agy-sonnet-5.5/train.png"></div>
+    <div class="notes-box"><ul class="notes"><li><b>Train.</b> Yellow and language stripes, no green; square black front; no pantograph (third rail).</li><li><b>Skyline.</b> Twelve pieces with mountains in the background and generic towers; names with accents ended up with broken characters.</li><li><b>Process.</b> A minute and a half, one train render, and it never viewed the scene. Antigravity did not report reasoning tokens.</li></ul><p class="files">JSON for this run: <a href="agy-sonnet-5.5/train.json">train</a> · <a href="agy-sonnet-5.5/skyline.json">skyline</a> (paste into the <a href="../../preview/">playground</a>)</p></div>
+  </div>
+</article>
+  </section>
+  <section>
+    <h2>What the test shows</h2>
+    <ul class="takeaways"><li>Codex produced the most faithful trains with the least output. Three of its four models (Sol, Terra and Astra) have all four features, with between 3.6k and 14.2k output tokens; the other six spent between 7.9k and 81.8k.</li><li>More reasoning did not buy fidelity. Haiku (70,000 reasoning tokens) and Gemini 4 Argon (54,000) delivered less faithful trains than GPT-6.1-Terra, which used 475 for reasoning.</li><li>Yellow and green together were the hardest test: only 4 of 10 included both (Sonnet in Claude Code, Sol, Terra and Astra). The rest kept one and gave the other row to the language stripe.</li><li>The four recognizable skylines (Opus, Sol, Astra and Argon) drew landmarks one by one with <code>rows</code>. None of those relying on catalog shapes reached that point.</li><li>The tool matters as much as the model: the same Sonnet went from 4/4 to 1/4 when switching from Claude Code to Antigravity.</li><li>This is one run per model: a sample, not an average. Style can change from one run to another.</li></ul>
+  </section>
+  <footer><p>Tokens: in Claude Code, counts were summed from each run's log, once per model call; in Codex they come from the <code>turn.completed</code> event of <code>codex exec --json</code>; in Antigravity, from the result of <code>agy -p --output-format json</code>. "Input" is all processed input, including cache. Each tool uses cache differently, so that column is best compared within the same tool.</p><p>Effort: Claude Code and Codex ran at xhigh; in Antigravity the maximum each model offers is high. Codex ran with the user's global configuration. Antigravity ran with session-only permissions: commands without asking but within its sandbox, and writing only in the comparativa/ folder.</p><p>Time: in Claude Code, from first to last message; in Codex, from startup to last event; in Antigravity, from startup to process end. Validations and renders are as reported by each model. Train and skyline scores are a visual review, not an automatic metric. Monetary cost was not calculated: each model has its own rate per token.</p></footer>
+</div>
+</body>
+</html>

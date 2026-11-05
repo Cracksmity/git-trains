@@ -1,4 +1,4 @@
-// Regenera los SVG de ejemplo que usa el README (datos de muestra, sin red).
+// Regenerates the example SVGs used by the README (sample data, no network).
 // node scripts/docs.js
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -9,44 +9,44 @@ import { renderStatsCard, renderLangsCard } from '../src/cards.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
 
-const ejemplo = (nombre) => parseCustomModel(JSON.parse(readFileSync(`examples/${nombre}.json`, 'utf8')));
-const nuevaYork = ejemplo('tren-nueva-york');
-const osaka = ejemplo('tren-osaka');
-const vapor = ejemplo('tren-vapor');
+const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/trains/${name}.json`, 'utf8')));
+const newYork = example('new-york');
+const osaka = example('osaka');
+const steam = example('steam');
 
 mkdirSync('docs', { recursive: true });
 
-const casos = [
-  ['ejemplo-claro', sampleStats({ total: 2400, yesterday: 6 }), { tren: 'auto', modo: 'single', theme: 'light' }],
-  ['ejemplo-oscuro', sampleStats({ total: 900, streak: 30, yesterday: 14 }), { tren: 'auto', modo: 'single', theme: 'dark' }],
-  ['ejemplo-multi', sampleStats({ total: 1500, yesterday: 5 }), { tren: 'auto', modo: 'multi', theme: 'light' }],
-  ['ejemplo-parado', sampleStats({ total: 300, streak: 0, yesterday: 0 }), { tren: 'tranvia', modo: 'single', theme: 'light' }],
+const scenes = [
+  ['example-light', sampleStats({ total: 2400, yesterday: 6 }), { train: 'auto', mode: 'single', theme: 'light' }],
+  ['example-dark', sampleStats({ total: 900, streak: 30, yesterday: 14 }), { train: 'auto', mode: 'single', theme: 'dark' }],
+  ['example-multi', sampleStats({ total: 1500, yesterday: 5 }), { train: 'auto', mode: 'multi', theme: 'light' }],
+  ['example-stopped', sampleStats({ total: 300, streak: 0, yesterday: 0 }), { train: 'tram', mode: 'single', theme: 'light' }],
   [
-    'ejemplo-nueva-york',
+    'example-new-york',
     sampleStats({ total: 400, streak: 20, yesterday: 5 }),
-    { tren: nuevaYork, modo: 'single', theme: 'auto', skyline: parseSkyline('nueva-york') },
+    { train: newYork, mode: 'single', theme: 'auto', skyline: parseSkyline('new-york') },
   ],
   [
-    'ejemplo-osaka',
+    'example-osaka',
     sampleStats({ total: 400, streak: 9, yesterday: 3 }),
-    { tren: osaka, modo: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
+    { train: osaka, mode: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
   ],
-  ['ejemplo-vapor', sampleStats({ total: 600, streak: 15, yesterday: 3 }), { tren: vapor, modo: 'single', theme: 'auto' }],
+  ['example-steam', sampleStats({ total: 600, streak: 15, yesterday: 3 }), { train: steam, mode: 'single', theme: 'auto' }],
 ];
 
-for (const [nombre, stats, opts] of casos) {
+for (const [name, stats, opts] of scenes) {
   const svg = renderScene(buildSpec(stats, opts));
-  writeFileSync(`docs/${nombre}.svg`, svg);
-  console.log(`docs/${nombre}.svg ${(svg.length / 1024).toFixed(1)} KB`);
+  writeFileSync(`docs/${name}.svg`, svg);
+  console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }
 
-// Tarjetas de perfil de ejemplo (colores por defecto, tema oscuro de GitHub).
+// Example profile cards (default colors, GitHub's dark theme).
 const demo = sampleStats();
-const tarjetas = [
-  ['tarjeta-stats', renderStatsCard(sampleProfile(), { idioma: 'es' })],
-  ['tarjeta-lenguajes', renderLangsCard(demo.languages, { idioma: 'es', max: 6 })],
+const cards = [
+  ['card-stats', renderStatsCard(sampleProfile(), { language: 'en' })],
+  ['card-languages', renderLangsCard(demo.languages, { language: 'en', max: 6 })],
 ];
-for (const [nombre, svg] of tarjetas) {
-  writeFileSync(`docs/${nombre}.svg`, svg);
-  console.log(`docs/${nombre}.svg ${(svg.length / 1024).toFixed(1)} KB`);
+for (const [name, svg] of cards) {
+  writeFileSync(`docs/${name}.svg`, svg);
+  console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }

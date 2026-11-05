@@ -1,0 +1,33 @@
+# Copy this file to .github/workflows/train.yml in your profile repository
+# (the one named after your username).
+name: GitHub train
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # every day at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: Cracksmity/git-trains@v1
+        with:
+          train: auto # or: tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet, or your JSON: .github/train.json
+          # skyline: new-york # or osaka, or your skyline in JSON: .github/skyline.json (see docs/ai/skyline.md)
+          mode: single # or: multi (3 tracks, one train per language)
+          # language: es # the LED sign reads RACHA instead of STREAK
+          # exclude-languages: HTML, Jupyter Notebook
+          # cards: both # adds card-stats.svg and card-languages.svg (see the README)
+
+      - name: Save the SVGs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || (git commit -m "chore: update train" && git push)

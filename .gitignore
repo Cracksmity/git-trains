@@ -1,5 +1,7 @@
 node_modules/
 .scratch/
+sample/
 muestra/
 .claude/
 reference/
+.conductor/

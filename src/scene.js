@@ -1,6 +1,6 @@
-// Compone la escena SVG: fondo, vías y uno o varios trenes animados.
-// Todo el movimiento es CSS dentro del SVG (funciona al incrustarlo con <img>
-// en un README) y avanza de 1 px en 1 px con steps() para conservar el pixel art.
+// Compose the SVG scene: background, tracks, and one or more animated trains.
+// All movement is CSS inside the SVG (works when embedded with <img>
+// in a README) and advances 1 px at a time with steps() to preserve the pixel art.
 
 import { Grid } from './pixel.js';
 import { buildTrain, TRAIN_H, TOP } from './train.js';
@@ -23,7 +23,7 @@ import {
 
 export { SCENE_W, sceneHeight };
 
-// Velocidad según la actividad de ayer.
+// Speed based on yesterday?s activity.
 export const STATES = {
   idle: { dur: 0 },
   slow: { dur: 34, wheel: 0.34 },
@@ -43,10 +43,10 @@ function speedLines(seed) {
 }
 
 export function renderScene(spec) {
-  // spec.skyline: fondo ya validado con parseSkyline (null = la ciudad aleatoria).
-  const { theme = 'auto', scale = 2, user = '', title = 'Tren de GitHub' } = spec;
-  if (!spec.tracks?.length) throw new Error('renderScene necesita al menos una vía');
-  // Cada vía sabe si su tren toma corriente de catenaria (pantógrafo) o de tercer riel.
+  // spec.skyline: background already validated with parseSkyline (null = the random city).
+  const { theme = 'auto', scale = 2, user = '', title = 'GitHub train' } = spec;
+  if (!spec.tracks?.length) throw new Error('renderScene needs at least one track');
+  // Each track knows whether its train draws power from overhead wires (pantograph) or a third rail.
   const tracks = spec.tracks.map((t) => {
     const model = typeof t.model === 'string' ? getModel(t.model) : t.model;
     return { ...t, model, overhead: !!model.pant };
@@ -82,7 +82,7 @@ export function renderScene(spec) {
     const parked = tracks.length === 1 ? center : dir === 1 ? W - train.width - margin : margin;
     const rest = moving ? center : t.parkAt ?? parked;
 
-    // Sombra sobre el balasto, bajo las ruedas.
+    // Shadow on the ballast, beneath the wheels.
     let inner = `<rect class="c-shadow" y="${TRAIN_H + 2}" width="${train.width}" height="2"/>`;
     if (moving && st.lines) {
       const lg = dir === 1 ? speedLines(900 + k) : speedLines(900 + k).mirror();
@@ -94,8 +94,8 @@ export function renderScene(spec) {
     inner += group('wb', `wb wb${k}`);
     inner += group('open', `do do${k}`);
     inner += group('led', 'led');
-    // Humo de la locomotora: bocanadas más seguidas cuanto más rápido va; parada,
-    // echa vapor despacio.
+    // Locomotive smoke: puffs come more often the faster it goes; when stopped,
+    // it releases steam slowly.
     if (!L.pa.isEmpty()) {
       inner += group('pa', `sm pa${k}`) + group('pb', `sm pb pb${k}`);
       const puff = moving ? +(st.wheel * 4).toFixed(2) : 3;

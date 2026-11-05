@@ -1,17 +1,17 @@
-// Tarjetas SVG de perfil: estadísticas y lenguajes más usados.
-// Siguen el esquema de las tarjetas de github-readme-stats (título, filas con icono y
-// anillo de rango; barra de proporciones con leyenda), con código e iconos propios, de
-// modo que se generan dentro del workflow sin depender de ningún servicio externo.
+// SVG profile cards: statistics and most used languages.
+// They follow the github-readme-stats card layout (title, rows with icon and
+// rank ring; proportions bar with legend), with their own code and icons, so
+// they are generated inside the workflow without depending on any external service.
 
 const FONT = "'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif";
 
-// Colores por defecto (tema oscuro de GitHub), en hexadecimal sin "#".
+// Default colors (GitHub dark theme), in hexadecimal without "#".
 export const CARD_COLORS = {
-  fondo: '0d1117',
-  titulo: '58a6ff',
-  icono: '58a6ff',
-  texto: 'c9d1d9',
-  anillo: '58a6ff',
+  background: '0d1117',
+  title: '58a6ff',
+  icon: '58a6ff',
+  text: 'c9d1d9',
+  ring: '58a6ff',
 };
 
 export const LABELS = {
@@ -37,7 +37,7 @@ export const LABELS = {
   },
 };
 
-// Iconos de 16x16 dibujados a mano (trazo en el color de icono; .fill va relleno).
+// Hand-drawn 16x16 icons (stroke in the icon color; .fill is filled).
 const star = (() => {
   const pts = [];
   for (let i = 0; i < 10; i++) {
@@ -58,14 +58,14 @@ const ICONS = {
   repo: '<path d="M3.5 2.5h9v11h-9a1 1 0 01-1-1v-9a1 1 0 011-1z"/><path d="M6 2.5v11"/>',
 };
 
-// Marca de GitHub (octicon mark-github, 16x16) para el centro del anillo.
+// GitHub mark (octicon mark-github, 16x16) for the center of the ring.
 const GITHUB_MARK =
   'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z';
 
-// Los atributos van entre comillas dobles, así que el apóstrofo no necesita escape.
+// Attributes use double quotes, so the apostrophe does not need escaping.
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-// Acepta "c9a04a", "#c9a04a" o "fff"; lo demás vuelve al valor por defecto.
+// Accepts "c9a04a", "#c9a04a", or "fff"; anything else falls back to the default.
 export function hexColor(value, fallback) {
   const v = String(value ?? '').trim().replace(/^#/, '');
   return /^([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v) ? `#${v}` : `#${fallback}`;
@@ -77,14 +77,14 @@ function resolveColors(o) {
   return c;
 }
 
-// 1200 -> "1.2k", como en github-readme-stats.
+// 1200 -> "1.2k", as in github-readme-stats.
 export const kFormat = (n) => (n > 999 ? `${(n / 1000).toFixed(1)}k` : String(n));
 
 const expCdf = (x) => 1 - 2 ** -x;
 const logNormCdf = (x) => x / (1 + x);
 
-// Rango aproximado: mezcla ponderada de commits, PRs, issues, reseñas, estrellas y seguidores.
-// Devuelve el nivel (S, A+, ... C) y el percentil (menor = mejor).
+// Approximate rank: weighted mix of commits, PRs, issues, reviews, stars, and followers.
+// Returns the level (S, A+, ... C) and percentile (lower = better).
 export function calculateRank({ commits, prs, issues, reviews = 0, stars, followers }) {
   const score =
     2 * expCdf(commits / 250) +
@@ -100,36 +100,36 @@ export function calculateRank({ commits, prs, issues, reviews = 0, stars, follow
   return { level: levels[i === -1 ? levels.length - 1 : i], percentile };
 }
 
-// Visibles por defecto: la animación de entrada (fade/ring) es solo un adorno, así que un
-// visor que no ejecute animaciones sigue mostrando la tarjeta completa.
+// Visible by default: the entrance animation (fade/ring) is only decoration, so a
+// viewer that does not run animations still shows the complete card.
 function shell({ width, height, title, body, c, border, css = '' }) {
   return (
     `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" ` +
     `xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t"><title id="t">${esc(title)}</title>` +
     `<style>` +
-    `.header{font:600 18px ${FONT};fill:${c.titulo};animation:fade .8s ease-in-out both}` +
-    `.stat{font:600 14px ${FONT};fill:${c.texto}}` +
+    `.header{font:600 18px ${FONT};fill:${c.title};animation:fade .8s ease-in-out both}` +
+    `.stat{font:600 14px ${FONT};fill:${c.text}}` +
     `.bold{font-weight:700}` +
-    `.lang{font:400 11px ${FONT};fill:${c.texto}}` +
-    `.icon{fill:none;stroke:${c.icono};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}` +
-    `.icon .fill{fill:${c.icono}}` +
+    `.lang{font:400 11px ${FONT};fill:${c.text}}` +
+    `.icon{fill:none;stroke:${c.icon};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}` +
+    `.icon .fill{fill:${c.icon}}` +
     `.row{animation:fade .3s ease-in-out both}` +
     `@keyframes fade{from{opacity:0}to{opacity:1}}` +
     css +
     `@media (prefers-reduced-motion:reduce){.header,.row,.ring{animation:none}}` +
     `</style>` +
-    `<rect x=".5" y=".5" rx="4.5" width="${width - 1}" height="${height - 1}" fill="${c.fondo}" ` +
-    `stroke="${c.texto}" stroke-opacity="${border ? 0.25 : 0}"/>` +
+    `<rect x=".5" y=".5" rx="4.5" width="${width - 1}" height="${height - 1}" fill="${c.background}" ` +
+    `stroke="${c.text}" stroke-opacity="${border ? 0.25 : 0}"/>` +
     `<g transform="translate(25 35)"><text class="header" x="0" y="0">${esc(title)}</text></g>` +
     `${body}</svg>`
   );
 }
 
 // p: { name, login, followers, stars, commits, prs, issues, contributed, reviews }
-// o: { idioma, borde, rango ('letra' | 'github'), fondo, titulo, icono, texto, anillo }
+// o: { language, border, rank ('letter' | 'github'), background, title, icon, text, ring }
 export function renderStatsCard(p, o = {}) {
   const c = resolveColors(o);
-  const L = LABELS[o.idioma] ?? LABELS.es;
+  const L = LABELS[o.language] ?? LABELS.en;
   const rank = calculateRank(p);
   const rows = [
     [ICONS.star, L.stars, p.stars],
@@ -153,33 +153,33 @@ export function renderStatsCard(p, o = {}) {
     .join('');
 
   const center =
-    o.rango === 'github'
-      ? `<g transform="translate(-20 -20) scale(2.5)"><path d="${GITHUB_MARK}" fill="${c.anillo}"/></g>`
+    o.rank === 'github'
+      ? `<g transform="translate(-20 -20) scale(2.5)"><path d="${GITHUB_MARK}" fill="${c.ring}"/></g>`
       : `<text class="rank-text" x="0" y="0" dominant-baseline="central" text-anchor="middle">${esc(rank.level)}</text>`;
 
   const body =
     `<g transform="translate(25 55)">${list}</g>` +
     `<g transform="translate(${W - 95} ${H / 2 + 2})" role="img" aria-label="${esc(rank.level)}">` +
-    `<circle r="40" fill="none" stroke="${c.anillo}" stroke-width="6" opacity=".2"/>` +
-    `<circle class="ring" r="40" fill="none" stroke="${c.anillo}" stroke-width="6" stroke-linecap="round" ` +
+    `<circle r="40" fill="none" stroke="${c.ring}" stroke-width="6" opacity=".2"/>` +
+    `<circle class="ring" r="40" fill="none" stroke="${c.ring}" stroke-width="6" stroke-linecap="round" ` +
     `opacity=".85" transform="rotate(-90)" stroke-dasharray="${RING}" ` +
     `stroke-dashoffset="${((rank.percentile / 100) * RING).toFixed(2)}"/>${center}</g>`;
 
   const css =
-    `.rank-text{font:800 24px ${FONT};fill:${c.texto}}` +
+    `.rank-text{font:800 24px ${FONT};fill:${c.text}}` +
     `.ring{animation:ring 1s ease-in-out both}` +
     `@keyframes ring{from{stroke-dashoffset:${RING}}}`;
 
-  return shell({ width: W, height: H, title: L.stats(p.name || p.login), body, c, border: o.borde !== false, css });
+  return shell({ width: W, height: H, title: L.stats(p.name || p.login), body, c, border: o.border !== false, css });
 }
 
 const DEFAULT_LANG_COLOR = '#8b949e';
 const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
-// langs: [{ name, color, bytes }] (de mayor a menor). o: { idioma, borde, max, ...colores }
+// langs: [{ name, color, bytes }] (largest first). o: { language, border, max, ...colors }
 export function renderLangsCard(langs, o = {}) {
   const c = resolveColors(o);
-  const L = LABELS[o.idioma] ?? LABELS.es;
+  const L = LABELS[o.language] ?? LABELS.en;
   const max = Math.max(1, Math.min(10, Math.round(o.max ?? 6)));
   const top = langs.slice(0, max);
   const total = top.reduce((a, l) => a + l.bytes, 0);
@@ -188,7 +188,7 @@ export function renderLangsCard(langs, o = {}) {
 
   if (!top.length || total <= 0) {
     const body = `<g transform="translate(25 62)" class="row"><text class="stat">${esc(L.noLangs)}</text></g>`;
-    return shell({ width: W, height: 105, title: L.langs, body, c, border: o.borde !== false });
+    return shell({ width: W, height: 105, title: L.langs, body, c, border: o.border !== false });
   }
 
   const items = top.map((l) => ({
@@ -223,5 +223,5 @@ export function renderLangsCard(langs, o = {}) {
     `<g transform="translate(25 55)"><g mask="url(#bar)">${segments}</g></g>` +
     `<g transform="translate(25 82)">${legend}</g>`;
 
-  return shell({ width: W, height: H, title: L.langs, body, c, border: o.borde !== false });
+  return shell({ width: W, height: H, title: L.langs, body, c, border: o.border !== false });
 }

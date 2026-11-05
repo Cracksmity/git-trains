@@ -1,0 +1,60 @@
+{
+  "name": "Mexico City",
+  "description": "Popocatépetl in the distance, Bellas Artes, the Angel of Independence, the Torre Latinoamericana and the Reforma towers; the procedural city fills the gaps.",
+  "fill": true,
+  "buildings": [
+    { "name": "Popocatépetl", "x": 300, "w": 120, "h": 2, "layer": "far", "windows": false, "top": [{ "type": "pyramid", "h": 30, "tip": 16 }] },
+    {
+      "name": "Palacio de Bellas Artes",
+      "x": 96,
+      "rows": [
+        "............#............",
+        "..........#####..........",
+        ".........#######.........",
+        "........#########........",
+        "........#########........",
+        ".......###########.......",
+        "....#################....",
+        "...###################...",
+        "..#####################..",
+        "..#w#w#w#w#w#w#w#w#w#w#..",
+        "..#####################..",
+        "..#w#w#w#w#w#w#w#w#w#w#..",
+        "#########################",
+        "#########################"
+      ]
+    },
+    { "name": "Torre Latinoamericana", "x": 150, "w": 12, "h": 40, "top": [{ "type": "stepped", "steps": 2, "h": 3 }, { "type": "antenna", "h": 10 }] },
+    {
+      "name": "Ángel de la Independencia",
+      "x": 130,
+      "rows": [
+        "#.#.#",
+        ".###.",
+        "..#..",
+        ".###.",
+        "..#..",
+        ".###.",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        "..#..",
+        ".###.",
+        ".###.",
+        "#####",
+        "#####",
+        "#####"
+      ]
+    },
+    { "name": "Torre Reforma", "x": 228, "w": 12, "h": 60 },
+    { "name": "Torre BBVA", "x": 244, "w": 14, "h": 52, "top": "flat" },
+    { "name": "Torre Mayor", "x": 262, "w": 14, "h": 50, "top": [{ "type": "pyramid", "h": 3, "tip": 8 }] }
+  ]
+}

@@ -1,5 +1,5 @@
-// Servidor estático mínimo para el playground (sin dependencias).
-// node scripts/serve.js [puerto]
+// Minimal static server for the playground (no dependencies).
+// node scripts/serve.js [port]
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -24,13 +24,14 @@ createServer(async (req, res) => {
   try {
     let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (path === '/') path = '/preview/index.html';
+    else if (path.endsWith('/')) path += 'index.html'; // like GitHub Pages
     const file = normalize(join(root, path));
-    if (!file.startsWith(root)) throw new Error('fuera de la raíz');
+    if (!file.startsWith(root)) throw new Error('outside the root');
     const data = await readFile(file);
     res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
     res.end(data);
   } catch {
     res.writeHead(404, { 'content-type': 'text/plain' });
-    res.end('no encontrado');
+    res.end('not found');
   }
-}).listen(port, () => console.log(`Playground en http://localhost:${port}`));
+}).listen(port, () => console.log(`Playground at http://localhost:${port}`));

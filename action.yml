@@ -1,5 +1,5 @@
-name: git-trenes
-description: Un tren en pixel art que crece, cambia de color y acelera según tu actividad en GitHub.
+name: git-trains
+description: A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.
 author: Cracksmity
 branding:
   icon: navigation
@@ -7,74 +7,97 @@ branding:
 
 inputs:
   github-token:
-    description: Token para leer tu actividad. Para contribuciones privadas usa un PAT.
+    description: Token to read your activity. Use a PAT to count private contributions.
     default: ${{ github.token }}
-  usuario:
-    description: Usuario de GitHub a dibujar. Por defecto, el dueño del repositorio.
+  user:
+    description: GitHub user to draw. Defaults to the repository owner.
     default: ${{ github.repository_owner }}
-  tren:
-    description: "auto (evoluciona con tus vagones), un modelo (tranvia, metro-naranja, metro-gris, metro-amarillo, metro-blanco, bala) o la ruta a tu propio tren en JSON (por ejemplo .github/tren.json)."
+  train:
+    description: "auto (evolves with your cars), a model (tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet) or the path to your own train in JSON (for example .github/train.json)."
     default: auto
-  fondo:
-    description: "Ciudad del fondo: ciudad (aleatoria), nueva-york, osaka o la ruta a tu propio skyline en JSON (por ejemplo .github/fondo.json)."
-    default: ciudad
-  modo:
-    description: "single (un tren con tu lenguaje principal) o multi (3 vías, un tren por lenguaje)."
+  skyline:
+    description: "City behind the train: city (procedural, unique to you), new-york, osaka or the path to your own skyline in JSON (for example .github/skyline.json)."
+    default: city
+  mode:
+    description: "single (one train in your top language) or multi (3 tracks, one train per language)."
     default: single
-  tema:
-    description: "both (genera claro, oscuro y automático), light, dark o auto."
+  theme:
+    description: "both (writes light, dark and automatic), light, dark or auto."
     default: both
-  idioma:
-    description: "Idioma de los textos: es o en. Cambia la palabra del letrero (RACHA / STREAK) y las tarjetas."
-    default: es
-  etiqueta:
-    description: Palabra del letrero LED antes del número de racha. Si se omite depende de idioma.
+  language:
+    description: "Language of the texts: en or es. Changes the word on the LED sign (STREAK / RACHA) and the cards."
+    default: en
+  label:
+    description: Word on the LED sign before the streak number. Defaults to the one for `language`.
     default: ""
-  escala:
-    description: Tamaño de cada píxel en el SVG (1 a 6).
+  scale:
+    description: Size of each pixel in the SVG (1 to 6).
     default: "2"
-  salida:
-    description: Carpeta donde se escriben los SVG.
+  output-dir:
+    description: Folder the SVGs are written to.
     default: dist
-  tarjetas:
-    description: "Tarjetas de perfil a generar: none, stats (estadísticas), langs (lenguajes) o both."
+  exclude-languages:
+    description: "Comma-separated languages to leave out of the stripe and the cards, for example: HTML, Jupyter Notebook."
+    default: ""
+  cards:
+    description: "Profile cards to generate: none, stats, languages or both."
     default: none
-  rango:
-    description: "Centro del anillo de la tarjeta de estadísticas: letra (S, A+, B...) o github (la marca)."
-    default: letra
-  borde:
-    description: "Borde de las tarjetas: true o false."
+  rank:
+    description: "Center of the stats card ring: letter (S, A+, B...) or github (the logo)."
+    default: letter
+  border:
+    description: "Card border: true or false."
     default: "true"
-  lenguajes-max:
-    description: Máximo de lenguajes en la tarjeta de lenguajes (1 a 10).
+  max-languages:
+    description: Most languages shown on the languages card (1 to 10).
     default: "6"
-  color-fondo:
-    description: Color de fondo de las tarjetas, hexadecimal sin #.
+  color-background:
+    description: Card background color, hex without #.
     default: ""
-  color-titulo:
-    description: Color del título de las tarjetas, hexadecimal sin #.
+  color-title:
+    description: Card title color, hex without #.
     default: ""
-  color-icono:
-    description: Color de los iconos de las tarjetas, hexadecimal sin #.
+  color-icon:
+    description: Card icon color, hex without #.
     default: ""
-  color-texto:
-    description: Color del texto de las tarjetas, hexadecimal sin #.
+  color-text:
+    description: Card text color, hex without #.
     default: ""
-  color-anillo:
-    description: Color del anillo de rango de las tarjetas, hexadecimal sin #.
+  color-ring:
+    description: Color of the stats card rank ring, hex without #.
     default: ""
 
+  # Spanish names from before v1. They still work and win when set.
+  usuario: { description: "Deprecated: use `user`.", deprecationMessage: "Use `user` instead." }
+  tren: { description: "Deprecated: use `train`.", deprecationMessage: "Use `train` instead." }
+  fondo: { description: "Deprecated: use `skyline`.", deprecationMessage: "Use `skyline` instead." }
+  modo: { description: "Deprecated: use `mode`.", deprecationMessage: "Use `mode` instead." }
+  tema: { description: "Deprecated: use `theme`.", deprecationMessage: "Use `theme` instead." }
+  idioma: { description: "Deprecated: use `language`.", deprecationMessage: "Use `language` instead." }
+  etiqueta: { description: "Deprecated: use `label`.", deprecationMessage: "Use `label` instead." }
+  escala: { description: "Deprecated: use `scale`.", deprecationMessage: "Use `scale` instead." }
+  salida: { description: "Deprecated: use `output-dir`.", deprecationMessage: "Use `output-dir` instead." }
+  tarjetas: { description: "Deprecated: use `cards`.", deprecationMessage: "Use `cards` instead." }
+  rango: { description: "Deprecated: use `rank`.", deprecationMessage: "Use `rank` instead." }
+  borde: { description: "Deprecated: use `border`.", deprecationMessage: "Use `border` instead." }
+  lenguajes-max: { description: "Deprecated: use `max-languages`.", deprecationMessage: "Use `max-languages` instead." }
+  color-fondo: { description: "Deprecated: use `color-background`.", deprecationMessage: "Use `color-background` instead." }
+  color-titulo: { description: "Deprecated: use `color-title`.", deprecationMessage: "Use `color-title` instead." }
+  color-icono: { description: "Deprecated: use `color-icon`.", deprecationMessage: "Use `color-icon` instead." }
+  color-texto: { description: "Deprecated: use `color-text`.", deprecationMessage: "Use `color-text` instead." }
+  color-anillo: { description: "Deprecated: use `color-ring`.", deprecationMessage: "Use `color-ring` instead." }
+
 outputs:
-  archivos:
-    description: Rutas de los SVG generados, separadas por coma.
-  vagones:
-    description: Número de vagones del tren principal.
-  racha:
-    description: Racha actual en días.
-  estado:
-    description: idle, slow, normal o fast, según la actividad de ayer.
-  modelo:
-    description: Modelo de tren principal.
+  files:
+    description: Paths of the generated SVGs, comma-separated.
+  cars:
+    description: Number of cars on the main train.
+  streak:
+    description: Current streak in days.
+  state:
+    description: idle, slow, normal or fast, from yesterday's activity.
+  model:
+    description: Model of the main train.
 
 runs:
   using: node24
