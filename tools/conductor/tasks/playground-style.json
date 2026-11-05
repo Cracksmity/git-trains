@@ -1,0 +1,17 @@
+{
+  "name": "playground-style",
+  "route": "design",
+  "ladder": [
+    { "backend": "codex", "model": "gpt-6.1-terra", "effort": "xhigh", "why": "asked for by name; 4/4 on the benchmark at xhigh" },
+    { "backend": "codex", "model": "gpt-6-astra", "effort": "xhigh", "why": "best visual design on the benchmark" }
+  ],
+  "promptFile": "playground-style.md",
+  "allow": ["preview/index.html"],
+  "gates": [
+    "node tools/conductor/gates/restyle-only.js preview/index.html",
+    "node tools/conductor/gates/links.js preview/index.html",
+    "node -e \"const t=require('fs').readFileSync('preview/index.html','utf8'); const need=['Pixelify Sans','IBM Plex Sans','--green','--surface','prefers-color-scheme','class=\\\"stripe\\\"','../benchmarks/medellin/']; const miss=need.filter(s=>!t.includes(s)); if(miss.length){console.log('missing: '+miss.join(', '));process.exit(1)} if(/#c2410c|#fb923c/i.test(t)){console.log('the old orange accent is still there');process.exit(1)}\""
+  ],
+  "attempts": 2,
+  "timeoutMin": 25
+}

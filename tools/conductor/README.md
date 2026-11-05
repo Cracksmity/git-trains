@@ -72,5 +72,6 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | comments-en | mechanical | GPT-6.1-Terra passed on the first attempt: 140 s, 5.8k output tokens, 12 files |
 | guides-en | mechanical | GPT-6.1-Terra passed on the first attempt: 153 s, 6.1k output tokens |
 | benchmark-en | bulk | Gemini 3.8 Flash changed nothing twice (headless Antigravity denied its shell commands); the ladder moved to GPT-6.1-Terra, which passed in 125 s. Reviewing the patch caught a CSS class renamed in the stylesheet but not in the HTML, which no gate checked. |
+| regions-research | research | Gemini 4 Argon was denied a shell command and stopped; GPT-6.1-Sol wrote [docs/research/regions.md](../../docs/research/regions.md) in 389 s. |
 
-Lessons, now in the code: Antigravity gets a narrow `permissions.allow` list (read files, run node and the tests), and a run that was denied actions says so in its failure message.
+**Known issue: Antigravity in headless mode.** Every Gemini run so far ended in a denied `RunCommand`, so the work fell to the Codex rungs. The conductor now tells Antigravity to use its file tools and plain single commands, grants narrow command prefixes through `--settings`, and reports denied actions in the failure message, but a smoke test was still denied: the grants don't seem to reach headless runs. `--dangerously-skip-permissions` would get past it, and is deliberately not used. Until this is solved the Gemini rungs cost a few seconds each and the ladder does the rest.

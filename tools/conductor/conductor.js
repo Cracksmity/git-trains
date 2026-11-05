@@ -220,7 +220,11 @@ async function run(file, flags) {
   try {
     for (const [r, rung] of ladder.entries()) {
       for (let attempt = 1; attempt <= attempts && !passed; attempt++) {
-        const prompt = `${HOUSE_RULES(task)}\n\n## Task\n\n${task.prompt}${failures ? `\n\n## Previous attempt\n\n${RETRY(failures)}` : ''}`;
+        // Each backend may add its own rules (Antigravity's headless mode, for one).
+        const backendRules = ROUTES.backends[rung.backend]?.rules;
+        const prompt =
+          `${HOUSE_RULES(task)}${backendRules ? `\n${backendRules}` : ''}\n\n## Task\n\n${task.prompt}` +
+          `${failures ? `\n\n## Previous attempt\n\n${RETRY(failures)}` : ''}`;
         const cmd = buildCommand(rung, { model: rung.model, effort: rung.effort ?? 'high', dir, prompt, images: task.images });
         const label = `${rung.backend}/${rung.model}${rung.effort ? ` (${rung.effort})` : ''}`;
         if (flags['dry-run']) {
