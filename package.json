@@ -12,6 +12,7 @@
     "sample": "node src/index.js --sample",
     "docs": "node scripts/docs.js",
     "export": "node scripts/export.js",
+    "community": "node scripts/community.js",
     "test": "node --test"
   },
   "repository": {

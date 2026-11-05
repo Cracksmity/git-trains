@@ -1,0 +1,47 @@
+{
+  "id": "nyc-subway",
+  "name": "New York City Subway",
+  "description": "Inspired by the R160 cars: fluted stainless steel, a gray front with a black mask, a route sign and low headlights.",
+  "author": "Cracksmity",
+  "pal": {
+    "body": "#b4b9c1",
+    "bodyHi": "#d0d4da",
+    "bodyLo": "#8e939b",
+    "roof": "#8a8f98",
+    "trim": "#2a2d35",
+    "glass": "#1f232c",
+    "door": "#c0c4cb"
+  },
+  "bands": "hbaalbl",
+  "row3": "h",
+  "win": { "y0": 4, "y1": 9 },
+  "doors": 3,
+  "nose": {
+    "color": "#9fa4ac",
+    "face": "#15171c",
+    "rows": [
+      "sssssssss...",
+      "ssnnnnnnnnn.",
+      "sssnnnnnnnnn",
+      "sssnfffffffn",
+      "sssnfGggfifn",
+      "sssnfgggfifn",
+      "sssnfgggfffn",
+      "sssnfgggfgfn",
+      "sssnfgggfgfn",
+      "sssnfgggfgfn",
+      "sssnfffffffn",
+      "sssnnnnnnnnn",
+      "sssnnaaaaaan",
+      "sssnnnnnnnnn",
+      "sssnnqnnnlln",
+      "sssnnqnnnlln",
+      "sssnnnnnnnnn",
+      "sssnnnnnnnnn",
+      "sssssskkkkkk",
+      "ssssskkkkkk."
+    ]
+  },
+  "pant": null,
+  "roofBoxes": true
+}

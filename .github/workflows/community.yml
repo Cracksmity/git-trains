@@ -1,0 +1,112 @@
+# The community depot (community/). On a pull request it checks every train and
+# skyline and draws previews of the ones that changed; on main it rebuilds
+# community/index.json for the gallery, so contributors never touch that file
+# (and two pull requests never conflict over it).
+#
+# The pull request comment is posted by community-comment.yml: a pull request
+# from a fork only gets a read-only token here, which is how it should be, since
+# this job runs the pull request's own code.
+name: Community depot
+
+on:
+  pull_request:
+    paths: ["community/**", "scripts/community.js"]
+  push:
+    branches: [main]
+    paths: ["community/**"]
+
+permissions: {}
+
+jobs:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2 # the merge commit and its first parent (the base), to diff them
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Check every file in community/
+        run: node scripts/community.js --check
+
+      - name: Draw the changed files
+        if: ${{ !cancelled() }}
+        run: node scripts/community.js preview --out preview --since HEAD^1
+
+      # One PNG with every preview, uploaded as is (not zipped) so it opens from its link.
+      - name: Attach the preview sheet
+        id: sheet
+        if: ${{ !cancelled() && hashFiles('preview/community-preview.png') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          path: preview/community-preview.png
+          archive: false
+          overwrite: true
+          retention-days: 30
+
+      - name: Attach every image
+        id: zip
+        if: ${{ !cancelled() && hashFiles('preview/*.png') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: community-previews
+          path: |
+            preview/*.png
+            preview/*.svg
+          overwrite: true
+          retention-days: 30
+
+      - name: Write the summary
+        if: ${{ !cancelled() && hashFiles('preview/report.json') != '' }}
+        env:
+          SHEET_URL: ${{ steps.sheet.outputs.artifact-url }}
+          ZIP_URL: ${{ steps.zip.outputs.artifact-url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p comment
+          node scripts/community.js report --out preview > comment/body.md
+          cat comment/body.md >> "$GITHUB_STEP_SUMMARY"
+          echo "$PR_NUMBER" > comment/pr.txt
+
+      - name: Leave the summary for the comment
+        if: ${{ !cancelled() && hashFiles('comment/body.md') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: community-comment
+          path: comment/
+          overwrite: true
+          retention-days: 5
+
+  index:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: community-index
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main # the latest main, not the pushed commit: a run may wait behind another
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Rebuild community/index.json
+        run: node scripts/community.js
+      - name: Commit it if it changed
+        run: |
+          if git diff --quiet -- community/index.json; then
+            echo "community/index.json is up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Rebuild community/index.json" -- community/index.json
+          git push -q || { git pull -q --rebase origin main && git push -q; }

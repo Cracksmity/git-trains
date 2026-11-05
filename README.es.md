@@ -178,6 +178,18 @@ Un skyline es una lista de edificios en pixel art, **sin demasiado detalle**: ca
 
 ![Osaka](docs/example-osaka.svg)
 
+## Comparte tu ciudad
+
+El [depósito comunitario](community/README.md) reúne trenes y skylines que la gente dibuja de sus propias ciudades: tu metro, el tranvía en el que vas al trabajo, el skyline que ves desde tu ventana. Míralos en la [galería](https://cracksmity.github.io/git-trains/gallery/), abre cualquiera en el estudio para hacerlo tuyo, o descarga su JSON y úsalo como `train: .github/train.json` o `skyline: .github/skyline.json`.
+
+Para agregar el tuyo:
+
+1. Dibújalo con IA como arriba y revísalo en el [playground](https://cracksmity.github.io/git-trains/preview/#yours).
+2. Agrega `"author"` (tu usuario de GitHub) y una `"description"` del tren o la ciudad real (en inglés, como el resto del depósito), y guárdalo como `community/trains/<id>.json` (el nombre del archivo es su `id`) o `community/skylines/<ciudad>.json`.
+3. Abre un pull request, uno por tren o skyline. Una revisión automática lo valida igual que la Action, dibuja una vista previa en claro y oscuro (más el mini tren del modo calendario) y la deja en un comentario. Cuando se fusiona, aparece en la galería.
+
+Las reglas son pocas: nada de logos ni letreros, una descripción del tren o la ciudad real, uno por pull request. Están en [community/README.md](community/README.md). ¿No tienes tiempo de dibujarlo? [Pide una ciudad o un tren](https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml) y alguien más puede tomarlo.
+
 ## Tarjetas de perfil
 
 Con `cards: both` la Action también escribe `card-stats.svg` y `card-languages.svg`: una tarjeta de estadísticas (estrellas, commits del último año, PRs, issues y repos en los que contribuiste, con un anillo de rango) y otra con tus lenguajes más usados. Siguen el diseño de las tarjetas de [github-readme-stats](https://github.com/anuraghazra/github-readme-stats), pero **se generan dentro de tu workflow** con el código de este proyecto: sin un servicio externo que se pueda caer y sin actions de terceros. Con `language: es` salen en español.
@@ -205,6 +217,7 @@ npm run preview    # playground en http://localhost:4173 (controles en vivo)
 npm run sample     # escribe SVG con datos de muestra en ./sample
 npm test           # tests
 npm run docs       # regenera los SVG de docs/
+npm run community  # revisa community/ y regenera community/index.json para la galería
 node scripts/sheet.js sheet.png 5 3 0                                # hoja PNG ampliada de todos los modelos
 node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json   # ...o de un tren en JSON
 ```

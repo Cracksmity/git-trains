@@ -175,6 +175,18 @@ A skyline is a list of pixel-art buildings, **without too much detail**: each on
 
 ![Osaka](docs/example-osaka.svg)
 
+## Share your city
+
+The [community depot](community/README.md) collects trains and skylines drawn by people from their own cities: your metro, the tram you take to work, the skyline outside your window. Browse them in the [gallery](https://cracksmity.github.io/git-trains/gallery/), open any of them in the studio to make it yours, or download its JSON and use it as `train: .github/train.json` or `skyline: .github/skyline.json`.
+
+To add yours:
+
+1. Draw it with AI as above and check it in the [playground](https://cracksmity.github.io/git-trains/preview/#yours).
+2. Add `"author"` (your GitHub username) and a `"description"` of the real train or city, and save it as `community/trains/<id>.json` (the file name is its `id`) or `community/skylines/<city>.json`.
+3. Open a pull request, one train or skyline per pull request. A check validates it the way the Action does, draws a preview in light and dark (plus the mini train from calendar mode) and comments with it. Once it's merged, it shows up in the gallery.
+
+The rules are short: no logos or lettering, a description of the real train or city, one per pull request. They're in [community/README.md](community/README.md). No time to draw it? [Request a city or train](https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml) and someone else can pick it up.
+
 ## Profile cards
 
 With `cards: both` the Action also writes `card-stats.svg` and `card-languages.svg`: a stats card (stars, commits in the last year, PRs, issues and repos you contributed to, with a rank ring) and a card with your most used languages. They follow the layout of the [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) cards, but they're **generated inside your workflow** with this project's own code: no external service that can go down, and no third-party actions.
@@ -202,6 +214,7 @@ npm run preview    # playground at http://localhost:4173 (live controls)
 npm run sample     # writes SVGs from sample data to ./sample
 npm test           # tests
 npm run docs       # regenerates the SVGs in docs/
+npm run community  # checks community/ and rebuilds community/index.json for the gallery
 node scripts/sheet.js sheet.png 5 3 0                                # zoomed PNG sheet of every model
 node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json   # ...or of a JSON train
 ```

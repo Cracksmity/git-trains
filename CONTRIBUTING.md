@@ -8,6 +8,7 @@ npm run preview    # the playground at http://localhost:4173
 npm run docs       # regenerates docs/*.svg after a visual change
 npm run export     # a sample scene as PNG and animated GIF, in sample/ (options atop scripts/export.js)
 npm run export -- social   # docs/social.png and docs/og.png, the share images
+npm run community  # checks community/ and rebuilds community/index.json
 ```
 
 ## Ground rules
@@ -30,7 +31,9 @@ Add it to `SKYLINES` in [src/skyline.js](src/skyline.js). Keep tall towers away 
 
 ## Sharing your city or train
 
-Open an issue or a pull request with the JSON under `examples/trains/` or `examples/skylines/`, plus a screenshot from the playground. Add a `description` saying which real train or city inspired it.
+Add it to the community depot: a pull request with one file, `community/trains/<id>.json` or `community/skylines/<city>.json`, with `name`, `description` and `author`. A check validates it and comments with a preview; [community/README.md](community/README.md) has the rules. `npm run community` checks the depot locally and rebuilds `community/index.json`, which `main` also rebuilds after every merge, so you don't need to commit it.
+
+`examples/` stays as the small set the docs and the playground point to.
 
 ## Before opening a pull request
 

@@ -1,0 +1,51 @@
+name: Request a city or train
+description: Ask for your city's metro, tram or skyline to join the community depot, so someone can draw it.
+title: "Depot: "
+labels: [help wanted]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Anyone can pick this up and add it to the [community depot](https://github.com/Cracksmity/git-trains/tree/main/community) with a pull request. Want to draw it yourself? With AI it takes a few minutes: see [community/README.md](https://github.com/Cracksmity/git-trains/blob/main/community/README.md).
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What should be drawn
+      options:
+        - A train
+        - A skyline
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: city
+    attributes:
+      label: City
+      placeholder: Lisbon
+    validations:
+      required: true
+  - type: input
+    id: train
+    attributes:
+      label: Train (if any)
+      description: The system, line and model, as precisely as you know them.
+      placeholder: Lisbon Metro, Blue Line, ML99 cars
+  - type: textarea
+    id: reference
+    attributes:
+      label: Photos or links
+      description: A side view of the train and a front view of its cab help the most; for a skyline, a photo of it from afar. Only colors and shapes are drawn, never logos or lettering.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What makes it recognizable
+      description: The colors, the shape of the front, the landmarks from left to right... whatever someone from there would look for.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I'd like to draw it myself
+        - label: I can review a draft against the real thing
