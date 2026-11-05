@@ -11,6 +11,7 @@
     "preview": "node scripts/serve.js",
     "sample": "node src/index.js --sample",
     "docs": "node scripts/docs.js",
+    "export": "node scripts/export.js",
     "test": "node --test"
   },
   "repository": {

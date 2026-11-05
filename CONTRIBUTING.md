@@ -6,6 +6,8 @@ Thanks for wanting to make the trains better. Everything runs on plain Node 24 w
 npm test           # the whole suite, about a second
 npm run preview    # the playground at http://localhost:4173
 npm run docs       # regenerates docs/*.svg after a visual change
+npm run export     # a sample scene as PNG and animated GIF, in sample/ (options atop scripts/export.js)
+npm run export -- social   # docs/social.png and docs/og.png, the share images
 ```
 
 ## Ground rules
@@ -33,7 +35,8 @@ Open an issue or a pull request with the JSON under `examples/trains/` or `examp
 ## Before opening a pull request
 
 - `npm test` passes.
-- After a visual change, `npm run docs` and commit the regenerated `docs/*.svg` (CI checks they are up to date).
+- After a visual change, `npm run docs` and commit the regenerated `docs/*.svg` (CI checks they are up to date). If it shows in the share images too, `npm run export -- social`.
+- Changed a layer or an animation in `src/scene.js` or `src/scenery.js`? `scripts/export.js` paints the same grids and samples the same timing for PNG and GIF: keep them in step (`test/export.test.js` checks the basics).
 - If you changed an input, a model or a skyline id, update `README.md` and `README.es.md`.
 
 ## Working with the conductor

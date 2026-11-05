@@ -3,74 +3,512 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>git-trains</title>
-<meta name="description" content="A GitHub Action that draws a pixel-art train from your public GitHub activity.">
+<title>git-trains: your GitHub activity as a pixel-art train</title>
+<meta name="description" content="A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity. A GitHub Action, no external service.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/">
+<meta property="og:title" content="git-trains: your GitHub activity as a pixel-art train">
+<meta property="og:description" content="A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity. A GitHub Action, no external service.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Home of the GitHub Pages site: the train on top and two destinations. */
+/* Home of the GitHub Pages site. The scenes are drawn here, in the browser, by src/. */
 :root {
   --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
-  --green: #1b8638; --yellow: #c98f00;
+  --green: #1b8638; --yellow: #c98f00; --chip: #e7ece8; --button-ink: #ffffff;
   --display: "Pixelify Sans", "Courier New", monospace;
   --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d; --green: #47c06a; --yellow: #f0c23a; color-scheme: dark; }
+  :root:not([data-theme="light"]) {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --button-ink: #101412; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+  --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --button-ink: #101412; color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
-img { max-width: 100%; display: block; }
-.wrap { max-width: 960px; margin: 0 auto; padding: 48px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 32px; }
+a { color: var(--green); text-underline-offset: 2px; }
+:is(a, button, input):focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+button { cursor: pointer; font: inherit; color: inherit; }
+img, canvas { display: block; max-width: 100%; }
+code { font: 0.86em var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding: 44px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 80px;
+}
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.1; text-wrap: balance; }
+h2 { font-size: clamp(26px, 3.4vw, 32px); }
+h3 { font-size: 20px; }
+p { margin: 0; max-width: 66ch; }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.muted { color: var(--muted); }
 .stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
-header { display: grid; gap: 14px; }
-h1, h2 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.15; }
-h1 { font-size: clamp(34px, 6vw, 52px); }
-h2 { font-size: 21px; }
-p { margin: 0; max-width: 64ch; }
-.scene img { width: 100%; image-rendering: pixelated; border-radius: 6px; }
-.places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.place { display: grid; gap: 8px; align-content: start; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
+.scene { width: 100%; height: auto; image-rendering: pixelated; border-radius: 6px; background: var(--chip); }
+
+/* Buttons and segmented controls, as in the playground. */
+.btn { display: inline-block; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px/1.3 var(--body); text-decoration: none; }
+.btn:hover { border-color: var(--green); }
+.btn.main { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 6px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1.4 var(--mono); }
+.seg button:hover { border-color: var(--green); }
+.seg button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+
+/* Hero: name, pitch and the live scene. */
+.hero { display: grid; gap: 22px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; }
+.hero-text { display: grid; gap: 14px; }
+h1 { font-size: clamp(48px, 10vw, 88px); line-height: 0.95; letter-spacing: -0.01em; }
+.pitch { font-size: clamp(18px, 2.3vw, 21px); line-height: 1.45; max-width: 34ch; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.hero figure { margin: 0; display: grid; gap: 12px; }
+.hero figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 14px; color: var(--muted); }
+.hero figcaption .label { color: var(--ink); font-weight: 500; }
+
+/* How to read a train: a close-up with hotspots, and the same parts as a list. */
+.closeup { position: relative; overflow: hidden; border-radius: 6px; background: var(--chip); }
+.closeup img { position: absolute; max-width: none; image-rendering: pixelated; }
+.spot { position: absolute; padding: 0; border: 0; background: transparent; border-radius: 2px; }
+.spot.on { background: color-mix(in srgb, var(--yellow) 22%, transparent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--green); z-index: 5; }
+.hint { font-size: 14px; color: var(--muted); }
+.parts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.parts button { width: 100%; height: 100%; display: grid; gap: 4px; align-content: start; text-align: left; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+.parts button:hover, .parts button.on { border-color: var(--green); }
+.parts button.on { box-shadow: inset 4px 0 0 var(--green); }
+.parts b { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.parts span { font-size: 14px; color: var(--muted); }
+.swatch { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+
+/* Models. */
+.models { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.model { display: grid; gap: 8px; align-content: start; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.model canvas { width: 100%; height: auto; image-rendering: pixelated; margin-bottom: 4px; }
+.model p { font-size: 14px; color: var(--muted); }
+.model .when { color: var(--ink); }
+
+/* Cities. */
+.city-bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 20px; }
+.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.field input { width: min(240px, 100%); padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 14px var(--mono); }
+
+/* Get it in 60 seconds. */
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: 26px; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 12px; }
+.steps > li::before { content: counter(step); grid-row: span 2; font: 600 28px/1 var(--display); color: var(--green); }
+.steps > li > * { grid-column: 2; }
+.steps > li > p { padding-top: 3px; }
+.code { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.code-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); color: var(--muted); }
+.code-head button { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); font: 500 12px var(--mono); }
+.code-head button:hover { border-color: var(--green); }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 13px/1.6 var(--mono); tab-size: 2; }
+.code pre code { background: none; padding: 0; font: inherit; }
+
+/* Destinations. */
+.places { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.place { display: grid; gap: 8px; align-content: start; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
 .place:hover { border-color: var(--green); }
-.place:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.place p { font-size: 15px; }
 .place .go { font: 500 13px var(--mono); color: var(--green); }
 footer { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
-footer a { color: var(--green); }
-@media (max-width: 640px) { .places { grid-template-columns: minmax(0, 1fr); } }
+
+@media (max-width: 860px) {
+  .models, .places { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  /* The close-up stays in view while you tap down the list of parts. */
+  .closeup { position: sticky; top: 8px; z-index: 10; box-shadow: 0 0 0 8px var(--bg); }
+}
+@media (max-width: 560px) {
+  .wrap { gap: 60px; padding-top: 28px; }
+  .models, .places { grid-template-columns: minmax(0, 1fr); }
+  .steps > li { grid-template-columns: 28px minmax(0, 1fr); }
+  .steps > li::before { font-size: 24px; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <header class="hero">
     <div class="stripe" aria-hidden="true"></div>
-    <h1>git-trains</h1>
-    <p>A GitHub Action that draws a pixel-art train from your public GitHub activity: the cars grow with your contributions, the stripe takes the color of your top language and the speed depends on what you did yesterday.</p>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>git-trains</h1>
+        <p class="pitch">A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#setup">Get it in 60 seconds</a>
+        <a class="btn" href="https://github.com/Cracksmity/git-trains">Star it on GitHub</a>
+      </div>
+    </div>
+    <figure>
+      <img class="scene" id="hero" width="896" height="408" src="docs/example-multi.svg" alt="Three pixel-art trains, one per language, running on three tracks in front of a city">
+      <figcaption>
+        <span class="label" id="yesterday-label">Contributions yesterday</span>
+        <div class="seg" id="yesterday" role="group" aria-labelledby="yesterday-label">
+          <button data-v="0" aria-pressed="false">0</button>
+          <button data-v="2" aria-pressed="false">1–3</button>
+          <button data-v="6" aria-pressed="true">4–9</button>
+          <button data-v="14" aria-pressed="false">10+</button>
+        </div>
+        <span id="yesterday-says" aria-live="polite">Normal speed, green signal.</span>
+      </figcaption>
+    </figure>
   </header>
-  <div class="scene">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/example-dark.svg">
-      <img alt="An example git-trains train passing in front of a city" src="docs/example-light.svg">
-    </picture>
-  </div>
-  <div class="places">
+
+  <section id="read" aria-labelledby="read-h">
+    <header>
+      <h2 id="read-h">How to read a train</h2>
+      <p>Every part of the drawing stands for something you did on GitHub. A workflow redraws it every morning, so it changes with you.</p>
+    </header>
+    <div class="closeup" id="closeup" hidden></div>
+    <p class="hint" id="hint" hidden>Hover or tap a part of the train, or an item below, to match them up.</p>
+    <ul class="parts" id="parts">
+      <li><button data-part="cars" aria-pressed="false"><b>Cars</b><span>Contributions in the last year. One car to start, then one more at 50, 200, 500, 1,000 and 2,000.</span></button></li>
+      <li><button data-part="stripe" aria-pressed="false"><b><i class="swatch" id="stripe-swatch" style="background:#3178c6"></i>Stripe</b><span>Your top language, in its GitHub color. Leave languages out with <code>exclude-languages</code>.</span></button></li>
+      <li><button data-part="led" aria-pressed="false"><b>LED sign</b><span>Your streak in days. With nothing yet today, it still counts from yesterday.</span></button></li>
+      <li><button data-part="lit" aria-pressed="false"><b>Lit windows</b><span>The streak again: more windows light up each day, front to back, and all of them at 30.</span></button></li>
+      <li><button data-part="wheels" aria-pressed="false"><b>Speed</b><span>Yesterday's contributions. None stops the train with its doors open; 10 or more brings sparks and speed lines.</span></button></li>
+      <li><button data-part="signal" aria-pressed="false"><b>Signal</b><span>Yesterday too: red for nothing, amber for a little, green for a normal or busy day.</span></button></li>
+    </ul>
+  </section>
+
+  <section id="models" aria-labelledby="models-h">
+    <header>
+      <h2 id="models-h">Six trains, one for each stage</h2>
+      <p>With <code>train: auto</code> your train moves up a model with every car it gains. You can also pick one, or <a href="preview/#yours">design your own with AI</a>.</p>
+    </header>
+    <div class="models">
+      <article class="model"><canvas data-model="tram" data-lang="TypeScript" width="1" height="1"></canvas><h3>Tram</h3><p>Guadalajara's SITEUR TEG-90: wine red, two bodies on a shared bogie.</p><p><code>tram</code> <span class="when">1 car, from day one</span></p></article>
+      <article class="model"><canvas data-model="metro-orange" data-lang="Python" width="1" height="1"></canvas><h3>Orange metro</h3><p>Mexico City's NC-82: a faceted front and rubber tires.</p><p><code>metro-orange</code> <span class="when">2 cars, 50 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-gray" data-lang="Rust" width="1" height="1"></canvas><h3>Gray metro</h3><p>São Paulo's L fleet: fluted stainless steel and a black mask.</p><p><code>metro-gray</code> <span class="when">3 cars, 200 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-yellow" data-lang="Go" width="1" height="1"></canvas><h3>Yellow metro</h3><p>The L.A. Metro's refurbished A650: a yellow front with an emergency door in the middle.</p><p><code>metro-yellow</code> <span class="when">4 cars, 500 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-white" data-lang="Ruby" width="1" height="1"></canvas><h3>White metro</h3><p>The Alstom Metropolis of Guadalajara's Line 3: a dark window band and a black face.</p><p><code>metro-white</code> <span class="when">5 cars, 1,000 contributions</span></p></article>
+      <article class="model"><canvas data-model="bullet" data-lang="JavaScript" width="1" height="1"></canvas><h3>Bullet train</h3><p>The high-speed train at the top of the line, under overhead wires.</p><p><code>bullet</code> <span class="when">6 cars, 2,000 contributions</span></p></article>
+    </div>
+  </section>
+
+  <section id="cities" aria-labelledby="cities-h">
+    <header>
+      <h2 id="cities-h">A city behind every train</h2>
+      <p>The default city is built from your username, so nobody else gets your skyline. New York and Osaka come built in, and an AI can draw any other one for you.</p>
+    </header>
+    <div class="city-bar">
+      <div class="seg" id="skyline" role="group" aria-label="Skyline">
+        <button data-v="city" aria-pressed="true">Your city</button>
+        <button data-v="new-york" aria-pressed="false">New York</button>
+        <button data-v="osaka" aria-pressed="false">Osaka</button>
+      </div>
+      <label class="field">GitHub username
+        <input id="user" type="text" value="octocat" maxlength="39" spellcheck="false" autocomplete="off" autocapitalize="off">
+      </label>
+    </div>
+    <img class="scene" id="city" width="896" height="200" src="docs/example-new-york.svg" alt="A train in front of a city">
+    <p class="muted">For another city, copy the AI instructions in the <a href="preview/#yours">playground</a>: <a href="examples/skylines/medellin.json">Medellín</a> and <a href="examples/skylines/mexico-city.json">Mexico City</a> were made that way.</p>
+  </section>
+
+  <section id="setup" aria-labelledby="setup-h">
+    <header>
+      <h2 id="setup-h">Get it in 60 seconds</h2>
+      <p>No token to create and no service to sign up for: a workflow in your profile repository draws the train every morning and commits the SVG.</p>
+    </header>
+    <ol class="steps">
+      <li>
+        <p>In your profile repository (the one named after your username), create this workflow:</p>
+        <div class="code">
+          <div class="code-head"><span>.github/workflows/train.yml</span><button data-copy="yaml">Copy</button></div>
+<pre><code id="yaml">name: GitHub train
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: Cracksmity/git-trains@v1
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || (git commit -m "chore: update train" &amp;&amp; git push)</code></pre>
+        </div>
+      </li>
+      <li>
+        <p>Add the train to your profile <code>README.md</code>. It follows GitHub's light or dark theme:</p>
+        <div class="code">
+          <div class="code-head"><span>README.md</span><button data-copy="readme">Copy</button></div>
+<pre><code id="readme">&lt;picture&gt;
+  &lt;source media=&quot;(prefers-color-scheme: dark)&quot; srcset=&quot;dist/train-dark.svg&quot;&gt;
+  &lt;img alt=&quot;My GitHub train&quot; src=&quot;dist/train-light.svg&quot;&gt;
+&lt;/picture&gt;</code></pre>
+        </div>
+      </li>
+      <li>
+        <p>Run the workflow once from the Actions tab, and your train pulls in. Every option, from the model to profile cards, is in the <a href="https://github.com/Cracksmity/git-trains#options">README</a>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <nav class="places" aria-label="More">
     <a class="place" href="preview/">
-      <h2>Playground</h2>
-      <p>Try the trains and skylines with live controls, and paste the JSON of your own train or city to see it right away, with the same error messages the Action gives.</p>
+      <h3>Playground</h3>
+      <p>Every model, skyline and speed with live controls. Paste the JSON of your own train or city and see it right away.</p>
       <span class="go">Open the playground</span>
     </a>
     <a class="place" href="benchmarks/medellin/">
-      <h2>Medellín Metro in ten runs</h2>
-      <p>Ten models in Claude Code, Codex and Antigravity design the same CAF train and the same skyline, with their tokens, times and results side by side.</p>
+      <h3>Medellín Metro in ten runs</h3>
+      <p>Ten AI runs in Claude Code, Codex and Antigravity design the same train and skyline from one brief, with their tokens, times and results side by side.</p>
       <span class="go">See the benchmark</span>
     </a>
-  </div>
+    <a class="place" href="https://github.com/Cracksmity/git-trains">
+      <h3>Source on GitHub</h3>
+      <p>MIT licensed, no dependencies. Issues, ideas and new trains are welcome, and a star helps more people find it.</p>
+      <span class="go">Cracksmity/git-trains</span>
+    </a>
+  </nav>
+
   <footer>
-    <a href="https://github.com/Cracksmity/git-trains">Code and how to use it</a>
     <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
     <a href="https://github.com/Cracksmity/git-trains/blob/main/README.es.md">README en español</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/CHANGELOG.md">Changelog</a>
+    <span>MIT license</span>
   </footer>
 </div>
+
+<script type="module">
+import { renderScene, planScene, SCENE_W } from './src/scene.js';
+import { buildSpec } from './src/compose.js';
+import { sampleStats } from './src/sample.js';
+import { carsFor, stateFor } from './src/stats.js';
+import { MODELS } from './src/models.js';
+import { buildTrain, TOP, TRAIN_H } from './src/train.js';
+import { parseSkyline } from './src/skyline.js';
+import { LANGUAGE_COLORS } from './src/languages.js';
+import { GY0, BALLAST, THEMES } from './src/scenery.js';
+
+const $ = (id) => document.getElementById(id);
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+const stillQuery = matchMedia('(prefers-reduced-motion: reduce)');
+const theme = () => document.documentElement.dataset.theme ?? (darkQuery.matches ? 'dark' : 'light');
+
+// Sample activity, with the numbers that matter set exactly.
+function stats({ user = 'octocat', total = 1400, streak = 21, yesterday = 6 } = {}) {
+  const s = sampleStats({ total, streak, yesterday });
+  return { ...s, user, total, streak, yesterday, cars: carsFor(total), state: stateFor(yesterday) };
+}
+
+// Scenes go in <img> (an inline SVG's <style> would leak into the page), like in a README.
+const urls = new Map();
+function show(img, svg, alt) {
+  if (urls.has(img)) URL.revokeObjectURL(urls.get(img));
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  urls.set(img, url);
+  img.src = url;
+  img.alt = alt;
+}
+// Extra CSS for the SVG: parked trains (the close-up) or no motion at all.
+const PARKED = '.tr,.wa,.wb,.sp{animation:none!important}.wb,.sb{opacity:0}';
+const STILL = PARKED + '.sm,.led,.do,.cl,.tw{animation:none!important}.pb{opacity:0}';
+const withCss = (svg, css) => svg.replace('</style>', `${css}</style>`);
+const motion = (svg) => (stillQuery.matches ? withCss(svg, STILL) : svg);
+
+// --- Hero: three tracks, and yesterday's contributions set the pace.
+const SAYS = {
+  idle: 'Stopped at the platform with the doors open, red signal.',
+  slow: 'Slow, amber signal.',
+  normal: 'Normal speed, green signal.',
+  fast: 'Fast, with sparks and speed lines, green signal.',
+};
+let yesterday = 6;
+function renderHero() {
+  const s = stats({ yesterday });
+  const spec = buildSpec(s, { mode: 'multi', theme: theme() });
+  show($('hero'), motion(renderScene(spec)), `${spec.title}. Three of their languages run on three tracks.`);
+  $('yesterday-says').textContent = SAYS[s.state];
+}
+$('yesterday').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  yesterday = Number(b.dataset.v);
+  for (const x of $('yesterday').children) x.setAttribute('aria-pressed', String(x === b));
+  renderHero();
+});
+
+// --- How to read a train: a parked train, cropped to it and its signal, with hotspots.
+function bbox(grid, test) {
+  let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+  for (let y = 0; y < grid.h; y++) {
+    for (let x = 0; x < grid.w; x++) {
+      if (!test(grid.cells[y * grid.w + x])) continue;
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    }
+  }
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+let active = null;
+let pinned = null;
+function renderCloseup() {
+  const s = stats({ total: 300, streak: 17, yesterday: 6 });
+  const spec = buildSpec(s, { theme: theme() });
+  spec.tracks[0].caption = '';
+  const { trains } = planScene(spec);
+  const { train, rest, y0 } = trains[0];
+  const stripe = s.languages[0].color;
+  $('stripe-swatch').style.background = stripe;
+  const at = (r) => ({ ...r, x: r.x + rest, y: r.y + y0 });
+  const parts = {
+    cars: { x: rest, y: y0 + TOP, w: train.width, h: 20 },
+    lit: at(bbox(train.layers.lit, Boolean)),
+    stripe: at(bbox(train.layers.body, (c) => c === stripe)),
+    wheels: { x: rest, y: y0 + TOP + 18, w: train.width, h: TRAIN_H - TOP - 18 },
+    led: at(train.led),
+    signal: { x: SCENE_W - 17, y: GY0 - 32, w: 5, h: 32 }, // where scenery.js puts it for a train running right
+  };
+  const crop = { x: rest - 12, y: y0 - 10, w: SCENE_W - rest + 12, h: GY0 + BALLAST - y0 + 10 };
+  const pct = (v, of) => `${(v / of) * 100}%`;
+  const box = $('closeup');
+  box.style.aspectRatio = `${crop.w} / ${crop.h}`;
+  const img = document.createElement('img');
+  Object.assign(img.style, { width: pct(SCENE_W, crop.w), left: pct(-crop.x, crop.w), top: pct(-crop.y, crop.h) });
+  show(img, withCss(motion(renderScene(spec)), PARKED), `${spec.title}, parked by its signal`);
+  box.replaceChildren(img);
+  for (const [name, r] of Object.entries(parts)) {
+    // Thin parts get a taller target, centered on them.
+    const h = Math.max(r.h, 5);
+    const spot = document.createElement('button');
+    spot.className = 'spot';
+    spot.dataset.part = name;
+    spot.tabIndex = -1;
+    spot.setAttribute('aria-hidden', 'true');
+    Object.assign(spot.style, {
+      left: pct(r.x - crop.x, crop.w), top: pct(r.y - (h - r.h) / 2 - crop.y, crop.h),
+      width: pct(r.w, crop.w), height: pct(h, crop.h),
+    });
+    box.append(spot);
+  }
+  box.hidden = false;
+  $('hint').hidden = false;
+  highlight(active);
+}
+function highlight(part) {
+  active = part;
+  for (const el of document.querySelectorAll('[data-part]')) el.classList.toggle('on', el.dataset.part === part);
+  for (const b of $('parts').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.part === pinned));
+}
+for (const root of [$('closeup'), $('parts')]) {
+  root.addEventListener('pointerover', (e) => {
+    const el = e.target.closest('[data-part]');
+    if (el && e.pointerType === 'mouse') highlight(el.dataset.part);
+  });
+  root.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') highlight(pinned); });
+  root.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-part]');
+    if (!el) return;
+    pinned = pinned === el.dataset.part ? null : el.dataset.part;
+    highlight(pinned);
+  });
+}
+$('parts').addEventListener('focusin', (e) => highlight(e.target.closest('[data-part]')?.dataset.part ?? pinned));
+$('parts').addEventListener('focusout', () => highlight(pinned));
+
+// --- The six models, two cars each, on a rail. All canvases share the widest
+// train's width, so every card shows the pixels at the same size.
+function renderModels() {
+  const t = THEMES[theme()];
+  const canvases = [...document.querySelectorAll('canvas[data-model]')];
+  const trains = canvases.map((canvas) => buildTrain(MODELS[canvas.dataset.model], {
+    cars: 2, stripe: LANGUAGE_COLORS[canvas.dataset.lang], streak: 9, label: 'STREAK',
+  }));
+  const W = Math.max(...trains.map((train) => train.width)) + 4;
+  canvases.forEach((canvas, i) => {
+    const train = trains[i];
+    const ox = Math.floor((W - train.width) / 2);
+    canvas.width = W;
+    canvas.height = TRAIN_H + 2;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = t.rail;
+    ctx.fillRect(0, TRAIN_H, W, 1);
+    ctx.fillStyle = t.railDark;
+    ctx.fillRect(0, TRAIN_H + 1, W, 1);
+    for (const name of ['body', 'lit', 'wa', 'led', 'pa']) {
+      const g = train.layers[name];
+      for (let y = 0; y < g.h; y++) {
+        for (let x = 0; x < g.w; x++) {
+          const c = g.cells[y * g.w + x];
+          if (!c || c[0] === '@') continue;
+          ctx.fillStyle = c;
+          ctx.fillRect(ox + x, y, 1, 1);
+        }
+      }
+    }
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', `${MODELS[canvas.dataset.model].name}, two cars, with a ${canvas.dataset.lang} stripe`);
+  });
+}
+
+// --- Cities: the skyline buttons and the username.
+let skyline = 'city';
+function renderCity() {
+  const user = $('user').value.trim() || 'octocat';
+  const spec = buildSpec(stats({ user, total: 600, streak: 9, yesterday: 3 }), { theme: theme(), skyline: parseSkyline(skyline) });
+  spec.tracks[0].caption = '';
+  const where = skyline === 'city' ? `${user}'s own city` : parseSkyline(skyline).name;
+  show($('city'), motion(renderScene(spec)), `A train in front of ${where}`);
+}
+$('skyline').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  skyline = b.dataset.v;
+  for (const x of $('skyline').children) x.setAttribute('aria-pressed', String(x === b));
+  renderCity();
+});
+$('user').addEventListener('input', renderCity);
+
+// --- Copy buttons.
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-copy]');
+  if (!b) return;
+  const code = $(b.dataset.copy);
+  try {
+    await navigator.clipboard.writeText(code.textContent);
+    b.textContent = 'Copied';
+  } catch {
+    // No clipboard (outside https, for example): select the text to copy it by hand.
+    getSelection().selectAllChildren(code);
+    b.textContent = `Selected: press ${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘C' : 'Ctrl+C'}`;
+  }
+  setTimeout(() => { b.textContent = 'Copy'; }, 1800);
+});
+
+function renderAll() {
+  renderHero();
+  renderCloseup();
+  renderModels();
+  renderCity();
+}
+darkQuery.addEventListener('change', renderAll);
+stillQuery.addEventListener('change', renderAll);
+renderAll();
+</script>
 </body>
 </html>

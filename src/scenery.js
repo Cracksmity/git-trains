@@ -70,8 +70,26 @@ export function skyLayer(W, used) {
   return out;
 }
 
+// The same sky on a pixel grid (for scripts/export.js): the dashes above, pixel by pixel.
+export function paintSky(g) {
+  const bh = GY0 / 4;
+  for (let i = 0; i < 4; i++) g.rect(0, i * bh, g.w, bh, `@sky${i}`);
+  for (let i = 1; i < 4; i++) {
+    for (let x = 0; x < g.w; x++) {
+      if (x % 4 === 0) g.set(x, i * bh - 3, `@sky${i}`);
+      if (x % 2 === 1) g.set(x, i * bh - 2, `@sky${i}`);
+      if (x % 4 !== 3) g.set(x, i * bh - 1, `@sky${i}`);
+    }
+  }
+}
+
 // Sun (with rays) or moon (with craters): the theme determines what is visible.
 export function celestialLayer(W, used) {
+  return celestialGrid(W).paths(used);
+}
+
+// The grids behind the SVG layers are exported too: scripts/export.js paints them as pixels.
+export function celestialGrid(W) {
   const g = new Grid(W, 40);
   const { x: sx, y: sy } = SUN;
   for (let a = 0; a < 8; a++) {
@@ -83,11 +101,16 @@ export function celestialLayer(W, used) {
     for (let dx = -6; dx <= 6; dx++) if (dx * dx + dy * dy <= 38) g.set(sx + dx, sy + dy, '@sun');
   }
   for (const [dx, dy] of [[-2, -1], [2, 2], [1, -3], [-1, 3], [3, -1]]) g.set(sx + dx, sy + dy, '@moonSpot');
-  return g.paths(used);
+  return g;
 }
 
 // Stars in two halves that twinkle alternately (visible only in the dark theme).
 export function starsLayers(W, used) {
+  const { a, b } = starsGrids(W);
+  return { a: a.paths(used), b: b.paths(used) };
+}
+
+export function starsGrids(W) {
   const rand = rng(4242);
   const a = new Grid(W, 52);
   const b = new Grid(W, 52);
@@ -97,7 +120,7 @@ export function starsLayers(W, used) {
     if (Math.abs(x - SUN.x) < 12 && Math.abs(y - SUN.y) < 12) continue;
     (i % 2 ? a : b).set(x, y, '@star');
   }
-  return { a: a.paths(used), b: b.paths(used) };
+  return { a, b };
 }
 
 function cloud(g, x, y, w, seed) {
@@ -119,12 +142,16 @@ function cloud(g, x, y, w, seed) {
 
 // Two consecutive cloud periods: shifting the layer W pixels makes a continuous loop.
 export function cloudsLayer(W, used) {
+  return cloudsGrid(W).paths(used);
+}
+
+export function cloudsGrid(W) {
   const g = new Grid(W * 2, 52);
   const clouds = [[20, 6, 30], [112, 22, 22], [196, 8, 34], [276, 28, 24], [352, 12, 28], [418, 32, 20]];
   clouds.forEach(([x, y, w], i) => {
     for (const o of [0, W]) cloud(g, x + o, y, w, 900 + i);
   });
-  return g.paths(used);
+  return g;
 }
 
 // --- Landscape ---------------------------------------------------------------
@@ -199,6 +226,22 @@ export function bandsLayer(W, tracks, used) {
   return out;
 }
 
+// The same strips on a pixel grid (for scripts/export.js).
+export function paintBands(g, tracks) {
+  tracks.forEach((_, k) => {
+    if (k === 0) return;
+    const gy = GY0 + PITCH * k;
+    const y1 = gy - 1;
+    g.rect(0, gy - PITCH + BALLAST, g.w, PITCH - BALLAST, '@haze');
+    for (const [shape, ph, color] of [[FAR, k, '@hill2'], [NEAR, k * 1.7, '@hill']]) {
+      for (let x = 0; x < g.w; x++) {
+        const h = hillH(x, shape, ph);
+        g.vline(x, y1 - h + 1, h, color);
+      }
+    }
+  });
+}
+
 // Foreground of those strips: village (odd k) or forest (even k).
 function paintBandFront(g, W, y1, k, rand) {
   const top = (x) => y1 - hillH(x, NEAR, k * 1.7) + 1;
@@ -240,6 +283,22 @@ export function railsLayer(W, tracks, used) {
     }
   });
   return out;
+}
+
+// The same tracks on a pixel grid (for scripts/export.js).
+export function paintRails(g, tracks) {
+  tracks.forEach((t, k) => {
+    const gy = GY0 + PITCH * k;
+    g.hline(0, gy, g.w, '@rail');
+    g.hline(0, gy + 1, g.w, '@railDark');
+    g.rect(0, gy + 2, g.w, BALLAST - 2, '@ballast');
+    for (let x = 0; x < g.w; x++) if (x % 8 < 5) g.vline(x, gy + 2, 4, '@sleeper');
+    if (!t.overhead) {
+      g.hline(0, gy + 3, g.w, '@rail');
+      g.hline(0, gy + 4, g.w, '@railDark');
+      for (let x = 4; x < g.w; x += 16) g.vline(x, gy + 5, 2, '@railDark');
+    }
+  });
 }
 
 // Signal: red if there was no activity yesterday, amber if low, green if normal or high.
