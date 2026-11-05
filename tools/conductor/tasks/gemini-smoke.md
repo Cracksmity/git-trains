@@ -1,0 +1,1 @@
+Read package.json and list the files in the examples/trains folder. Then create the file smoke/report.md with two lines: the package name from package.json, and the number of JSON files in examples/trains.
