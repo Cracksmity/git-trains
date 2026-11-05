@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · community depot</title>
+<meta name="description" content="Trains and skylines from people's own cities, added with a pull request. Open any of them in the studio, or add your city's metro.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/gallery/">
+<meta property="og:title" content="git-trains · community depot">
+<meta property="og:description" content="Trains and skylines from people's own cities, added with a pull request. Open any of them in the studio, or add your city's metro.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* The community depot: every train and skyline in community/, drawn here by src/. */
+:root {
+  --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
+  --green: #1b8638; --yellow: #c98f00; --chip: #e7ece8; --bad: #a33a2c; --button-ink: #ffffff;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --bad: #f08a7a; --button-ink: #101412; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+  --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --bad: #f08a7a; --button-ink: #101412; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
+a { color: var(--green); text-underline-offset: 2px; }
+:is(a, button, input):focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+button { cursor: pointer; font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+code { font: 0.86em var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding: 40px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 56px;
+}
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: clamp(34px, 6vw, 56px); }
+h2 { font-size: clamp(24px, 3.2vw, 30px); }
+h3 { font-size: 20px; }
+p { margin: 0; max-width: 66ch; }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.muted { color: var(--muted); }
+.stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+/* Buttons and segmented controls, as on the home page. */
+.btn { display: inline-block; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px/1.3 var(--body); text-decoration: none; }
+.btn:hover { border-color: var(--green); }
+.btn.main { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+.btn.small { padding: 6px 11px; font: 500 13px/1.4 var(--mono); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 6px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1.4 var(--mono); }
+.seg button:hover { border-color: var(--green); }
+.seg button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+
+/* Header. */
+.hero { display: grid; gap: 16px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; }
+.hero-text { display: grid; gap: 12px; }
+.pitch { font-size: clamp(17px, 2.1vw, 19px); line-height: 1.5; max-width: 52ch; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Filters. */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.bar-left { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.search { flex: 0 1 290px; min-width: 0; }
+.search input { width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 14px var(--mono); }
+.tally { font: 13px/1.5 var(--mono); color: var(--muted); }
+
+/* Entries. */
+.entries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.entry { display: grid; grid-template-rows: auto 1fr auto; gap: 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-width: 0; scroll-margin-top: 16px; }
+.entry.target { outline: 2px solid var(--green); outline-offset: -2px; }
+.entry .scene { width: 100%; height: auto; aspect-ratio: 448 / 100; image-rendering: pixelated; border-radius: 6px; background: var(--chip); }
+.entry-text { display: grid; gap: 6px; align-content: start; padding: 0 4px; }
+.entry-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.kind { flex: none; font: 500 11px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.desc { font-size: 14px; color: var(--muted); }
+.error { font: 12px/1.5 var(--mono); color: var(--bad); overflow-wrap: anywhere; }
+.entry-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 0 4px; }
+.by { display: inline-flex; align-items: center; gap: 8px; font: 13px var(--mono); color: var(--ink); text-decoration: none; min-width: 0; }
+.by:hover { color: var(--green); }
+.by img { width: 22px; height: 22px; border-radius: 50%; background: var(--chip); flex: none; }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.empty { padding: 28px; text-align: center; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
+.empty p { margin: 0 auto; }
+
+/* Add yours. */
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: 22px; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 12px; }
+.steps > li::before { content: counter(step); grid-row: span 2; font: 600 28px/1 var(--display); color: var(--green); }
+.steps > li > * { grid-column: 2; }
+.steps > li > p { padding-top: 3px; }
+footer { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+@media (max-width: 760px) {
+  .entries { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .wrap { gap: 44px; padding-top: 28px; }
+  .steps > li { grid-template-columns: 28px minmax(0, 1fr); }
+  .steps > li::before { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="stripe" aria-hidden="true"></div>
+    <nav class="eyebrow"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>Community depot</h1>
+        <p class="pitch">Trains and skylines drawn by people from their own cities, each one added with a pull request. Open any of them in the studio to make it yours, or bring the train you ride every day.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#add">Add your city</a>
+        <a class="btn" href="https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml">Request a city or train</a>
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="depot-h">
+    <h2 id="depot-h" hidden>Trains and skylines</h2>
+    <div class="bar">
+      <div class="bar-left">
+        <div class="seg" id="kind" role="group" aria-label="Show">
+          <button data-v="all" aria-pressed="true">All</button>
+          <button data-v="train" aria-pressed="false">Trains</button>
+          <button data-v="skyline" aria-pressed="false">Skylines</button>
+        </div>
+        <label class="search"><span hidden>Search</span>
+          <input id="q" type="search" placeholder="Search a city, train or author" spellcheck="false" autocomplete="off" autocapitalize="off">
+        </label>
+      </div>
+      <div class="seg" id="theme" role="group" aria-label="Scene theme">
+        <button data-v="light" aria-pressed="false">Light</button>
+        <button data-v="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+    <p class="tally" id="tally" aria-live="polite">Loading the depot…</p>
+    <div class="entries" id="entries"></div>
+    <div class="empty" id="empty" hidden>
+      <p>Nothing here matches yet. <a href="https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml">Request it</a>, or <a href="#add">draw it yourself</a>.</p>
+    </div>
+  </section>
+
+  <section id="add" aria-labelledby="add-h">
+    <header>
+      <h2 id="add-h">Add your city</h2>
+      <p>Your city's metro, the tram you take to work, the skyline outside your window: if it's real, it belongs here. You don't need to code.</p>
+    </header>
+    <ol class="steps">
+      <li>
+        <p><b>Draw it with AI.</b> Copy the instructions in the <a href="../preview/#yours">playground</a> into your AI with a photo, and paste back the JSON it writes: the playground shows it right away and lists any problems.</p>
+      </li>
+      <li>
+        <p><b>Sign it.</b> Add <code>"author"</code> (your GitHub username) and a <code>"description"</code> of the real train or city, and save it as <code>community/trains/&lt;id&gt;.json</code> (the file name is its <code>id</code>) or <code>community/skylines/&lt;city&gt;.json</code>.</p>
+      </li>
+      <li>
+        <p><b>Open a pull request.</b> A check validates it the way the Action does and draws a preview in light and dark. Once it's merged, it pulls in here. The <a href="https://github.com/Cracksmity/git-trains/blob/main/community/README.md">depot rules</a> are short: no logos or lettering, a description of the real thing, one train or skyline per pull request.</p>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <a href="https://github.com/Cracksmity/git-trains/tree/main/community">community/ on GitHub</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.es.md">README en español</a>
+    <span>MIT license</span>
+  </footer>
+</div>
+
+<script type="module">
+import { renderScene } from '../src/scene.js';
+import { buildSpec } from '../src/compose.js';
+import { sampleStats } from '../src/sample.js';
+import { carsFor, stateFor } from '../src/stats.js';
+import { parseCustomModel } from '../src/custom.js';
+import { parseSkyline } from '../src/skyline.js';
+
+const $ = (id) => document.getElementById(id);
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+const stillQuery = matchMedia('(prefers-reduced-motion: reduce)');
+const FOLDER = { train: 'trains', skyline: 'skylines' };
+const LABEL = { train: 'Train', skyline: 'Skyline' };
+const params = new URLSearchParams(location.search);
+const state = {
+  kind: FOLDER[params.get('kind')] ? params.get('kind') : 'all',
+  q: params.get('q') ?? '',
+  theme: darkQuery.matches ? 'dark' : 'light',
+};
+
+// Sample activity, with the numbers that matter set exactly. Trains get five
+// cars; skylines a three-car catalog train, so more of the city shows.
+function stats({ user, total, streak = 12, yesterday = 6 }) {
+  const s = sampleStats({ total, streak, yesterday });
+  return { ...s, user, total, streak, yesterday, cars: carsFor(total), state: stateFor(yesterday) };
+}
+
+// The share link carries the file itself: raw DEFLATE, base64url (see studio/).
+async function decodeShare(share) {
+  const m = /#(train|skyline)=([A-Za-z0-9_-]+)$/.exec(share);
+  if (!m) throw new Error('the share link is malformed');
+  const b64 = m[2].replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return JSON.parse(await new Response(stream).text());
+}
+// Without DecompressionStream (older browsers), read the file instead.
+async function load(entry) {
+  try {
+    return await decodeShare(entry.share);
+  } catch {
+    const res = await fetch(fileOf(entry));
+    if (!res.ok) throw new Error(`could not read ${fileOf(entry)}`);
+    return res.json();
+  }
+}
+const fileOf = (e) => `../community/${FOLDER[e.kind]}/${e.id}.json`;
+
+// Scenes go in <img> (an inline SVG's <style> would leak into the page), as in a README.
+const STILL = '.tr,.wa,.wb,.sp{animation:none!important}.wb,.sb{opacity:0}.sm,.led,.do,.cl,.tw{animation:none!important}.pb{opacity:0}';
+const motion = (svg) => (stillQuery.matches ? svg.replace('</style>', `${STILL}</style>`) : svg);
+const urls = new Map();
+function show(img, svg) {
+  if (urls.has(img)) URL.revokeObjectURL(urls.get(img));
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  urls.set(img, url);
+  img.src = url;
+}
+
+const parsed = new Map(); // entry -> Promise of the validated model or skyline
+function draw(card) {
+  const { entry } = card;
+  if (!parsed.has(entry)) {
+    parsed.set(entry, load(entry).then((raw) => (entry.kind === 'train' ? parseCustomModel(raw) : parseSkyline(raw))));
+  }
+  parsed.get(entry).then(
+    (value) => {
+      const isTrain = entry.kind === 'train';
+      // The author's name goes on the station sign, and a train runs through the
+      // author's own procedural city.
+      const s = stats({ user: entry.author, total: isTrain ? 1400 : 200 });
+      const spec = buildSpec(s, { theme: state.theme, ...(isTrain ? { train: value } : { skyline: value }) });
+      spec.tracks[0].caption = '';
+      show(card.img, motion(renderScene(spec)));
+      card.img.alt = isTrain
+        ? `${entry.name}, five cars long, running through ${entry.author}'s city`
+        : `${entry.name} skyline behind a train`;
+      card.drawnTheme = state.theme;
+    },
+    (err) => {
+      card.error.hidden = false;
+      card.error.textContent = `Could not draw it: ${err.errors?.join('; ') ?? err.message}`;
+    },
+  );
+}
+
+// Scenes are drawn as they come into view.
+const seen = new IntersectionObserver((items) => {
+  for (const item of items) {
+    if (!item.isIntersecting) continue;
+    const card = cards.find((c) => c.el === item.target);
+    card.visible = true;
+    if (card.drawnTheme !== state.theme) draw(card);
+  }
+}, { rootMargin: '300px 0px' });
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  node.append(...children);
+  return node;
+}
+
+let cards = [];
+function build(entries) {
+  cards = entries.map((entry) => {
+    const img = el('img', { class: 'scene', width: '896', height: '200', alt: '' });
+    const error = el('p', { class: 'error' });
+    error.hidden = true;
+    const profile = `https://github.com/${encodeURIComponent(entry.author)}`;
+    const node = el('article', { class: 'entry', id: `${entry.kind}-${entry.id}` },
+      img,
+      el('div', { class: 'entry-text' },
+        el('div', { class: 'entry-top' }, el('h3', {}, entry.name), el('span', { class: 'kind' }, LABEL[entry.kind])),
+        el('p', { class: 'desc' }, entry.description),
+        error,
+      ),
+      el('div', { class: 'entry-foot' },
+        el('a', { class: 'by', href: profile, title: `${entry.author} on GitHub` },
+          el('img', { src: `${profile}.png?size=44`, alt: '', width: '22', height: '22', loading: 'lazy' }),
+          entry.author,
+        ),
+        el('span', { class: 'links' },
+          el('a', { class: 'btn small', href: fileOf(entry), download: `${entry.id}.json` }, 'JSON'),
+          el('a', { class: 'btn small main', href: `../${entry.share}` }, 'Open in the studio'),
+        ),
+      ),
+    );
+    const card = { entry, el: node, img, error, visible: false, drawnTheme: null };
+    seen.observe(node);
+    return card;
+  });
+  $('entries').replaceChildren(...cards.map((c) => c.el));
+}
+
+const text = (e) => `${e.name} ${e.description} ${e.author} ${e.id}`.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function filter() {
+  const words = state.q.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().split(/\s+/).filter(Boolean);
+  let shown = 0;
+  for (const c of cards) {
+    const ok = (state.kind === 'all' || c.entry.kind === state.kind) && words.every((w) => text(c.entry).includes(w));
+    c.el.hidden = !ok;
+    if (ok) shown++;
+  }
+  $('empty').hidden = shown > 0 || !cards.length;
+  const all = cards.map((c) => c.entry);
+  const n = (kind) => all.filter((e) => e.kind === kind).length;
+  const authors = new Set(all.map((e) => e.author.toLowerCase())).size;
+  const plural = (k, one, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
+  const total = `${plural(n('train'), 'train')} and ${plural(n('skyline'), 'skyline')} from ${plural(authors, 'contributor')}`;
+  $('tally').textContent = shown === all.length ? total : `Showing ${shown} of ${all.length}: ${total}`;
+  // The filters live in the address, so a filtered view can be shared.
+  const p = new URLSearchParams();
+  if (state.kind !== 'all') p.set('kind', state.kind);
+  if (state.q) p.set('q', state.q);
+  const query = p.toString();
+  history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
+}
+
+function press(id, value) {
+  for (const b of $(id).children) b.setAttribute('aria-pressed', String(b.dataset.v === value));
+}
+$('kind').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.kind = b.dataset.v;
+  press('kind', state.kind);
+  filter();
+});
+$('q').addEventListener('input', () => {
+  state.q = $('q').value.trim();
+  filter();
+});
+function redraw() {
+  for (const c of cards) if (c.visible) draw(c);
+}
+$('theme').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.theme = b.dataset.v;
+  press('theme', state.theme);
+  redraw();
+});
+stillQuery.addEventListener('change', redraw);
+
+// A link to one entry (gallery/#train-nyc-subway) scrolls to it and marks it.
+function target() {
+  for (const c of cards) c.el.classList.toggle('target', `#${c.el.id}` === location.hash);
+  const hit = cards.find((c) => `#${c.el.id}` === location.hash);
+  if (hit) {
+    hit.el.hidden = false;
+    hit.el.scrollIntoView({ block: 'center' });
+  }
+}
+addEventListener('hashchange', target);
+
+press('kind', state.kind);
+press('theme', state.theme);
+$('q').value = state.q;
+try {
+  const res = await fetch('../community/index.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  build(await res.json());
+  filter();
+  target();
+} catch (err) {
+  $('tally').textContent = `Could not load the depot (community/index.json): ${err.message}`;
+}
+</script>
+</body>
+</html>

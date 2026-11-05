@@ -1,0 +1,50 @@
+[
+  {
+    "id": "metro-medellin-caf",
+    "name": "Medellín Metro",
+    "description": "Inspired by the CAF train of the Medellín Metro: white body, windows on a dark band, yellow and green stripes that curve down to the black front, dark gray bumper.",
+    "author": "Cracksmity",
+    "kind": "train",
+    "share": "studio/#train=jdPNjtsgEAfwV0GzVzaKnWzScOuu1A-pe-2l6gHM4KDgwQJS11rlkfoUfbEK4rT5OnSOP3lm_iD8BlaDgA5T8I8danTO0mMjDXAg2SEIeC36-xex1_wVcNAYm2D7ZD2BgM8UextQMzWytEX28v4DS0FaYt4UuBog2LC1CZnyeuRssKT9EJknJpmWYceUJM3ZiM75gUnSrA2IxGIKtsfI0lYm1uzDD2TaD8SSL0uUk82OmeAp8eOcNsiRqX3XY5gBB7lPWx9AwEuQzS52No3AoZcOxBvkLCDgwVRmaSrgBT7ZQqUm-uIL1Wo9fwIO-77HcNEXvDcZ9FJv9GaCadDCrMxqoq9IKaNaKqU0cEjBdhkqs8FFXpfPUEBVWNfAoXUyxiK6rut3JzkOf1qt5-vS5sshHxBNhTjB1UnizoayvVY1LhZw4JAvPQ9XzqUkVUk5LEDAHjgMlvIljXMQSw5jBaKaHwo_S9IlUlPP69W0LYJYcCAfMXc13vnLOzKywdK0rFaVPK6KIL5BPNVsqpz1rO5ZPDMyp_prZGypc4tkPrZt296zI552kPlfMzd2nuZfZro1IrpnZIxzZ5ZSwSsretErpZTZzy13Zr_MEnenurXZDL4f8u9Rnql0aXq3z_4nRhAp7PHwBw"
+  },
+  {
+    "id": "nyc-subway",
+    "name": "New York City Subway",
+    "description": "Inspired by the R160 cars: fluted stainless steel, a gray front with a black mask, a route sign and low headlights.",
+    "author": "Cracksmity",
+    "kind": "train",
+    "share": "studio/#train=jZJPj9QwDMW_iuW9htF02oVpjuwBkBAHOCHEwfnTNmomGeJUpVrNd0dpd1jNopV4t9-zZT85eURnUGJY9Bue1EwLCgx0sijxi53he0wjPLi8wLdr1VjWyZ2ziwElfgp8dskaUAvkwcLX6u0eNCWW0PkpWwOcyQVvmYGztV4AQZ9ogS7FkGF2eQAC5UmPcCIeSz3FKVtg1wegYMDHGQZLxrt-yLxDgTTlISaU-JBIj3xyuSQ7k0f5iCqaBSXeqUa1ukKxGh9dsczeNIaerM-xWEfb1q1CgSnGbjXo2LVHFJiTOxXjQAdT36PA3hNzcaruUB90uUVcU9zpvW60wotARcGUnkEReeXXuXNdDBQ4u1ACLnuUjcClQtletiGMshYYItvSoKPf5rYdNVQWdaTtuvm-elfpbSqj_IF81W5XDsMcrtrwmZ-w2_QXP_R9556x_xe7W-z_F28XvYgRaNVr1V8hBO9fwxfNN8jM46orbrTDn5fyQ0JGGSbvt_d-H39bRpnTZC9_AA"
+  },
+  {
+    "id": "osaka-metro-400",
+    "name": "Osaka Metro 400 series",
+    "description": "Inspired by the 400 series on the Chuo line: brushed steel, green doors and an octagonal black face with a green rim and headlights in all four corners; third rail.",
+    "author": "Cracksmity",
+    "kind": "train",
+    "share": "studio/#train=pdLNitswEAfwVxmmV22wHTd11Fv30BZa-gClh9GHbWFFCtKYNCx59yI7CYH0tv-bfxprRkJv6AxKjJkmejlYTvGlrSoUGOhgUeKvsgA_ywK0VQXZJmczCjQ26-SO7GJAid9DPrpkDagz8GgfSiGGRV7HOYJ3wUpQac6jNZDZWi9gSNYGMDGmDBQMUIComYYYyIPypCfoSVs4OR6BruXJHZbi0ZLxbhg5gwtA3kMf5wQ6pmBT_gw8umQgkfMbFEgzjzGhxNdEesoHx2cUeCSP8g1VNGeU-EF1SustigW-uUKmNZ-MvtKPWGjf7TW1KDDF2C9gqKYOBXJyhwJNo7cfbbkqStMCu2bf9Chw8JRzkVrVtimblNMvJb3qds0V1t67rdl3Bi8CFQVTfhuVUor80vu0LYACTy6UQ5wrlK3Ac42yri7rPhnlVmCI2ZYKHf3aS7e602W-crvLNE3d1t26bUb5G_MtmxIUBcItTxAegJnZmHAH5r7vPd-B-evQD-4BhuF_MLwP-iXvgqfRnw93ywol05LNHa7fG_xzKc8tMMowe78-ni_xr80oOc328g8"
+  },
+  {
+    "id": "steam-tank-engine",
+    "name": "Steam tank engine",
+    "description": "A generic tank engine with three driving axles: green with red lining, a black smokebox, brass dome and chimney; it pulls maroon and cream coaches.",
+    "author": "Cracksmity",
+    "kind": "train",
+    "share": "studio/#train=tZXRbpswFIZfxfp760YLLGniXW276APssuqFwQewMHZkO0uiKu8-GZI2TbKWaNovJOCc7_c5NmBeoBUEQiTZ3Udp23uytbYEDis7gsCvlGIpxV5TikLp9SpqZyHwndVkyevylGIbHRsWG0_ElNe_ta2Z3BoKgtWeyA55T4oZbbWtOZOsMLJsWehcS4XbclZ4GQJTriMmrWJloztLu29MR7ZaGxNYJ71zdkj61GbpZNlQmIBDrmPjPAR-elm2odNxB46VNBAvKJzaQeDuochUNgfHerWiBN_RXC2KBTi8c1UKzIpZNU9I9LpLgXKRP2QqrYL0bQpkX7N5VoKjNjKEPiKzKk-DKNe38FYntNrHHqGsymfYcxTSquQqCikLY_rSmxwC6XKjbep39wVixrGbQiz3w7ABIkvzsRHCro0ZOv7hthQgKmkCcRhXumQvnRn6yKp5kUtwVLKkPpAfevduEyCeAI7JGO16_R96opRKC9yfT3U63mi4L30OT-w79di_wFVfsjrQXddZWz8-1rW1zRVVg97TdaKv6Rpdj6CVuoVOdz191GXbH9HxQh_S53280sOS32IwR8NZ_vMKIw0xxquGv844xti21yxXdG6Ro3W0pNev_URqeIDDTEYZBt1sUO3Ij1wdbGPxg8DxdjxzbBoiE9Iel34yBPE0nfJsyvPpM4eCWPKLzW_P0f9iIPLlfv8H"
+  },
+  {
+    "id": "medellin",
+    "name": "Medellín",
+    "description": "From a reference skyline, left to right: a two-towered basilica, an arcaded building, a neo-Gothic palace, an office tower, the clock palace, the Coltejer with its spire, a neo-Gothic church and a modern tower; the mountains of the Aburrá Valley behind.",
+    "author": "Cracksmity",
+    "kind": "skyline",
+    "share": "studio/#skyline=7V3NbuM2EH4VgrxsAcWInTS7UU_toi16KNBD0ctiD4xEx9zIYkDJ1QaLfZg-wB6KPoJfbCFZP9QfLcmSlnbnA4JYw29G_EaKNCIp5xP26ZZhG__OXOZ5-y8-trDLAkfy55ALH9v4Fym2iCLJ1kwy32EoeHrxuM8s5LF1iEKBJH_chDaiKIzEVSgiJpmLHmjAPe5QC1EfUelQNzbuuOdy_9FCFPlMXP0qwg130DP1qMMSplivucNQEsVC4YYhxxPOU06JLW-FF7IPTKKIhxvEwwAFz1yySlBns5POBlHfRRRthcukfwj7QxJkK3Z-SLkfILFODD8-7KTc_4P-op7HXtAD23DfXWAL0124ERLb-K2kzlOw5eELtvCaex62Q7ljFs5kBdh-9ynPqPBDuv-XBshlHvo7jorcYjevBAtC9h228EdsX62uLezRFxbvZk0ltnDEfVdEAbbX1AuYhWWy8Q4vNCAxdASDgK02KaSMmfs1AI1SSBtO3dukWalKaVVxmp4J0lKDIqWDigEdmSAvWim9VHTsxySJ0e0JW3igjtZujBaoZ6JOl6J0Y7xIXbuvYiQpY2PIITZUyhCAFBMBUkwESDERIMVEgBQTAVJMBEgxESDFRIAUEwFSTARIMREgxUSAFBMBUkwESDER-P1nq_PCAGVdwPLNKOsCTEKSD017-7oAo1A-vs0c86W0na814oRSdBnsFaIdJfIkUrrkcECMI3rGltIji2PIUCOPJ6XffseUkSK7b80kQqtouIqSlLbwE6mo7XGEQG3VxBwiRsaxwug8VCToWuMZLeKASypXQYqBACkmAqSYCJBiIkCKiQApJgKkmAiQYiJAiokAKSYCpJgIkGIiQIqJACkm4pKk9Fmt4XAmZbZe4-bk9RpKN47Pr_V6xV0bpneORgrTEG2EE2mkMGS80xrCQBgIA2EgDISBMBDGnDBqrfsTDfZf4i9tiytcVwQoFFKyIK1tr8vF67H6NKvCDsWpnqouAewRdypuj_4mSdRT4_a-3PTo6KmElKpcPTU5Y_rE7cmNSKTlHtpbuKSdW-1DbUuXhwZq-S9nGLe6oeE2bLVxmzcbua3bdS4hbYaUG-VNB3OkkPPtKjelRgq5jZvtLlK6UeWmdlJHm7YGqmrtc3UELnCBC9yL4aol3c8uX3OHi7iio9IRaTF3v2oYicwC5Ab1pYymxoH9nbQxKn6Uj5fXaFzioREaz6xRvVD-EX_BOBfxN4g_7v8LuSPSV3Bv7jWTNt3elJyd1fDYNpSVZErPIjmrOpFTZqVpH4NVwCjWIr9KL05hqY9j-aNYwSJHWSRnlZ7Xio0hrKxFZRXslJU3KSyF3q2OGZ-l3j8zaG-4J7Pm1wgsYAFrYpZaMvwZj47HD1YifsTyafpstbz_3sIRtpe3Ft5g-_W1zgW9oj77KNL1I6vr-8T1TeJ5t2qoT-JVKJJ54kPqcfO6y3eA6Fd_GOOnG27W-CWHZj6_9FyYyU85-_rtT--m9TsM7M7nN6SfQ_NyRn5ZRTGX37F-Nra2-1UurHP79cS38YsaflTU287Lb2hewA_8wA_8wO9i_RqnqbL_7ZiuOVouK4uOlHt-tq6nyVSbw6qbSLOJdDORqmnR1UQUE-llIkdNRddaTERrIoNNpJupvFCnj6npNGs1lQoRiAWxwPS_Nql3mt8ePRZwWszz0fRWc3vXOpB2bAIMKCdQSO1B_swph5NOQ8nmOEujpN-KkuMsKIdBxqNTtR0otYM0ESVKxkQbKaROIX0o6jStSqlMyVZndxsomV2h5L87U_IGUv2UUYrjW_tAOs0Nd6YchqBKg1SFaWbKOIqAAhSgnESpz91uhcukn1aAt-nk6-oum319__kr"
+  },
+  {
+    "id": "mexico-city",
+    "name": "Mexico City",
+    "description": "Popocatépetl in the distance, Bellas Artes, the Angel of Independence, the Torre Latinoamericana and the Reforma towers; the procedural city fills the gaps.",
+    "author": "Cracksmity",
+    "kind": "skyline",
+    "share": "studio/#skyline=rZTBitswEIZfRYyuIjjebNh6T8meCl0opfSy5DC1xomoIglJIWuWHPo4fY59sSLZ6dpxaAutfJDlb2akmfnlFzC4J6jgkZ5VbdmDii0IkBRqr1xU1kAFH62zNcbXH46iZsqwuCMmVYhoahJsTVpjYCsfKYjMVmZLmtmGvTeSHBlJ2TChz9Z7Yh8wKmNxT17VaJChkZl-osb6PbJoj-TDff7mvK1JHjxqVqvYskZpHTLZogszEICHuLMeKnjwWH8L-y6HZAdV9AcS8PWgtFRmG6B6ejmnPEoLBDxDdVMUAo5QzctCwA6qUoDGllLsBj0IOCoj7TFA1aAOJCBal0PG1qWQrvW4VxKy800hICoH1Xx52pzE276osVaWSRqVrjvBu6UAn3d4gtlg8OECxIDxNK4zzsdwwDi_gH_HOL-EPeOX441NUIaZXUEJdux45fknv6teafyWDVt3Vb1d4-a3Z-nk5i-KiThCJOcoiSO9hayuJJMUvzdBE8nkiDuo5sVINq_f862SxDQOL5Y6HyDp7SwdPuOzlFaqVF-Wrjx_Wv_v-Ry_n0fl_jVPS9z_CLrMyvJuWNplMTFfr7-setvForNdZNvbsm8DNBojTBwfsbW-91yWI89pA8e3u7_cd6fNaXP6CQ"
+  }
+]

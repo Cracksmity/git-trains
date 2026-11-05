@@ -1,0 +1,59 @@
+# Posts the community depot check (community.yml) on its pull request, and updates
+# that one comment on every push. The check runs the pull request's code with a
+# read-only token, so it leaves its summary behind as an artifact. This workflow
+# runs from main, never checks out the pull request, treats the summary as plain
+# text and only posts it after confirming the run belongs to the pull request it
+# names.
+name: Community depot comment
+
+on:
+  workflow_run:
+    workflows: [Community depot]
+    types: [completed]
+
+permissions:
+  actions: read # download the check's artifact
+  pull-requests: write # comment on the pull request
+
+jobs:
+  comment:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion != 'cancelled' &&
+      github.event.workflow_run.conclusion != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the summary
+        uses: actions/download-artifact@v8
+        with:
+          name: community-comment
+          path: comment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Post it, or update the earlier one
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr=$(head -c 20 comment/pr.txt | tr -cd '0-9')
+          if [ -z "$pr" ]; then
+            echo "::error::The check did not say which pull request it ran for"
+            exit 1
+          fi
+          if [ "$(gh api "repos/$REPO/pulls/$pr" --jq .head.sha)" != "$HEAD_SHA" ]; then
+            echo "Pull request #$pr is not at $HEAD_SHA (it moved on, or the run is not its own): not commenting."
+            exit 0
+          fi
+          marker='<!-- git-trains-community -->'
+          { echo "$marker"; head -c 64000 comment/body.md | grep -vF "$marker" || true; } > body.md
+          id=$(gh api "repos/$REPO/issues/$pr/comments" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@body.md > /dev/null
+            echo "Updated the comment on #$pr"
+          else
+            gh api "repos/$REPO/issues/$pr/comments" -F body=@body.md > /dev/null
+            echo "Commented on #$pr"
+          fi

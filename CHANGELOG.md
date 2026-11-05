@@ -5,6 +5,7 @@
 ### Added
 
 - `calendar: true` writes an animated contribution calendar with a mini version of your train, including custom and steam models. It follows the scene's themes and reduced-motion setting.
+- The community depot: anyone can add their city's train or skyline to `community/` with a pull request. A check validates it, draws light and dark previews and comments with them, and the [gallery](https://cracksmity.github.io/git-trains/gallery/) shows every entry live, with a link to open it in the studio. `npm run community` checks the depot and rebuilds `community/index.json`.
 
 ## 1.0.0 (2026-11-04)
 
