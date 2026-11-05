@@ -41,28 +41,31 @@
         "-p",
         "{prompt}"
       ],
-      "rules": "You run headless: nobody can approve anything. Read, list and write files with your file tools, not the shell. If you must run a command, run one plain command per call: no `;`, `&&`, `||`, pipes or redirections, or it will be denied and your turn will end.",
-      "$settings": "Headless mode cannot ask for permission, so any command not granted here is denied. Grants are command prefixes, without wildcards (command(node) allows \"node ...\"). The list stays narrow: reading files and running the gates.",
+      "rules": "You run headless: nobody can approve anything. Read, list and write files with your file tools, not the shell. Commands run in a sandbox, and only these are allowed: `node ...`, `npm test`, `git status`, `git diff`, `git log`, and plain reads (`ls`, `dir`, `cat`, `type`, `head`, `Get-Content`, `Get-ChildItem`, `rg`, `findstr`). Run one plain command per call: no `;`, `&&`, `||`, pipes, redirections, `$( )` or backticks. Anything else is refused.",
+      "$settings": "Headless agy can't ask for permission, and its command grants only match a command exactly on Windows (command(node) does not allow \"node --version\"). So commands run in agy's terminal sandbox with the proceed-in-sandbox mode, and the hook (agy-hook.js) narrows them to the prefixes in `commands`. The conductor adds each task gate as an exact grant, for machines where the sandbox is unavailable.",
       "settings": {
+        "toolPermission": "proceed-in-sandbox",
         "permissions": {
-          "allow": [
-            "command(node)",
-            "command(npm test)",
-            "command(git status)",
-            "command(git diff)",
-            "command(git log)",
-            "command(ls)",
-            "command(dir)",
-            "command(cat)",
-            "command(type)",
-            "command(head)",
-            "command(Get-Content)",
-            "command(Get-ChildItem)",
-            "command(rg)",
-            "command(findstr)"
-          ]
+          "allow": []
         }
       },
+      "hook": "agy-hook.js",
+      "commands": [
+        "node",
+        "npm test",
+        "git status",
+        "git diff",
+        "git log",
+        "ls",
+        "dir",
+        "cat",
+        "type",
+        "head",
+        "Get-Content",
+        "Get-ChildItem",
+        "rg",
+        "findstr"
+      ],
       "usage": "agy"
     }
   },

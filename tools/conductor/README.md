@@ -74,4 +74,18 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | benchmark-en | bulk | Gemini 3.8 Flash changed nothing twice (headless Antigravity denied its shell commands); the ladder moved to GPT-6.1-Terra, which passed in 125 s. Reviewing the patch caught a CSS class renamed in the stylesheet but not in the HTML, which no gate checked. |
 | regions-research | research | Gemini 4 Argon was denied a shell command and stopped; GPT-6.1-Sol wrote [docs/research/regions.md](../../docs/research/regions.md) in 389 s. |
 
-**Known issue: Antigravity in headless mode.** Every Gemini run so far ended in a denied `RunCommand`, so the work fell to the Codex rungs. The conductor now tells Antigravity to use its file tools and plain single commands, grants narrow command prefixes through `--settings`, and reports denied actions in the failure message, but a smoke test was still denied: the grants don't seem to reach headless runs. `--dangerously-skip-permissions` would get past it, and is deliberately not used. Until this is solved the Gemini rungs cost a few seconds each and the ladder does the rest.
+## Antigravity in headless mode
+
+The first Gemini runs all ended in a denied `RunCommand`. `agy -p` can't ask for permission, so it denies any command that isn't granted, and that ends the turn. The `--settings` grants did reach the CLI; they just never matched: on Windows a `command(...)` grant only matches the exact command, so `command(node)` doesn't allow `node --version` (`command(node --version)` does). What works, all set from [routes.json](routes.json):
+
+- **Sandbox.** `--sandbox` plus `"toolPermission": "proceed-in-sandbox"` in `--settings`: commands run in agy's terminal sandbox without asking.
+- **Allowlist hook.** A `PreToolUse` hook, [agy-hook.js](agy-hook.js), narrows that to the prefixes in `commands`: `node`, `npm test`, `git status`/`diff`/`log` and plain reads, one plain command per call (no `;`, `&&`, `||`, pipes, redirections, `$( )` or backticks outside quotes). While the agent runs, the conductor writes `<worktree>/.agents/hooks.json` to point at it; it removes the file before the gates, and fails the attempt if the agent edited the hook. A refusal from the hook doesn't end the turn: the agent reads the reason and carries on with its file tools.
+- **Exact grants for the gates.** Each gate is also passed as `command(<gate>)`, so the gates still run where the sandbox is unavailable (Windows before 11 24H2).
+
+The hook keeps the agent on task, but `node` can run any code, so the sandbox is the real boundary. A hook that answers `allow`, even with `permissionOverrides`, doesn't get past headless mode by itself, and `--dangerously-skip-permissions` is still not used.
+
+[gemini-smoke](tasks/gemini-smoke.json) checks the whole path: Gemini 3.8 Flash read `package.json`, counted the trains with `node -e`, wrote `smoke/report.md`, ran its gate and `git status`, and passed on the first attempt in 22 s. Rerun on Gemini 4 Argon alone, regions-research passed on the first attempt in 484 s (30k output tokens), and all 8 of its commands ran (listings, `git log`, both gates).
+
+```bash
+node tools/conductor/conductor.js run tools/conductor/tasks/gemini-smoke.json
+```
