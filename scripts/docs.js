@@ -4,8 +4,16 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { renderScene } from '../src/scene.js';
 import { buildSpec } from '../src/compose.js';
-import { sampleStats, sampleProfile, sampleDepartures, SAMPLE_NOW } from '../src/sample.js';
-import { renderStatsCard, renderLangsCard } from '../src/cards.js';
+import {
+  sampleStats,
+  sampleProfile,
+  sampleDepartures,
+  sampleRepoStats,
+  sampleRepoProfile,
+  sampleReleases,
+  SAMPLE_NOW,
+} from '../src/sample.js';
+import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from '../src/cards.js';
 import { renderDeparturesCard } from '../src/departures.js';
 import { buildTrain, TRAIN_H } from '../src/train.js';
 import { MODELS } from '../src/models.js';
@@ -101,6 +109,9 @@ const cards = [
   ['card-stats', renderStatsCard(sampleProfile(), { language: 'en' })],
   ['card-languages', renderLangsCard(demo.languages, { language: 'en', max: 6 })],
   ['card-departures', renderDeparturesCard(sampleDepartures(), 'octocat', { language: 'en', now: SAMPLE_NOW })],
+  // Repo mode: the cards of a repository (its numbers, and its releases on the departures board).
+  ['card-repo-stats', renderRepoStatsCard({ ...sampleRepoProfile(), commits: sampleRepoStats().total }, { language: 'en' })],
+  ['card-repo-departures', renderDeparturesCard(sampleReleases(), sampleRepoProfile().repo, { language: 'en', now: SAMPLE_NOW, repo: true })],
 ];
 for (const [name, svg] of cards) {
   writeFileSync(`docs/${name}.svg`, svg);

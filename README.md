@@ -16,7 +16,7 @@ Your GitHub activity as a **pixel-art train**: it gets longer with your contribu
   <img alt="The author's contribution calendar today, with the same train running through it" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-light.svg">
 </picture>
 
-<sub>That's the author's train and [calendar](#calendar-mode) today, redrawn every morning by [this repo's own workflow](.github/workflows/train.yml). Try every option in the **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
+<sub>That's the author's train and [calendar](#calendar-mode) today, redrawn every morning by [this repo's own workflow](.github/workflows/train.yml). Try every option in the **[playground](https://cracksmity.github.io/git-trains/preview/)**. Want one for a project instead of a profile? See [In a repository README](#in-a-repository-readme).</sub>
 
 ## What each part means
 
@@ -147,6 +147,7 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `unlocks` | `true` | Add a special car when you earn it (see [Unlockable cars](#unlockable-cars)); `false` skips the extra API request |
 | `scale` | `2` | Size of each pixel (1 to 6) |
 | `user` | repo owner | User to draw |
+| `repo` | | `owner/name`: draw a repository instead of a user (see [In a repository README](#in-a-repository-readme)); `user` is then ignored |
 | `github-token` | `github.token` | Use a PAT to count private contributions |
 | `output-dir` | `dist` | Output folder |
 | `cards` | `none` | Profile cards: `stats`, `languages`, `departures` or `both` (stats and languages); a list works too, e.g. `stats, departures` (see below) |
@@ -294,6 +295,60 @@ If the stats query fails (for example, an API limit), the Action logs a `::warni
 | STATUS | `BOARDING` (pushed today), `ON TIME` (last 7 days), `DELAYED` (last 30 days) or `DEPARTED` (older) |
 
 The characters flip into place when the card loads, with CSS only; it respects `prefers-reduced-motion`. With `language: es` it reads `SALIDAS`, `HORA`, `DESTINO`, `ANDÉN`, `ESTADO` and `ABORDANDO`, `A TIEMPO`, `RETRASADO`, `SALIÓ`. It takes the same `color-*` and `border` inputs as the other cards, but starts from a board of its own: `color-background` is the panel, `color-title` the title bar, headings and `BOARDING`, `color-text` the flap characters, `color-icon` the `ON TIME` status and the little train, and `color-ring` the `DELAYED` status. Forks aren't listed, and neither is your profile repository (the one named like you): the workflow that draws these images commits to it every day, so it would always be first.
+
+## In a repository README
+
+A train isn't only for profiles. With `repo: owner/name` it describes **a repository**, so any project can have a living train in its README: it grows with the commits of the last year, wears the color of the repository's main language and runs as fast as the repository moved yesterday.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-dark.svg">
+  <img alt="This repository's own train today, drawn in repo mode by this repository's workflow" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-light.svg">
+</picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-calendar-dark.svg">
+  <img alt="This repository's commit calendar today, with its train running through it" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-calendar-light.svg">
+</picture>
+
+<sub>That's **this** repository, `Cracksmity/git-trains`, in repo mode: [the same workflow](.github/workflows/train.yml) that draws the author's train above draws it too, every morning.</sub>
+
+```yaml
+      - uses: actions/checkout@v5
+      - uses: Cracksmity/git-trains@v1
+        with:
+          repo: ${{ github.repository }} # or any public owner/name, for example facebook/react
+          output-dir: out
+          calendar: true
+          cards: stats, departures
+```
+
+The default `GITHUB_TOKEN` is enough: it reads any public repository and the one the workflow runs in. A complete workflow that publishes the images to a branch of their own (so the repository's history doesn't fill with image commits) is in [examples/workflow-repo.yml](examples/workflow-repo.yml). Then, in the README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/OWNER/REPO/train/train-repo-dark.svg">
+  <img alt="The train of this repository" src="https://raw.githubusercontent.com/OWNER/REPO/train/train-repo-light.svg">
+</picture>
+```
+
+Everything else works as it does for a profile (`mode: multi`, `train`, `skyline`, `seasons`, `language`, `exclude-languages`...). What changes:
+
+| | A profile | A repository |
+| --- | --- | --- |
+| Cars, speed and streak | Your contributions | The commits on the default branch (last year), the days with commits, and yesterday's |
+| Stripe and caption | The language of your repositories | The repository's own languages |
+| Station sign and LED sign | Your username | The repository name |
+| The city | Seeded with your username | Seeded with `owner/name`: the same repository name under another owner is another city |
+| `calendar: true` | Contribution calendar | Commit calendar, captioned `... COMMITS` |
+| `cards: stats` | Stars, commits, PRs, issues, repos contributed to | Stars, forks, commits (last year), open issues and contributors, with the same rank ring |
+| `cards: departures` | Your recently pushed repositories | The latest releases, with tags that have no release behind them |
+| Unlockable cars | Your streak, stars and PRs | The repository's own: its commit streak, stars and pull requests |
+| Files | `train*.svg`, `card-*.svg` | `train-repo*.svg`, `card-repo-*.svg`: one workflow can draw a profile and a repository into the same folder |
+
+![Repository stats](docs/card-repo-stats.svg) ![Repository departures](docs/card-repo-departures.svg)
+
+On the departures board the TIME column is when the release was published, DESTINATION is its tag, PLATFORM says `RELEASE`, `PRERELEASE` or `TAG`, and STATUS reads like it does for repositories: `BOARDING` is a release made today, `DEPARTED` one from over a month ago. A repository with no releases and no tags gets an empty board. The cards show sample numbers here; the stats card's rank is the profile one, read for a project (forks count where followers do).
+
+**Where the numbers come from.** The commit activity comes from GitHub's statistics endpoint (`/stats/commit_activity`), which answers `202` while it is being computed, usually the first time anyone asks. The Action asks again a few times, with a pause; if the numbers never come, it counts the commits one by one (the last 1,000 at most) and logs a notice, so the train is still drawn. Only the default branch counts, and bots count as GitHub counts them. The languages come from `/languages` and the other numbers from one GraphQL query, so a run makes about five requests. If the cards can't be read the Action logs a `::warning::` and keeps the train, as it does for profiles.
 
 ## How it works
 

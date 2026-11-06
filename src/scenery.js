@@ -424,13 +424,15 @@ export function seedFor(user) {
 }
 
 // skyline: the skyline already validated (see skyline.js) or null for the procedural city.
-export function paintBackdrop(W, H, tracks, user, skyline = null) {
+// seed: what the random numbers are seeded with; the user's name unless the scene says otherwise
+// (repo mode seeds with the full name, owner/name, while the sign shows the repository name).
+export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
   const g = new Grid(W, H);
-  const rand = rng(seedFor(user));
+  const rand = rng(seedFor(seed));
   // The region's countryside (see region.js). Its colors join THEMES for this scene only.
   const region = skyline?.region ? regionParts(skyline.region) : null;
   applyRegionTheme(THEMES, region);
-  const pick = region ? regionRng(seedFor(user)) : null;
+  const pick = region ? regionRng(seedFor(seed)) : null;
 
   // City. With a custom skyline the random city is still calculated, on separate
   // grids, so it consumes the same random numbers and the rest of the scenery

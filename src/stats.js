@@ -32,7 +32,9 @@ export function streakFrom(days) {
 
 // days: [{ date, count }] in ascending order; languages: [{ name, color, bytes }].
 // exclude: language names to leave out (any case), e.g. ['HTML', 'Jupyter Notebook'].
-export function summarize({ user, days, languages }, { exclude = [] } = {}) {
+// Anything else that comes with the activity is passed through: repo mode (see repo.js) brings
+// `kind: 'repo'`, `fullName` and `seed`, which the title, the calendar caption and the city read.
+export function summarize({ user, days, languages, ...identity }, { exclude = [] } = {}) {
   const total = days.reduce((a, d) => a + d.count, 0);
   const yesterday = days.length >= 2 ? days[days.length - 2].count : 0;
   const skip = new Set(exclude.map((n) => n.trim().toLowerCase()).filter(Boolean));
@@ -56,6 +58,7 @@ export function summarize({ user, days, languages }, { exclude = [] } = {}) {
 
   return {
     user,
+    ...identity,
     total,
     yesterday,
     streak: streakFrom(days),

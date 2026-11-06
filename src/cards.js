@@ -24,6 +24,13 @@ export const LABELS = {
     contributed: 'Contribuciones a (último año)',
     langs: 'Lenguajes más usados',
     noLangs: 'Sin datos de lenguajes',
+    // Repo mode: the stats card of a repository.
+    repoStats: (n) => `Estadísticas de ${n}`,
+    forks: 'Forks',
+    repoStars: 'Estrellas',
+    repoCommits: 'Commits (último año)',
+    openIssues: 'Issues abiertos',
+    contributors: 'Colaboradores',
   },
   en: {
     stats: (n) => `${n}'s GitHub Stats`,
@@ -34,6 +41,12 @@ export const LABELS = {
     contributed: 'Contributed to (last year)',
     langs: 'Most Used Languages',
     noLangs: 'No language data',
+    repoStats: (n) => `${n} Stats`,
+    forks: 'Forks',
+    repoStars: 'Stars',
+    repoCommits: 'Commits (last year)',
+    openIssues: 'Open Issues',
+    contributors: 'Contributors',
   },
 };
 
@@ -56,6 +69,12 @@ const ICONS = {
     '<circle cx="12" cy="12.4" r="1.7"/><path d="M12 10.7V6.5a2 2 0 00-2-2H8M9.6 3.1L8 4.5l1.6 1.4"/>',
   issue: '<circle cx="8" cy="8" r="6.4"/><path d="M8 4.6v4"/><circle class="fill" cx="8" cy="11.2" r=".7"/>',
   repo: '<path d="M3.5 2.5h9v11h-9a1 1 0 01-1-1v-9a1 1 0 011-1z"/><path d="M6 2.5v11"/>',
+  fork:
+    '<circle cx="4" cy="3.6" r="1.7"/><circle cx="12" cy="3.6" r="1.7"/><circle cx="8" cy="12.4" r="1.7"/>' +
+    '<path d="M4 5.3v1a2 2 0 002 2h4a2 2 0 002-2v-1M8 8.3v2.4"/>',
+  people:
+    '<circle cx="6" cy="5" r="2.4"/><path d="M1.4 13.5a4.6 4.6 0 019.2 0"/>' +
+    '<path d="M10.6 2.9a2.2 2.2 0 010 4.2M12.2 9.3a4.2 4.2 0 012.4 4.2"/>',
 };
 
 // GitHub mark (octicon mark-github, 16x16) for the center of the ring.
@@ -127,19 +146,10 @@ function shell({ width, height, title, body, c, border, css = '' }) {
   );
 }
 
-// p: { name, login, followers, stars, commits, prs, issues, contributed, reviews }
-// o: { language, border, rank ('letter' | 'github'), background, title, icon, text, ring }
-export function renderStatsCard(p, o = {}) {
+// The card shared by the profile and the repository: a title, five rows (icon, label, number) and
+// the rank ring. A number that is null (it could not be read) shows as a dash.
+function statsCard({ title, rows, rank, o }) {
   const c = resolveColors(o);
-  const L = LABELS[o.language] ?? LABELS.en;
-  const rank = calculateRank(p);
-  const rows = [
-    [ICONS.star, L.stars, p.stars],
-    [ICONS.commit, L.commits, p.commits],
-    [ICONS.pr, L.prs, p.prs],
-    [ICONS.issue, L.issues, p.issues],
-    [ICONS.repo, L.contributed, p.contributed],
-  ];
   const W = 495;
   const H = 195;
   const RING = 251.33; // 2 * PI * 40
@@ -150,7 +160,7 @@ export function renderStatsCard(p, o = {}) {
         `<g transform="translate(0 ${i * 25})" class="row" style="animation-delay:${450 + i * 150}ms">` +
         `<svg class="icon" x="0" y="0" width="16" height="16" viewBox="0 0 16 16">${icon}</svg>` +
         `<text class="stat bold" x="25" y="12.5">${esc(label)}:</text>` +
-        `<text class="stat bold" x="275" y="12.5" text-anchor="end">${esc(kFormat(value))}</text></g>`,
+        `<text class="stat bold" x="275" y="12.5" text-anchor="end">${esc(value == null ? '-' : kFormat(value))}</text></g>`,
     )
     .join('');
 
@@ -172,7 +182,45 @@ export function renderStatsCard(p, o = {}) {
     `.ring{animation:ring 1s ease-in-out both}` +
     `@keyframes ring{from{stroke-dashoffset:${RING}}}`;
 
-  return shell({ width: W, height: H, title: L.stats(p.name || p.login), body, c, border: o.border !== false, css });
+  return shell({ width: W, height: H, title, body, c, border: o.border !== false, css });
+}
+
+// p: { name, login, followers, stars, commits, prs, issues, contributed, reviews }
+// o: { language, border, rank ('letter' | 'github'), background, title, icon, text, ring }
+export function renderStatsCard(p, o = {}) {
+  const L = LABELS[o.language] ?? LABELS.en;
+  const rows = [
+    [ICONS.star, L.stars, p.stars],
+    [ICONS.commit, L.commits, p.commits],
+    [ICONS.pr, L.prs, p.prs],
+    [ICONS.issue, L.issues, p.issues],
+    [ICONS.repo, L.contributed, p.contributed],
+  ];
+  return statsCard({ title: L.stats(p.name || p.login), rows, rank: calculateRank(p), o });
+}
+
+// Repo mode: the stats card of a repository (see fetchRepoProfile; commits is the last year's total).
+// p: { repo, name, stars, forks, commits, openIssues, issues, prs, contributors }
+// o: the same as renderStatsCard. The rank is the same approximation, read for a project: its forks
+// stand where a person's followers do, and nobody reviews here, so reviews count as 0.
+export function renderRepoStatsCard(p, o = {}) {
+  const L = LABELS[o.language] ?? LABELS.en;
+  const rows = [
+    [ICONS.star, L.repoStars, p.stars],
+    [ICONS.fork, L.forks, p.forks],
+    [ICONS.commit, L.repoCommits, p.commits],
+    [ICONS.issue, L.openIssues, p.openIssues],
+    [ICONS.people, L.contributors, p.contributors],
+  ];
+  const rank = calculateRank({
+    commits: p.commits ?? 0,
+    prs: p.prs ?? 0,
+    issues: p.issues ?? 0,
+    reviews: 0,
+    stars: p.stars,
+    followers: p.forks ?? 0,
+  });
+  return statsCard({ title: L.repoStats(clip(p.repo || p.name, 26)), rows, rank, o });
 }
 
 const DEFAULT_LANG_COLOR = '#8b949e';

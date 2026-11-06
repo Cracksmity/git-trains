@@ -31,6 +31,12 @@ jobs:
         run: node tools/conductor/gates/guide-json.js docs/ai/train.md docs/ai/skyline.md
       - name: The Action runs end to end on sample data
         run: node src/index.js --sample
+      - name: Repo mode runs end to end on sample data
+        run: node src/index.js --sample
+        env:
+          INPUT_REPO: octocat/signal-box
+          INPUT_CARDS: stats, languages, departures
+          INPUT_CALENDAR: "true"
 
   action:
     # The Action itself, as users run it, against the repository owner's activity.
@@ -42,4 +48,17 @@ jobs:
           output-dir: out
           cards: both
           mode: multi
+      - run: ls -l out
+
+  action-repo:
+    # Repo mode, as users run it: this repository, read with the workflow's own token.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./
+        with:
+          repo: ${{ github.repository }}
+          output-dir: out
+          cards: stats, languages, departures
+          calendar: true
       - run: ls -l out

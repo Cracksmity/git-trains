@@ -70,3 +70,52 @@ export function sampleProfile() {
     reviews: 12,
   };
 }
+
+// Repo mode (see repo.js): a made-up repository, so `--sample` and the docs need no network.
+export const SAMPLE_REPO = 'octocat/signal-box';
+
+export function sampleRepoStats(overrides = {}) {
+  return summarize(
+    {
+      user: 'signal-box',
+      fullName: SAMPLE_REPO,
+      seed: SAMPLE_REPO,
+      kind: 'repo',
+      days: sampleDays({ total: 620, streak: 8, yesterday: 4, ...overrides }),
+      languages: [
+        { name: 'Rust', color: '#dea584', bytes: 520000 },
+        { name: 'TypeScript', color: '#3178c6', bytes: 210000 },
+        { name: 'Shell', color: '#89e051', bytes: 24000 },
+      ],
+    },
+    { exclude: overrides.exclude },
+  );
+}
+
+// The repository's numbers for the stats card (commits is added from the year's total).
+export function sampleRepoProfile() {
+  return {
+    repo: SAMPLE_REPO,
+    name: 'signal-box',
+    stars: 1340,
+    forks: 96,
+    watchers: 41,
+    openIssues: 23,
+    issues: 310,
+    openPrs: 7,
+    prs: 188,
+    contributors: 27,
+  };
+}
+
+// Releases and tags for the repository's departures board: one of each kind and status at SAMPLE_NOW.
+export function sampleReleases() {
+  return [
+    { name: 'v2.4.0', pushedAt: '2026-11-02T14:05:00Z', kind: 'release' },
+    { name: 'v2.4.0-rc.1', pushedAt: '2026-10-30T09:40:00Z', kind: 'prerelease' },
+    { name: 'v2.3.2', pushedAt: '2026-10-21T18:12:00Z', kind: 'release' },
+    { name: 'v2.3.0', pushedAt: '2026-10-02T11:30:00Z', kind: 'release' },
+    { name: 'nightly-2026-09-14', pushedAt: '2026-09-14T03:00:00Z', kind: 'tag' },
+    { name: 'v2.0.0', pushedAt: '2026-06-18T16:20:00Z', kind: 'release' },
+  ];
+}
