@@ -56,6 +56,48 @@ export function sampleDepartures() {
   ];
 }
 
+// The sample activity of one calendar year, for the year in review: reproducible, busier in
+// spring and autumn than in a quiet summer, with one long streak in April and May and one
+// very busy day in March. Like the real thing, a year in progress (the one `now` is in) ends
+// on `now`'s day. Returns what fetchYear returns.
+export function sampleYear(year = 2025, now = SAMPLE_NOW) {
+  const season = [0.6, 0.9, 1.5, 1.3, 1.1, 0.8, 0.7, 0.25, 0.9, 1.3, 1.1, 0.5]; // by month
+  const days = [];
+  let seed = 11 + year;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const limit = now.toISOString().slice(0, 10);
+  for (let ms = Date.UTC(year, 0, 1); ms < Date.UTC(year + 1, 0, 1); ms += 86400000) {
+    const d = new Date(ms);
+    const date = d.toISOString().slice(0, 10);
+    if (date > limit) break;
+    const weekend = [0, 6].includes(d.getUTCDay());
+    const k = season[d.getUTCMonth()];
+    const count = rand() < Math.min(0.9, (weekend ? 0.25 : 0.7) * k) ? 1 + Math.floor(rand() * 7 * k) : 0;
+    days.push({ date, count });
+  }
+  const set = (date, floor) => {
+    const day = days.find((x) => x.date === date);
+    if (day) day.count = Math.max(day.count, floor);
+  };
+  // 41 days in a row, from April 6 to May 16, and one busy day.
+  for (let ms = Date.UTC(year, 3, 6); ms <= Date.UTC(year, 4, 16); ms += 86400000) {
+    set(new Date(ms).toISOString().slice(0, 10), 1 + Math.floor(rand() * 4));
+  }
+  set(`${year}-03-14`, 58);
+  return {
+    user: 'octocat',
+    year,
+    days,
+    // Commits to the repositories of each primary language that year.
+    languages: [
+      { name: 'TypeScript', color: '#3178c6', bytes: 410 },
+      { name: 'Python', color: '#3572A5', bytes: 240 },
+      { name: 'Rust', color: '#dea584', bytes: 120 },
+      { name: 'Luau', color: '#00A2FF', bytes: 45 },
+    ],
+  };
+}
+
 // Sample profile figures for the cards.
 export function sampleProfile() {
   return {

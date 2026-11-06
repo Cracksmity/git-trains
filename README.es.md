@@ -70,6 +70,39 @@ Con `theme: both` (el valor por defecto), agrega esto a tu README:
 
 La Action también escribe `train-calendar.svg`. Con un solo tema, escribe únicamente ese archivo de calendario. Mira también el [ejemplo de vapor](docs/example-calendar-steam.svg).
 
+## Resumen del año
+
+Con `year-in-review: true` la Action escribe un póster de un año natural de tu actividad, dibujado como un viaje en tren.
+
+![Resumen del año, con un tren recorriendo la línea y una estación por mes](docs/example-year-in-review-es.svg)
+
+Qué lleva:
+
+- **Tu año en cuatro números:** contribuciones, días activos, la racha más larga (con sus fechas) y el día más activo.
+- **Un mapa de la ruta:** una línea de tren con una estación por mes, tan alta como lo activo que fue ese mes (el mes más activo ondea una bandera). Tu tren recorre la línea, el mismo modelo que la escena (`train`: un modelo del catálogo, tu propio JSON o una locomotora de vapor) con tantos vagones como gane el total de ese año, con la franja de tu lenguaje principal. Se detiene en cada estación tanto como lo fue el mes y pasa de largo los meses sin nada. Con movimiento reducido se queda en la última estación.
+- **El mes más activo y tus lenguajes principales** de ese año: los lenguajes principales de los repositorios en los que hiciste commits, ordenados por commits (`exclude-languages` se aplica; hasta cuatro).
+- **El vagón especial** si lo conseguiste (ver [Vagones desbloqueables](#vagones-desbloqueables)), detrás de la cabina y con una línea que dice cuál. Para el póster se gana con ese año: su racha más larga, más las estrellas y los pull requests de tu perfil.
+
+```yaml
+      - uses: Cracksmity/git-trains@v1
+        with:
+          year-in-review: true
+          review-year: 2025 # opcional
+```
+
+**¿Qué año?** `review-year` acepta un año de 2008 al actual. Vacío es el **año en curso hasta hoy**, salvo en **enero**, cuando el año nuevo apenas empieza y el póster muestra el **año que acaba de terminar**. (UTC, como todo aquí.) Un año en curso cubre los días hasta el día en que corre la Action.
+
+Sigue `theme`, `language` y `border`, y usa los mismos cinco colores que las tarjetas (`color-background`, `color-title`, `color-icon`, `color-text`, `color-ring`): el fondo, los títulos y los números grandes, los rieles y los iconos, el texto y las estaciones. Con el `theme: both` por defecto añade esto a tu README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="dist/year-in-review-dark.svg">
+  <img alt="Mi resumen del año" src="dist/year-in-review-light.svg">
+</picture>
+```
+
+La Action también escribe `year-in-review.svg` (automático); con un solo tema escribe únicamente ese archivo. Hace una petición más a la API (además de la del perfil que ya usan los vagones desbloqueables). Si falla, la Action registra un `::warning::` y escribe todo lo demás. Con `language: es` sale como [en el ejemplo](docs/example-year-in-review-es.svg).
+
 ## Estaciones y fiestas
 
 La escena sigue el calendario, así que tu perfil se siente vivo todo el año. El día que corre la Action (UTC) añade unos pocos píxeles de decoración en capas propias, detrás del tren, y también se detiene si se prefiere reducir el movimiento:
@@ -140,6 +173,8 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
+| `year-in-review` | `false` | `true` también escribe `year-in-review.svg`: un póster de un año natural, dibujado como un viaje en tren (ver [Resumen del año](#resumen-del-año)) |
+| `review-year` | año en curso | El año que muestra el póster (de 2008 al actual). Vacío: el año en curso hasta hoy, o el año que acaba de terminar en enero |
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |

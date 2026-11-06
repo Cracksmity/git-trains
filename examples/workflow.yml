@@ -24,6 +24,8 @@ jobs:
           # language: es # the LED sign reads RACHA instead of STREAK
           # exclude-languages: HTML, Jupyter Notebook
           # cards: both # adds card-stats.svg and card-languages.svg (see the README)
+          # year-in-review: true # adds year-in-review.svg: a poster of one year as a train journey
+          # review-year: 2025 # which year; empty = this year so far (last year in January)
 
       - name: Save the SVGs
         run: |

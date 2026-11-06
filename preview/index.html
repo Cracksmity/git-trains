@@ -171,6 +171,10 @@
   <h2 id="calendar-mode">Calendar mode (calendar: true)</h2>
   <div class="stage"><img id="calendar" alt="Contribution calendar with the train running through it"></div>
 
+  <h2 id="year-in-review">Year in review (year-in-review: true)</h2>
+  <p class="sub" style="font-size:15px;margin:-4px 0 14px">One calendar year as a train journey, with the same train, theme, language and top language as above. The contributions slider sets the year's total; the days are the sample year.</p>
+  <div class="stage"><img id="review" alt="Year in review: a poster with a station per month and the train running the line"></div>
+
   <h2 id="yours">Make your own train or skyline with AI</h2>
   <p class="sub" style="font-size:15px;margin:-4px 0 14px">Prefer to draw it yourself? The <a href="../studio/">studio</a> has every field as a form and the nose as a pixel grid.</p>
   <div class="editors">
@@ -234,6 +238,8 @@ import { sampleDays, SAMPLE_LANGUAGES } from '../src/sample.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline, SKYLINES } from '../src/skyline.js';
 import { renderCalendar } from '../src/calendar.js';
+import { buildReview, renderReview } from '../src/review.js';
+import { sampleYear } from '../src/sample.js';
 import { DECORATIONS, decorationFor } from '../src/seasons.js';
 
 const $ = (id) => document.getElementById(id);
@@ -393,6 +399,7 @@ function pickedSkyline() {
 
 let url;
 let calUrl;
+let reviewUrl;
 function render() {
   $('o-total').textContent = $('total').value;
   $('o-streak').textContent = $('streak').value;
@@ -410,7 +417,17 @@ function render() {
   if (calUrl) URL.revokeObjectURL(calUrl);
   calUrl = URL.createObjectURL(new Blob([cal], { type: 'image/svg+xml' }));
   $('calendar').src = calUrl;
-  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span>`;
+  // The year in review: the sample year, scaled to the total of the slider, with the same train and top language.
+  const year = sampleYear(2025);
+  const sum = year.days.reduce((a, d) => a + d.count, 0) || 1;
+  year.days = year.days.map((d) => ({ ...d, count: Math.round((d.count * s.total) / sum) }));
+  year.user = s.user;
+  year.languages = s.languages;
+  const poster = renderReview(buildReview(year, { year: 2025 }), { language: state.language, theme: state.theme, model: t.model, stripe: t.stripe });
+  if (reviewUrl) URL.revokeObjectURL(reviewUrl);
+  reviewUrl = URL.createObjectURL(new Blob([poster], { type: 'image/svg+xml' }));
+  $('review').src = reviewUrl;
+  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span><span>year in review ${(poster.length / 1024).toFixed(1)} KB</span>`;
   zoom(t);
   document.querySelectorAll('.card').forEach((c) => c.classList.toggle('pick', c.dataset.id === t.model));
 }

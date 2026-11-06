@@ -29,6 +29,63 @@ const CAR = [
 ];
 const PANES = [2, 5, 8]; // x of each window, back to front
 
+// The special cars (see cars.js and unlocks.js) on the same 12 x 10 body. Same symbols as CAR,
+// plus G glass highlight, t trim, D door, d door highlight, v roof vent, o outline, and N the lantern
+// that rides on the roof of the dining car (two rows above the body). `panes` are the windows
+// that light up with the streak, as above.
+const EXTRA = {
+  // Four portholes and a roof lantern.
+  dining: {
+    rows: [
+      '.RRRRRRRRRR.',
+      'rrrrrrrrrrrr',
+      '333333333333',
+      'uggugguggugg',
+      'uggugguggugg',
+      'uuuuuuuuuuuu',
+      'AAAAAAAAAAAA',
+      'LLLLLLLLLLLL',
+      '.kkkkkkkkkk.',
+      '.ww......ww.',
+    ],
+    panes: [1, 4, 7, 10],
+    roof: ['.....tt.....', '.....NN.....'],
+  },
+  // A glass canopy over the roof and panoramic windows with ribs.
+  observation: {
+    rows: [
+      '.GGGGGGGGGG.',
+      'gggoggggoggg',
+      '333333333333',
+      'ugggogggoggu',
+      'ugggogggoggu',
+      'uuuuuuuuuuuu',
+      'AAAAAAAAAAAA',
+      'LLLLLLLLLLLL',
+      '.kkkkkkkkkk.',
+      '.ww......ww.',
+    ],
+    panes: [1, 5, 9],
+  },
+  // No windows: an envelope badge, a sliding door and roof vents.
+  mail: {
+    rows: [
+      '.RRRRRRRRRR.',
+      'rrvvrrrrvvrr',
+      '333333333333',
+      'utttuoDDDDou',
+      'utttuodDDDou',
+      'uuuuuuuuuuuu',
+      'AAAAAAAAAAAA',
+      'LLLLLLLLLLLL',
+      '.kkkkkkkkkk.',
+      '.ww......ww.',
+    ],
+    panes: [],
+  },
+};
+export const MINI_EXTRAS = Object.keys(EXTRA);
+
 // Body row (0 roof .. 19 skirt) that each mini row stands for, and the range it
 // summarizes when a nose or locomotive drawing is shrunk.
 const BODY_ROW = [0, 2, 3, 5, 7, 10, 13, 16, 18];
@@ -50,13 +107,21 @@ function carColors(model, stripe) {
     L: symbolColor(model, bands[5], stripe),
     k: p.skirt,
     w: p.wheel,
+    // Only the special cars use these; a model without them falls back to its body.
+    G: p.glassHi ?? p.glass,
+    t: p.trim ?? p.upper,
+    D: p.door ?? p.upper,
+    d: p.doorHi ?? p.upper,
+    v: p.roofVent ?? p.roof,
+    o: p.outline,
+    N: LIT,
   };
 }
 
 // lit: how many windows are lit, from the front.
-function paintCar(g, ox, oy, colors, lit) {
-  const litX = new Set(PANES.slice(PANES.length - lit));
-  CAR.forEach((row, y) => {
+function paintCar(g, ox, oy, colors, lit, rows = CAR, panes = PANES) {
+  const litX = new Set(panes.slice(panes.length - lit));
+  rows.forEach((row, y) => {
     [...row].forEach((s, x) => {
       if (s === '.') return;
       let c = colors[s];
@@ -147,14 +212,27 @@ function miniLoco(model, stripe) {
   return { grid: g, w };
 }
 
-// Returns the units of a mini train: { head: {grid, w}, car: {grid, w} }.
+// Returns the units of a mini train: { head: {grid, w}, car: {grid, w} } and, when `extra`
+// names a special car (dining, observation or mail), { extra: {grid, w} } too.
 // streak lights the windows like on the big train (30 days lights them all).
-export function miniTrain(model, { stripe = '#58a6ff', streak = 0 } = {}) {
-  const lit = streak > 0 ? clamp(Math.round(PANES.length * Math.min(1, streak / 30)), 1, PANES.length) : 0;
+export function miniTrain(model, { stripe = '#58a6ff', streak = 0, extra = null } = {}) {
+  const litFor = (panes) => (streak > 0 && panes.length ? clamp(Math.round(panes.length * Math.min(1, streak / 30)), 1, panes.length) : 0);
+  const lit = litFor(PANES);
   const car = new Grid(CAR_W, MINI_UP + MINI_H);
   paintCar(car, 0, MINI_UP, carColors(model, stripe), lit);
-  return {
+  const unit = {
     head: model.loco ? miniLoco(model, stripe) : miniCab(model, stripe, lit),
     car: { grid: car, w: CAR_W },
   };
+  if (extra) {
+    const kind = EXTRA[extra];
+    if (!kind) throw new Error(`Unknown special car: "${extra}". Options: ${MINI_EXTRAS.join(', ')}`);
+    const g = new Grid(CAR_W, MINI_UP + MINI_H);
+    const colors = carColors(model, stripe);
+    paintCar(g, 0, MINI_UP, colors, litFor(kind.panes), kind.rows, kind.panes);
+    // The dining car's lantern sits on the roof, in the two rows above the body.
+    kind.roof?.forEach((row, y) => [...row].forEach((s, x) => s !== '.' && g.set(x, y, colors[s])));
+    unit.extra = { grid: g, w: CAR_W };
+  }
+  return unit;
 }

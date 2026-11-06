@@ -48,6 +48,12 @@ inputs:
   calendar:
     description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."
     default: "false"
+  year-in-review:
+    description: "true also writes year-in-review.svg (and -light/-dark with theme both): a poster of one calendar year of your activity drawn as a train journey. Your numbers, a route map with a station per month, your train running it, your top languages. It takes the same colors and language as the cards and makes one extra API request."
+    default: "false"
+  review-year:
+    description: "The year the poster shows, from 2008 to the current one. Empty means the current year so far, or the year that just ended in January."
+    default: ""
   cards:
     description: "Profile cards to generate: none, stats, languages, departures or both (stats and languages). Accepts a list: stats, departures."
     default: none

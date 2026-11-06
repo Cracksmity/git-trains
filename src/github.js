@@ -57,6 +57,24 @@ query($login: String!) {
   }
 }`;
 
+// One calendar year of activity: the day-by-day calendar and, for the languages, the
+// primary language of every repository the user committed to that year.
+const YEAR_QUERY = `
+query($login: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $login) {
+    login
+    contributionsCollection(from: $from, to: $to) {
+      contributionCalendar {
+        weeks { contributionDays { date contributionCount } }
+      }
+      commitContributionsByRepository(maxRepositories: 100) {
+        repository { primaryLanguage { name color } }
+        contributions(first: 1) { totalCount }
+      }
+    }
+  }
+}`;
+
 // GraphQL answers 502/503/504 now and then on heavy queries, and the network can
 // blip: those are retried with backoff. Anything else (bad token, unknown user)
 // fails right away.
@@ -64,7 +82,7 @@ const RETRIES = 3;
 const RETRY_STATUS = new Set([500, 502, 503, 504]);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function graphql({ token, query, user, fetchImpl, retryDelay = 1500 }) {
+async function graphql({ token, query, user, variables = {}, fetchImpl, retryDelay = 1500 }) {
   for (let attempt = 0; ; attempt++) {
     const last = attempt === RETRIES;
     let res;
@@ -76,7 +94,7 @@ async function graphql({ token, query, user, fetchImpl, retryDelay = 1500 }) {
           'content-type': 'application/json',
           'user-agent': 'git-trains',
         },
-        body: JSON.stringify({ query, variables: { login: user } }),
+        body: JSON.stringify({ query, variables: { login: user, ...variables } }),
       });
     } catch (err) {
       if (last) throw new Error(`Could not reach GitHub: ${err.message}`);
@@ -115,6 +133,46 @@ export async function fetchActivity({ token, user, today = new Date(), fetchImpl
   );
 
   return { user: u.login, days, languages };
+}
+
+// One calendar year (January 1 to December 31, UTC) for the year in review. For the
+// current year the window ends now, so the days to come are not asked for. GitHub caps a
+// window at one year, which a calendar year never exceeds.
+// Returns { user, year, days: [{date, count}] ascending, languages: [{name, color, bytes}] }.
+// The languages are the primary languages of the repositories committed to that year, and
+// `bytes` counts those commits (not bytes of code), so the year's own work is what ranks.
+export async function fetchYear({ token, user, year, today = new Date(), fetchImpl = fetch, retryDelay }) {
+  if (!Number.isInteger(year) || year < 2008) throw new Error(`Not a year to review: "${year}"`);
+  const first = `${year}-01-01`;
+  const last = `${year}-12-31`;
+  const limit = today.toISOString().slice(0, 10);
+  if (first > limit) throw new Error(`The year ${year} has not started yet`);
+  const to = limit < last ? today.toISOString() : `${last}T23:59:59Z`;
+  const u = await graphql({
+    token,
+    query: YEAR_QUERY,
+    user,
+    variables: { from: `${first}T00:00:00Z`, to },
+    fetchImpl,
+    retryDelay,
+  });
+
+  const days = u.contributionsCollection.contributionCalendar.weeks
+    .flatMap((w) => w.contributionDays)
+    .map((d) => ({ date: d.date, count: d.contributionCount }))
+    .filter((d) => d.date >= first && d.date <= last && d.date <= limit)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const byLanguage = new Map();
+  for (const c of u.contributionsCollection.commitContributionsByRepository) {
+    const lang = c.repository?.primaryLanguage;
+    if (!lang) continue;
+    const cur = byLanguage.get(lang.name) ?? { name: lang.name, color: lang.color, bytes: 0 };
+    cur.bytes += c.contributions.totalCount;
+    cur.color ||= lang.color;
+    byLanguage.set(lang.name, cur);
+  }
+  return { user: u.login, year, days, languages: [...byLanguage.values()].filter((l) => l.bytes > 0) };
 }
 
 // Numbers for the stats card.
