@@ -26,7 +26,7 @@ jobs:
             exit 1
           fi
       - name: Relative links in the site and the docs resolve
-        run: node tools/conductor/gates/links.js index.html preview benchmarks gallery community docs/ai README.md README.es.md CONTRIBUTING.md
+        run: node tools/conductor/gates/links.js index.html preview benchmarks gallery community leaderboard docs/ai README.md README.es.md CONTRIBUTING.md
       - name: The AI guides' examples pass the validator
         run: node tools/conductor/gates/guide-json.js docs/ai/train.md docs/ai/skyline.md
       - name: The Action runs end to end on sample data

@@ -44,4 +44,4 @@ Add it to the community depot: a pull request with one file, `community/trains/<
 
 ## Working with the conductor
 
-Bigger mechanical jobs (translations, sweeping renames, research) can be delegated to Codex or Antigravity with [tools/conductor](tools/conductor). Read the patch before you apply it: the gates catch a lot, not everything.
+Bigger mechanical jobs (translations, sweeping renames, research) can be delegated to Codex or Antigravity with [tools/conductor](tools/conductor). Read the patch before you apply it: the gates catch a lot, not everything. The conductor logs every attempt, and `npm run leaderboard` merges your logs into `docs/leaderboard.json` for the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/): commit that file with the work the runs did.

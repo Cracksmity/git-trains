@@ -23,6 +23,8 @@ You need the CLIs installed and signed in: `codex` (`codex exec`) and/or `agy` (
 
 Every attempt is logged to `.conductor/runs.jsonl` (model, effort, seconds, input/output/reasoning tokens, pass/fail): that log is how the routes should be tuned over time.
 
+`npm run leaderboard` merges those logs, from every checkout of the repository on your machine, into [docs/leaderboard.json](../../docs/leaderboard.json), and the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) reads that file: per model, how often it passed on the first try, its median time and tokens, the routes it served and where a ladder fell back to the next model. Only safe fields are kept (never prompts, file paths or your user name) and a run that is already in the file is skipped, so logs from several machines pile up. `npm run leaderboard -- --from <file>` adds another machine's `runs.jsonl`. After a merge conflict in the file, keep both sides and run it again.
+
 ## Routes
 
 [routes.json](routes.json) maps each kind of task to a ladder. The starting order comes from the [Medellín benchmark](../../benchmarks/medellin/), one run per model, so it is a prior, not a law:
@@ -66,6 +68,8 @@ The ones in [tasks/](tasks) are real: they did the 1.0 migration to English.
 Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-line `node -e` check.
 
 ## First runs
+
+The [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) has every attempt of these tasks, with its model, time, tokens and which check failed; the rows below say what happened in words.
 
 | Task | Route | What happened |
 | --- | --- | --- |
