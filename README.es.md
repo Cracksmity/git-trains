@@ -54,7 +54,7 @@ Con `calendar: true` la Action también escribe un calendario de contribuciones 
 ![Calendario de contribuciones con un metro blanco](docs/example-calendar.svg)
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           calendar: true
 ```
@@ -84,7 +84,7 @@ Qué lleva:
 - **El vagón especial** si lo conseguiste (ver [Vagones desbloqueables](#vagones-desbloqueables)), detrás de la cabina y con una línea que dice cuál. Para el póster se gana con ese año: su racha más larga, más las estrellas y los pull requests de tu perfil.
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           year-in-review: true
           review-year: 2025 # opcional
@@ -143,8 +143,8 @@ jobs:
   train:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: Cracksmity/git-trains@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           language: es # el letrero dice RACHA en vez de STREAK
       - run: |
@@ -193,6 +193,8 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `max-languages` | `6` | Lenguajes en la tarjeta de lenguajes (1 a 10) |
 | `color-background`, `color-title`, `color-icon`, `color-text`, `color-ring` | GitHub oscuro | Colores de las tarjetas, hexadecimal sin `#` |
 
+El `GITHUB_TOKEN` predeterminado con `contents: read` basta para leer el repositorio actual y los datos públicos; publicar los archivos generados requiere `contents: write`. Un PAT opcional puede revelar contribuciones privadas visibles para su propietario. Guárdalo como secreto de Actions, concede solo el acceso necesario y revisa los SVG antes de publicarlos: las imágenes públicas pueden revelar actividad derivada de contribuciones privadas.
+
 Salidas: `files`, `cars`, `streak`, `state`, `model`.
 
 > ¿Vienes de 0.x? Los nombres en español (`tren`, `fondo`, `modo`, `tema`, `idioma`...) y los ids anteriores (`tranvia`, `metro-blanco`, `bala`...) siguen funcionando y dejan un aviso en el log. Los archivos de salida ahora son `train-*.svg` y `card-*.svg`: actualiza las rutas en tu README. Detalles en el [changelog](CHANGELOG.md).
@@ -227,7 +229,7 @@ Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente d
 3. En el workflow usa `train: .github/train.json`.
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           train: .github/train.json
           skyline: new-york
@@ -283,7 +285,7 @@ Desde un clon, `node bin/git-trains.js design ...` hace lo mismo. Necesita Node 
 Qué pasa:
 
 1. Arma un prompt con la guía para IA ([tren](docs/ai/train.md) o [skyline](docs/ai/skyline.md)) más tu descripción y tus fotos.
-2. Ejecuta la CLI sin interfaz, **solo lectura y en una carpeta temporal vacía**: Codex en su sandbox de solo lectura, Claude Code con la herramienta Read únicamente (para las fotos) y Antigravity con un hook que rechaza cualquier comando. Solo se lee la respuesta final, así que tus archivos nunca se tocan y nada corre con `--dangerously-skip-permissions`.
+2. Ejecuta la CLI sin interfaz en una carpeta de trabajo temporal vacía: Codex usa su sandbox de solo lectura, Claude Code se configura solo con la herramienta Read (para fotos) y Antigravity tiene un hook que rechaza herramientas que no sean de lectura. La carpeta de trabajo y la configuración de herramientas no restringen las lecturas del sistema de archivos; la CLI puede acceder a archivos que tu cuenta pueda leer. Los prompts y las fotos proporcionadas se envían al proveedor de IA elegido. Revisa los permisos de la CLI y del proveedor antes de usar datos sensibles.
 3. Saca el JSON de la respuesta y lo revisa con el mismo validador que la Action. Si hay problemas, la lista vuelve a la IA para otro intento, hasta `--tries`.
 4. Cuando pasa, escribe `.github/train.json` (o `.github/skyline.json`), dibuja una imagen pequeña en la terminal (caracteres de medio bloque, en una terminal con color verdadero) e imprime un enlace al [estudio](https://cracksmity.github.io/git-trains/studio/) que lleva el archivo completo, para que lo retoques a mano.
 
@@ -350,8 +352,8 @@ Un tren no es solo para perfiles. Con `repo: owner/name` describe **un repositor
 <sub>Ese es **este** repositorio, `Cracksmity/git-trains`, en modo repo: [el mismo workflow](.github/workflows/train.yml) que dibuja el tren del autor más arriba lo dibuja también a él, cada mañana.</sub>
 
 ```yaml
-      - uses: actions/checkout@v5
-      - uses: Cracksmity/git-trains@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           repo: ${{ github.repository }} # o cualquier owner/name público, por ejemplo facebook/react
           output-dir: out

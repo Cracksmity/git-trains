@@ -66,6 +66,7 @@ function parseDrawing(d, kind, where, accents, errors) {
   const w = Math.max(...rows.map((r) => r.length));
   if (rows.length > max.h || w > max.w) {
     errors.push(`${where}.rows: at most ${max.w} columns and ${max.h} rows for ${kind === 'landmark' ? 'a landmark' : kind} (this one is ${w} x ${rows.length})`);
+    return null;
   }
   rows.forEach((r, y) => {
     const bad = [...r].filter((c) => !SYMBOLS.includes(c));

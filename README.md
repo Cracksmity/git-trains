@@ -54,7 +54,7 @@ Set `calendar: true` to write a contribution calendar alongside the train. A min
 ![Contribution calendar with a white metro](docs/example-calendar.svg)
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           calendar: true
 ```
@@ -84,7 +84,7 @@ What's on it:
 - **The special car** if you earned one (see [Unlockable cars](#unlockable-cars)), riding behind the cab with a line saying which. For the poster it is earned on that year: its longest streak, plus your profile's stars and pull requests.
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           year-in-review: true
           review-year: 2025 # optional
@@ -143,8 +143,8 @@ jobs:
   train:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: Cracksmity/git-trains@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -191,6 +191,8 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `max-languages` | `6` | Languages on the languages card (1 to 10) |
 | `color-background`, `color-title`, `color-icon`, `color-text`, `color-ring` | GitHub dark | Card colors, hex without `#` |
 
+The default `GITHUB_TOKEN` with `contents: read` is sufficient for reading the current repository and public data; publishing generated files requires `contents: write`. An optional PAT may expose private contributions visible to its owner. Store it as an Actions secret, grant only the access required, and review the generated SVGs before publishing: public images can reveal activity derived from private contributions.
+
 Outputs: `files`, `cars`, `streak`, `state`, `model`.
 
 > Coming from 0.x? The Spanish input names (`tren`, `fondo`, `modo`, `tema`, `idioma`...) and model ids (`tranvia`, `metro-blanco`, `bala`...) still work and log a deprecation warning. The output files are now `train-*.svg` and `card-*.svg`: update the paths in your README. See the [changelog](CHANGELOG.md).
@@ -225,7 +227,7 @@ Any train fits in a small JSON file: colors, stripes, doors, and the front drawn
 3. In the workflow, use `train: .github/train.json`.
 
 ```yaml
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           train: .github/train.json
           skyline: new-york
@@ -280,7 +282,7 @@ From a clone, `node bin/git-trains.js design ...` does the same. It needs Node 2
 What happens:
 
 1. It builds a prompt from the AI guide ([train](docs/ai/train.md) or [skyline](docs/ai/skyline.md)) plus your description and photos.
-2. It runs the CLI headless, **read-only, in an empty temporary folder**: Codex in its read-only sandbox, Claude Code with only the Read tool (for photos), Antigravity with a hook that refuses every command. Only the final answer is read, so your files are never touched and nothing runs with `--dangerously-skip-permissions`.
+2. It runs the CLI headless in an empty temporary working folder: Codex uses its read-only sandbox, Claude Code is configured with only the Read tool (for photos), and Antigravity has a hook that rejects non-read tools. The working folder and tool settings do not confine filesystem reads; the CLI may access files readable by your account. Prompts and supplied photos are sent to the selected AI provider. Review the provider and CLI permissions before using sensitive data.
 3. It pulls the JSON out of the answer and checks it with the same validator as the Action. If there are problems, the list goes back to the AI for another try, up to `--tries`.
 4. When it passes, it writes `.github/train.json` (or `.github/skyline.json`), draws a small picture in the terminal (half-block characters, in a truecolor terminal) and prints a [studio](https://cracksmity.github.io/git-trains/studio/) link that carries the whole file, so you can tweak it by hand.
 
@@ -347,8 +349,8 @@ A train isn't only for profiles. With `repo: owner/name` it describes **a reposi
 <sub>That's **this** repository, `Cracksmity/git-trains`, in repo mode: [the same workflow](.github/workflows/train.yml) that draws the author's train above draws it too, every morning.</sub>
 
 ```yaml
-      - uses: actions/checkout@v5
-      - uses: Cracksmity/git-trains@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           repo: ${{ github.repository }} # or any public owner/name, for example facebook/react
           output-dir: out

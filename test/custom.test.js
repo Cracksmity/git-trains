@@ -96,6 +96,18 @@ test('a train too long for the scene is rejected with a clear message', () => {
   assert.match(errs[0], /is \d+ px long and the scene is 448/);
 });
 
+test('oversized nose dimensions and operations are rejected before allocating or drawing', () => {
+  const train = (nose) => ({ pal: { body: '#888' }, nose });
+  const rows = Array.from({ length: 20 }, (_, y) => y === 10 ? 'sssl' : 'ssss');
+  for (const w of [41, 1e12, Number.MAX_SAFE_INTEGER]) {
+    assert.ok(problems(() => parseCustomModel(train({ rows, w }))).some((e) => e.startsWith('nose.w:')));
+  }
+  assert.ok(problems(() => parseCustomModel(train({ rows: rows.map((r) => r.repeat(11)) }))).some((e) => e.startsWith('nose.w:')));
+  const edge = Array(20).fill(3);
+  assert.ok(problems(() => parseCustomModel(train({ w: 4, edge, ops: [['r', 0, 0, 1e12, 19, 'l']] }))).some((e) => e.includes('coordinates')));
+  assert.ok(problems(() => parseCustomModel(train({ w: 4, edge, ops: Array(201).fill(['p', 3, 10, 'l']) }))).some((e) => e.includes('at most 200')));
+});
+
 test('colors cannot smuggle anything into the SVG', () => {
   for (const body of ['#fff" onload="x', 'url(#a)', 'red', '#12345g']) {
     assert.ok(problems(() => parseCustomModel({ pal: { body }, nose: 'bullet' })).some((e) => e.startsWith('pal.body')), body);

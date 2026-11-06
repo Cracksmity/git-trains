@@ -7,10 +7,36 @@
 // without padding. Works in browsers and in Node (both have CompressionStream).
 
 const KINDS = ['train', 'skyline'];
+export const MAX_SHARE_BYTES = 256 * 1024;
+const MAX_PACKED_BYTES = MAX_SHARE_BYTES + 1024;
+export const MAX_SHARE_LENGTH = Math.ceil(MAX_PACKED_BYTES / 3) * 4;
 
-async function pipe(bytes, stream) {
-  const out = new Response(new Blob([bytes]).stream().pipeThrough(stream));
-  return new Uint8Array(await out.arrayBuffer());
+class ShareLimitError extends Error {
+  constructor() { super('This share link is too large: use at most 256 KB of JSON.'); }
+}
+
+async function pipe(bytes, stream, limit) {
+  const reader = new Blob([bytes]).stream().pipeThrough(stream).getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) {
+        await reader.cancel();
+        throw new ShareLimitError();
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const out = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.byteLength; }
+  return out;
 }
 
 function toBase64Url(bytes) {
@@ -29,19 +55,25 @@ function fromBase64Url(text) {
 export async function encodeShare(kind, value) {
   if (!KINDS.includes(kind)) throw new Error(`Unknown kind "${kind}"`);
   const text = typeof value === 'string' ? value : JSON.stringify(value);
-  const packed = await pipe(new TextEncoder().encode(text), new CompressionStream('deflate-raw'));
+  if (text.length > MAX_SHARE_BYTES) throw new ShareLimitError();
+  const bytes = new TextEncoder().encode(text);
+  if (bytes.byteLength > MAX_SHARE_BYTES) throw new ShareLimitError();
+  const packed = await pipe(bytes, new CompressionStream('deflate-raw'), MAX_PACKED_BYTES);
   return `#${kind}=${toBase64Url(packed)}`;
 }
 
 // hash: location.hash (with or without "#"). Returns { kind, text } or null when
 // there is nothing to read. Throws with a readable message on a broken link.
 export async function decodeShare(hash) {
+  if (typeof hash === 'string' && /^#?(train|skyline)=/.test(hash) && hash.length > MAX_SHARE_LENGTH + 9) throw new ShareLimitError();
   const m = /^#?(train|skyline)=([A-Za-z0-9_-]+)$/.exec(hash ?? '');
   if (!m) return null;
   try {
-    const bytes = await pipe(fromBase64Url(m[2]), new DecompressionStream('deflate-raw'));
-    return { kind: m[1], text: new TextDecoder().decode(bytes) };
-  } catch {
+    if (m[2].length > MAX_SHARE_LENGTH) throw new ShareLimitError();
+    const bytes = await pipe(fromBase64Url(m[2]), new DecompressionStream('deflate-raw'), MAX_SHARE_BYTES);
+    return { kind: m[1], text: new TextDecoder('utf-8', { fatal: true }).decode(bytes) };
+  } catch (err) {
+    if (err instanceof ShareLimitError) throw err;
     throw new Error('This share link is broken or incomplete: copy it again in full.');
   }
 }

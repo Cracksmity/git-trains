@@ -2,8 +2,9 @@
 // the validator until the JSON passes, then writes the file, draws a preview and
 // prints a studio link.
 //
-// The agent runs in a temporary empty folder and only its final answer is read, so it
-// never touches the person's files. Every try is a fresh run: the retry prompt carries
+// The agent runs in a temporary folder with tool restrictions and its final answer
+// is validated as data. These restrictions are not a general filesystem read sandbox.
+// Every try is a fresh run: the retry prompt carries
 // the previous JSON and the validator's list, the same thing a person would paste back.
 
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -105,7 +106,7 @@ export async function design(opts, io = {}) {
   process.once('SIGINT', onSigint);
 
   log(`Designing a ${kind} with ${be.label} (${model || 'its default model'}), ${found.version}`);
-  log(`The agent works in an empty temporary folder and can't edit your files. Up to ${tries} ${tries === 1 ? 'try' : 'tries'}.`);
+  log(`The agent runs in a temporary folder with restricted tools. Your request and photos go to the selected AI provider. Up to ${tries} ${tries === 1 ? 'try' : 'tries'}.`);
 
   try {
     const staged = { names: be.photos === 'files' ? stagePhotos(photos, dir) : photos.map((p) => basename(p)), attached: be.photos === 'attached' };

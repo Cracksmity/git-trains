@@ -165,7 +165,7 @@ test('out of tries: nothing is written to --out, the last answer is kept as a dr
   assert.equal(s.runs().length, 2);
 });
 
-test('Antigravity: the task goes in a file, photos are copied next to it, commands are refused by a hook', (t) => {
+test('Antigravity: the task goes in a file, photos are staged, and a hook restricts tools', (t) => {
   const s = sandbox(t, { answers: [fence(GOOD_SKYLINE)] });
   const photo = join(s.work, 'my skyline.PNG');
   writeFileSync(photo, 'not really a png');
@@ -174,7 +174,7 @@ test('Antigravity: the task goes in a file, photos are copied next to it, comman
   assert.deepEqual(JSON.parse(readFileSync(join(s.work, '.github', 'skyline.json'), 'utf8')), GOOD_SKYLINE);
   const [run] = s.runs();
   assert.deepEqual(run.files.filter((f) => !f.includes('.agents')).sort(), ['photo-1.png', 'task.md']);
-  assert.ok(run.files.includes('.agents/hooks.json') && run.files.includes('.agents/deny-commands.js'));
+  assert.ok(run.files.includes('.agents/hooks.json') && run.files.includes('.agents/read-inputs.cjs'));
   assert.match(run.task, /Design a skyline for git-trains/);
   assert.match(run.task, /Lisbon/);
   assert.match(run.task, /photo-1\.png/);

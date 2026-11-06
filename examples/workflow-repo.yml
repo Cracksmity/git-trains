@@ -18,10 +18,13 @@ concurrency:
 jobs:
   train:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
         with:
           repo: ${{ github.repository }} # or any owner/name, for example facebook/react
           output-dir: out

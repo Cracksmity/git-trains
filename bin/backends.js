@@ -13,21 +13,31 @@ import { delimiter, join } from 'node:path';
 // Antigravity reads PreToolUse hooks from <folder>/.agents/hooks.json, even in
 // print mode. A denied tool call in headless mode ends the whole turn with an
 // empty answer; a *hook* refusal does not: the agent reads the reason and goes on.
-// So this hook refuses every command with advice, and the turn survives.
-const AGY_HOOK = `// Refuses every command the agent tries to run (git-trains design is read-only).
+// Only reads of the staged task and photos are allowed. Unknown tools, writes,
+// commands, web requests and subagents are denied, including malformed calls.
+const AGY_HOOK = `// Restricts git-trains design to reading its staged inputs.
+const { realpathSync } = require('node:fs');
+const { basename, dirname, resolve } = require('node:path');
 let input = '';
 process.stdin.on('data', (c) => (input += c));
 process.stdin.on('end', () => {
-  let line;
-  try { line = JSON.parse(input).toolCall?.args?.CommandLine; } catch {}
-  process.stdout.write(JSON.stringify(typeof line === 'string'
-    ? { decision: 'deny', reason: 'No commands can run here and none are needed. Read files with your file tools and put the complete JSON in your reply.' }
-    : {}));
+  let allowed = false;
+  try {
+    const call = JSON.parse(input).toolCall;
+    if (call?.name === 'view_file' && typeof call.args?.AbsolutePath === 'string') {
+      const base = realpathSync(resolve(__dirname, '..'));
+      const file = realpathSync(call.args.AbsolutePath);
+      allowed = dirname(file) === base && (basename(file) === 'task.md' || /^photo-[1-9][0-9]*\\.(png|jpg|jpeg|webp|gif)$/.test(basename(file)));
+    }
+  } catch {}
+  process.stdout.write(JSON.stringify(allowed
+    ? { decision: 'allow' }
+    : { decision: 'deny', reason: 'Only view_file of task.md and the staged photo files is allowed. Do not run commands, edit files, browse the web or delegate; put the complete JSON in your reply.' }));
 });
 `;
 
 const AGY_HOOKS = JSON.stringify(
-  { 'git-trains-design': { PreToolUse: [{ matcher: 'run_command', hooks: [{ type: 'command', command: 'node deny-commands.js', timeout: 10 }] }] } },
+  { 'git-trains-design': { PreToolUse: [{ matcher: '*', hooks: [{ type: 'command', command: 'node read-inputs.cjs', timeout: 10 }] }] } },
   null,
   2,
 );
@@ -66,7 +76,7 @@ export const BACKENDS = {
         '-p', 'Your whole task is in the file task.md in this folder (it also names any photos). Open it, do what it says, and reply with the answer it asks for.',
       ],
       stdin: false,
-      files: { 'task.md': prompt, '.agents/hooks.json': AGY_HOOKS, '.agents/deny-commands.js': AGY_HOOK },
+      files: { 'task.md': prompt, '.agents/hooks.json': AGY_HOOKS, '.agents/read-inputs.cjs': AGY_HOOK },
     }),
     read: readAgy,
   },

@@ -473,6 +473,12 @@ export function mountTrainEditor(root, { initialText, onStatus } = {}) {
     noseGrid = null;
     locoGrid = null;
     update({ keepJson, quiet: true });
+    // Shared JSON is untrusted. Never build canvases from rejected dimensions.
+    if (errors.length) {
+      form.replaceChildren(startSection(), el('p', { textContent: 'Fix the JSON below or choose another starting train to edit its fields.' }));
+      update({ keepJson });
+      return;
+    }
     form.replaceChildren(startSection(), identitySection(), paletteSection(), bodySection(), frontSection());
     update({ keepJson });
   }

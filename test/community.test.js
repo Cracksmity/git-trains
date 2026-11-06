@@ -32,7 +32,7 @@ test('every file in community/ passes, and community/index.json lists nothing th
     assert.deepEqual(Object.keys(e), ['id', 'name', 'description', 'author', 'kind', 'share']);
     if (e.kind === 'train') assert.equal(json(`community/trains/${e.id}.json`).id, e.id);
   }
-  // On a pull request the index may lag (main rebuilds it after the merge), but
+  // This function checks source files independently of the generated index, but
   // never by an entry that was already there.
   const index = json('community/index.json');
   for (const old of index) assert.ok(result.entries.some((e) => e.kind === old.kind && e.id === old.id), `${old.kind} ${old.id} is in the index but not in community/`);

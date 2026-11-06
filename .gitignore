@@ -5,3 +5,12 @@ muestra/
 .claude/
 reference/
 .conductor/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx

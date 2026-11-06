@@ -198,6 +198,7 @@ import { sampleStats } from '../src/sample.js';
 import { carsFor, stateFor } from '../src/stats.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
+import { decodeShare as readShare } from '../studio/share.js';
 
 const $ = (id) => document.getElementById(id);
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -220,13 +221,9 @@ function stats({ user, total, streak = 12, yesterday = 6 }) {
 
 // The share link carries the file itself: raw DEFLATE, base64url (see studio/).
 async function decodeShare(share) {
-  const m = /#(train|skyline)=([A-Za-z0-9_-]+)$/.exec(share);
-  if (!m) throw new Error('the share link is malformed');
-  const b64 = m[2].replace(/-/g, '+').replace(/_/g, '/');
-  const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
-  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-  return JSON.parse(await new Response(stream).text());
+  const decoded = await readShare(typeof share === 'string' ? share.slice(share.indexOf('#')) : '');
+  if (!decoded) throw new Error('the share link is malformed');
+  return JSON.parse(decoded.text);
 }
 // Without DecompressionStream (older browsers), read the file instead.
 async function load(entry) {

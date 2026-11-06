@@ -1,0 +1,8 @@
+# Review changes to execution, automation, and security-sensitive configuration.
+/.github/ @Cracksmity
+/action.yml @Cracksmity
+/bin/ @Cracksmity
+/src/ @Cracksmity
+/studio/ @Cracksmity
+/scripts/ @Cracksmity
+/SECURITY.md @Cracksmity

@@ -19,7 +19,7 @@ Your city's metro, the tram you take to work, the skyline outside your window: i
    }
    ```
 
-3. **Save it** as `community/trains/<id>.json` (the file name is the train's `id`) or `community/skylines/<city>.json` (the file name is the skyline's id), and open a pull request. You can do it all from the GitHub website: open the folder, choose **Add file → Create new file**, paste, and propose the change.
+3. **Save it** as `community/trains/<id>.json` (the file name is the train's `id`) or `community/skylines/<city>.json` (the file name is the skyline's id), and run `npm run community` with Node 24. Commit the regenerated `community/index.json` along with your file and open a pull request.
 
 A check runs on your pull request: it validates the file the way the Action does, draws a preview (the scene in light and dark, and for a train the mini version from calendar mode) and comments with the result. If something is off, the comment lists every problem at once, worded so you can paste it back to the AI. Once it's merged, the gallery picks it up.
 
@@ -54,4 +54,4 @@ node scripts/community.js --check                                      # every f
 node scripts/community.js preview --out sample/community community/trains/nyc-subway.json   # PNG previews
 ```
 
-Don't edit `community/index.json`: it's rebuilt on `main` after every merge (`npm run community` does the same locally).
+Run `npm run community` after changing community files and commit the regenerated `community/index.json`. If it conflicts with another contribution, update your branch, run the command again, and commit the result.

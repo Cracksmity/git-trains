@@ -99,8 +99,8 @@ function noseFromRows(raw, errors) {
   }
   const longest = Math.max(...rows.map((r) => r.length));
   const w = raw.w ?? longest;
-  if (!isInt(w) || w < 4 || w < longest) {
-    errors.push(`nose.w: ${raw.w} does not match the longest row (${longest} columns)`);
+  if (!isInt(w) || w < 4 || w > 40 || w < longest) {
+    errors.push(`nose.w: must be an integer from 4 to 40 matching the longest row (${longest} columns; got ${raw.w ?? longest})`);
     return null;
   }
   const out = [];
@@ -124,7 +124,7 @@ function noseFromOps(raw, errors) {
       if (!isInt(e) || e < 0 || e >= w) errors.push(`nose.edge[${y}]: ${e} must be an integer from 0 to ${w - 1}`);
     });
   }
-  if (!Array.isArray(ops)) errors.push('nose.ops: must be a list');
+  if (!Array.isArray(ops) || ops.length > 200) errors.push('nose.ops: must be a list of at most 200 operations');
   else {
     ops.forEach((op, i) => {
       if (!Array.isArray(op) || !(op[0] in NOSE_OPS)) {
@@ -138,7 +138,7 @@ function noseFromOps(raw, errors) {
       }
       const nums = op.slice(1, -1);
       const sym = op[op.length - 1];
-      if (!nums.every(isInt)) errors.push(`nose.ops[${i}]: coordinates must be integers`);
+      if (!nums.every((v) => Number.isSafeInteger(v) && v >= -80 && v <= 80)) errors.push(`nose.ops[${i}]: coordinates must be integers from -80 to 80`);
       if (typeof sym !== 'string' || sym.length !== 1 || !NOSE_SYMBOLS.includes(sym)) {
         errors.push(`nose.ops[${i}]: unknown symbol "${sym}" (valid: ${NOSE_SYMBOLS})`);
       }
@@ -173,6 +173,7 @@ function parseLoco(raw, errors) {
   const w = Math.max(...rows.map((r) => r.length));
   if (w < LOCO_MIN_W || w > LOCO_MAX_W) {
     errors.push(`loco.rows: the longest row is ${w} columns; the locomotive must be ${LOCO_MIN_W} to ${LOCO_MAX_W} wide`);
+    return null;
   }
   rows.forEach((r, y) => {
     const bad = [...r].filter((c) => c !== '.' && !NOSE_SYMBOLS.includes(c));

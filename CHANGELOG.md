@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+- Restrict the local preview server to loopback and public assets, including checks on symlink targets.
+- Bound shared-link decompression, custom drawing dimensions and nose operations before rendering. Rejected train JSON stays editable without building a pixel grid.
+- Restrict Antigravity design tools to reads of staged inputs, and document the AI providers' access and data handling.
+- Pin workflow actions, add Dependabot and a private reporting policy, and check the community index in pull requests so publishing it no longer needs a direct push to main.
+
 ## 1.1.1 (2026-11-05)
 
 ### Fixed

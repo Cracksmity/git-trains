@@ -31,7 +31,7 @@ Add it to `SKYLINES` in [src/skyline.js](src/skyline.js). Keep tall towers away 
 
 ## Sharing your city or train
 
-Add it to the community depot: a pull request with one file, `community/trains/<id>.json` or `community/skylines/<city>.json`, with `name`, `description` and `author`. A check validates it and comments with a preview; [community/README.md](community/README.md) has the rules. `npm run community` checks the depot locally and rebuilds `community/index.json`, which `main` also rebuilds after every merge, so you don't need to commit it.
+Add it to the community depot: a pull request with one file, `community/trains/<id>.json` or `community/skylines/<city>.json`, with `name`, `description` and `author`. Run `npm run community` and commit the regenerated `community/index.json` with it. A check validates it and comments with a preview; [community/README.md](community/README.md) has the rules. If the index conflicts, update your branch and regenerate it.
 
 `examples/` stays as the small set the docs and the playground point to.
 
@@ -45,3 +45,9 @@ Add it to the community depot: a pull request with one file, `community/trains/<
 ## Working with the conductor
 
 Bigger mechanical jobs (translations, sweeping renames, research) can be delegated to Codex or Antigravity with [tools/conductor](tools/conductor). Read the patch before you apply it: the gates catch a lot, not everything. The conductor logs every attempt, and `npm run leaderboard` merges your logs into `docs/leaderboard.json` for the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/): commit that file with the work the runs did.
+
+## Security and repository maintenance
+
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Maintainers should enable private vulnerability reporting and Dependabot security updates; keep secret scanning and push protection enabled. Once the pull-request index workflow reaches main, require pull requests and the `test`, `action`, and `action-repo` CI checks. CODEOWNERS requests review; require code-owner approval when a second eligible reviewer is available. Review Dependabot action-pin updates against upstream releases. GitHub settings are configured separately from this repository.
+
+After the pull-request index workflow is deployed to `main`, an administrator can activate the prepared rule with `gh api -X PUT repos/Cracksmity/git-trains/branches/main/protection --input .github/main-protection.json`. It requires the three CI checks and pull requests without approvals; administrators can bypass the rule until `enforce_admins` is enabled. Review the rule and add a second eligible reviewer before requiring code-owner approval.

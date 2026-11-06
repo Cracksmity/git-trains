@@ -501,7 +501,10 @@ function parseBuilding(b, i, errors) {
       errors.push(`${where}.rows: 1 to ${MAX_H} strings; the last row touches the ground`);
     } else {
       const longest = Math.max(...b.rows.map((r) => r.length));
-      if (longest > 200) errors.push(`${where}.rows: at most 200 columns (the longest has ${longest})`);
+      if (longest > 200) {
+        errors.push(`${where}.rows: at most 200 columns (the longest has ${longest})`);
+        return null;
+      }
       b.rows.forEach((r, y) => {
         const bad = [...r].filter((c) => !ART.includes(c));
         if (bad.length) errors.push(`${where}.rows[${y}]: unknown symbols "${[...new Set(bad)].join('')}" (valid: # w .)`);
@@ -517,7 +520,10 @@ function parseBuilding(b, i, errors) {
     out.w = b.w;
     out.h = b.h;
     const tops = b.top === undefined ? [] : Array.isArray(b.top) ? b.top : [b.top];
-    if (tops.length > 4) errors.push(`${where}.top: at most 4 stacked tops`);
+    if (tops.length > 4) {
+      errors.push(`${where}.top: at most 4 stacked tops`);
+      return null;
+    }
     out.top = tops.map((t, k) => parseTop(t, `${where}.top${Array.isArray(b.top) ? `[${k}]` : ''}`, errors)).filter(Boolean);
   }
   return errors.length > before ? null : out;
@@ -544,6 +550,7 @@ export function parseSkyline(raw) {
   const list = raw.buildings;
   if (!Array.isArray(list) || !list.length || list.length > MAX_BUILDINGS) {
     errors.push(`buildings: a list of 1 to ${MAX_BUILDINGS} buildings`);
+    throw new CustomError('The skyline', errors);
   }
   const buildings = Array.isArray(list) ? list.map((b, i) => parseBuilding(b, i, errors)) : [];
   const region = raw.region === undefined ? undefined : parseRegion(raw.region, errors);
