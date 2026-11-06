@@ -2,12 +2,25 @@
 
 ## Unreleased
 
+## 1.1.2 (2026-11-06)
+
+No input, output name, route or published file changes. This release collects the security hardening done after 1.1.1 and tidies the repository.
+
 ### Security
 
 - Restrict the local preview server to loopback and public assets, including checks on symlink targets.
 - Bound shared-link decompression, custom drawing dimensions and nose operations before rendering. Rejected train JSON stays editable without building a pixel grid.
 - Restrict Antigravity design tools to reads of staged inputs, and document the AI providers' access and data handling.
 - Pin workflow actions, add Dependabot and a private reporting policy, and check the community index in pull requests so publishing it no longer needs a direct push to main.
+
+### Changed
+
+- The code is organized into domain folders (`activity`, `graphics`, `trains`, `landscape`, `scene`, `cards`, `calendar`, `review`, `github`, `action`, `cli`, `studio`, `sharing`) with `npm run check` gates for architecture (acyclic imports, layer boundaries, 400-line modules), generated assets, links and AI examples. Rendered SVGs are unchanged.
+- The READMEs lead with what the Action draws and a shorter setup, and installation examples use a commit that contains the security fixes above.
+
+### Added
+
+- Project logo and favicon.
 
 ## 1.1.1 (2026-11-05)
 
