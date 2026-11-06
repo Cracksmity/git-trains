@@ -24,7 +24,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           repo: ${{ github.repository }} # or any owner/name, for example facebook/react
           output-dir: out
