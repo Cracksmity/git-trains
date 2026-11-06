@@ -54,7 +54,7 @@ Con `calendar: true` la Action también escribe un calendario de contribuciones 
 ![Calendario de contribuciones con un metro blanco](docs/example-calendar.svg)
 
 ```yaml
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           calendar: true
 ```
@@ -84,7 +84,7 @@ Qué lleva:
 - **El vagón especial** si lo conseguiste (ver [Vagones desbloqueables](#vagones-desbloqueables)), detrás de la cabina y con una línea que dice cuál. Para el póster se gana con ese año: su racha más larga, más las estrellas y los pull requests de tu perfil.
 
 ```yaml
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           year-in-review: true
           review-year: 2025 # opcional
@@ -144,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           language: es # el letrero dice RACHA en vez de STREAK
       - run: |
@@ -229,7 +229,7 @@ Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente d
 3. En el workflow usa `train: .github/train.json`.
 
 ```yaml
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           train: .github/train.json
           skyline: new-york
@@ -353,7 +353,7 @@ Un tren no es solo para perfiles. Con `repo: owner/name` describe **un repositor
 
 ```yaml
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: Cracksmity/git-trains@7ffb045aee1e713f121b6ba62d9ea15e024d283e # v1
+      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
         with:
           repo: ${{ github.repository }} # o cualquier owner/name público, por ejemplo facebook/react
           output-dir: out
