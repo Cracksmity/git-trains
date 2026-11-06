@@ -2,11 +2,22 @@
   "name": "regions-new-cities",
   "route": "design",
   "promptFile": "regions-new-cities.md",
-  "allow": ["examples/skylines/guadalajara.json", "examples/skylines/malmo.json"],
+  "allow": [
+    "examples/skylines/guadalajara.json",
+    "examples/skylines/malmo.json"
+  ],
   "gates": [
     "node tools/conductor/gates/region-art.js examples/skylines/guadalajara.json:plains examples/skylines/malmo.json:sea",
     "node --test test/custom.test.js test/region.test.js test/skyline-editor.test.js test/studio.test.js test/share.test.js"
   ],
   "attempts": 2,
-  "timeoutMin": 60
+  "timeoutMin": 60,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "why": "Run on GPT-6.1-Sol, the design route second rung, at the user request"
+    }
+  ]
 }

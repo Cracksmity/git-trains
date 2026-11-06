@@ -178,11 +178,14 @@
       <ol>
         <li>Copy the instructions and paste them into your AI with the city you want or a photo of its skyline.</li>
         <li>Paste the JSON here. These are pixel-art silhouettes: the colors follow the theme on their own.</li>
+        <li>Want its countryside too (Japanese farmhouses and cherry trees for Osaka, adobe houses and agave for Guadalajara)? Paste the countryside instructions into your AI along with your JSON. It shows between the tracks in <b>multi</b> mode.</li>
         <li>Save it as <code>.github/skyline.json</code> and use <code>skyline: .github/skyline.json</code>.</li>
       </ol>
       <div class="btns">
         <button class="main" data-copy="skyline">Copy the AI instructions</button>
+        <button data-copy="region">Copy the countryside instructions</button>
         <button data-example="skyline">Example</button>
+        <button data-example="skyline" data-file="../examples/skylines/guadalajara.json">Example with countryside</button>
         <button data-errors="skyline">Copy problems</button>
         <button data-download="skyline">Download skyline.json</button>
       </div>
@@ -257,6 +260,7 @@ function statsFromControls() {
 const SOURCES = {
   train: { file: '../docs/ai/train.md', example: '../examples/trains/new-york.json', parse: parseCustomModel, what: 'The train' },
   skyline: { file: '../docs/ai/skyline.md', example: '../examples/skylines/mexico-city.json', parse: parseSkyline, what: 'The skyline' },
+  region: { file: '../docs/ai/region.md' }, // only copied: its JSON goes inside the skyline's
 };
 const custom = { train: { value: null, error: '' }, skyline: { value: null, error: '' } };
 const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);

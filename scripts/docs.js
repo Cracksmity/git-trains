@@ -14,6 +14,7 @@ const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/tra
 const newYork = example('new-york');
 const osaka = example('osaka');
 const steam = example('steam');
+const skylineFile = (name) => parseSkyline(JSON.parse(readFileSync(`examples/skylines/${name}.json`, 'utf8')));
 
 mkdirSync('docs', { recursive: true });
 
@@ -31,6 +32,17 @@ const scenes = [
     'example-osaka',
     sampleStats({ total: 400, streak: 9, yesterday: 3 }),
     { train: osaka, mode: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
+  ],
+  // The region's countryside shows between the tracks of the multi mode.
+  [
+    'example-osaka-countryside',
+    sampleStats({ total: 1500, streak: 9, yesterday: 5 }),
+    { train: osaka, mode: 'multi', theme: 'auto', skyline: parseSkyline('osaka') },
+  ],
+  [
+    'example-guadalajara',
+    sampleStats({ total: 1500, streak: 14, yesterday: 5 }),
+    { train: 'auto', mode: 'multi', theme: 'auto', skyline: skylineFile('guadalajara') },
   ],
   ['example-steam', sampleStats({ total: 600, streak: 15, yesterday: 3 }), { train: steam, mode: 'single', theme: 'auto' }],
 ];

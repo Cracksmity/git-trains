@@ -171,9 +171,19 @@ There's a city behind the train. By default it's procedural and seeded with your
 | `new-york` | One World Trade Center, Empire State, Chrysler, the Brooklyn Bridge and the Statue of Liberty |
 | `osaka` | Shitennō-ji pagoda, the Ferris wheel, Tsutenkaku, Abeno Harukas, the Umeda Sky Building, a cable-stayed bridge and the castle |
 
-A skyline is a list of pixel-art buildings, **without too much detail**: each one is a block with a top (stepped, spire, antenna, dome, pyramid) or a row-by-row drawing for landmarks with their own shape. It has no colors of its own: it uses the theme's, so it switches between light and dark by itself and the windows light up at night. To make yours, paste [docs/ai/skyline.md](docs/ai/skyline.md) into your AI with the city you want or a photo. Examples in [examples/skylines](examples/skylines) (Mexico City, Medellín).
+A skyline is a list of pixel-art buildings, **without too much detail**: each one is a block with a top (stepped, spire, antenna, dome, pyramid) or a row-by-row drawing for landmarks with their own shape. It has no colors of its own: it uses the theme's, so it switches between light and dark by itself and the windows light up at night. To make yours, paste [docs/ai/skyline.md](docs/ai/skyline.md) into your AI with the city you want or a photo. Examples in [examples/skylines](examples/skylines) (Mexico City, Medellín, Guadalajara, Malmö).
 
 ![Osaka](docs/example-osaka.svg)
+
+### The countryside of a region
+
+Between the tracks of `mode: multi` there is a strip of countryside (a village and a forest), and in every mode a slope of bushes in front of the city. By default it is the same houses, pines and round trees everywhere. A skyline can bring its own: add a `region` block and Osaka shows Japanese farmhouses, cherry trees and a torii, while Guadalajara shows adobe houses, blue agave and jacarandas, with the Tequila volcano on the horizon.
+
+![Osaka with its countryside](docs/example-osaka-countryside.svg)
+
+![Guadalajara with its countryside](docs/example-guadalajara.svg)
+
+A `region` holds small pixel drawings (`houses`, `trees`, `plants` and one `landmark`, written row by row like the buildings), a `terrain` behind them (`hills`, `mountains`, `plains` or `sea`) and up to four `accents`: extra colors with a light and a dark value each, so they follow the theme like everything else. Without a `region` the countryside is exactly what it was. `osaka` and `new-york` come with theirs, and so do the examples for Mexico City, Medellín, Guadalajara and Malmö. To research and draw yours, paste [docs/ai/region.md](docs/ai/region.md) into your AI along with your city (and your skyline JSON, if you already have one). `node scripts/region-sheet.js examples/skylines/guadalajara.json sheet.png` draws the pieces zoomed in, by day and at night.
 
 ## Share your city
 

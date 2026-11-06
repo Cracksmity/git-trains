@@ -2,11 +2,21 @@
   "name": "regions-presets",
   "route": "design",
   "promptFile": "regions-presets.md",
-  "allow": ["src/regions.js"],
+  "allow": [
+    "src/regions.js"
+  ],
   "gates": [
     "node tools/conductor/gates/region-art.js osaka:mountains new-york:hills",
     "node --test test/custom.test.js test/region.test.js test/skyline-editor.test.js test/studio.test.js test/share.test.js"
   ],
   "attempts": 2,
-  "timeoutMin": 45
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "why": "Run on GPT-6.1-Sol, the design route second rung, at the user request"
+    }
+  ]
 }
