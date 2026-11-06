@@ -4,11 +4,21 @@
 import { appendFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fetchActivity, fetchProfile, fetchDepartures, fetchYear } from './github.js';
+import { parseRepo, fetchRepoActivity, fetchRepoProfile, fetchRepoReleases } from './repo.js';
 import { summarize } from './stats.js';
-import { sampleStats, sampleProfile, sampleDepartures, sampleYear, SAMPLE_NOW } from './sample.js';
+import {
+  sampleStats,
+  sampleProfile,
+  sampleDepartures,
+  sampleRepoStats,
+  sampleRepoProfile,
+  sampleReleases,
+  sampleYear,
+  SAMPLE_NOW,
+} from './sample.js';
 import { buildSpec, LANGUAGES } from './compose.js';
 import { renderScene } from './scene.js';
-import { renderStatsCard, renderLangsCard } from './cards.js';
+import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from './cards.js';
 import { renderDeparturesCard } from './departures.js';
 import { unlockFor } from './unlocks.js';
 import { renderCalendar } from './calendar.js';
@@ -133,6 +143,9 @@ async function main() {
   const calendar = input('calendar', 'false') === 'true';
   const yearInReview = oneOf('year-in-review', input('year-in-review', 'false'), BOOLEANS) === 'true';
   const unlocks = input('unlocks', 'true') !== 'false';
+  // Repo mode: with `repo: owner/name` the train describes that repository, not a user (see repo.js).
+  const repoIn = input('repo');
+  const repo = repoIn ? parseRepo(repoIn) : null;
 
   let stats;
   let loadProfile;
@@ -140,22 +153,30 @@ async function main() {
   let loadYear;
   let now = new Date();
   if (sample) {
-    stats = sampleStats({ exclude });
-    loadProfile = async () => sampleProfile();
-    loadDepartures = async () => sampleDepartures();
+    stats = repo ? sampleRepoStats({ exclude }) : sampleStats({ exclude });
+    loadProfile = async () => (repo ? sampleRepoProfile() : sampleProfile());
+    loadDepartures = async () => (repo ? sampleReleases() : sampleDepartures());
     loadYear = async (year) => sampleYear(year, SAMPLE_NOW);
     now = SAMPLE_NOW;
   } else {
     const token = input('github-token') || process.env.GITHUB_TOKEN;
-    const user = input('user') || process.env.GITHUB_REPOSITORY_OWNER;
     if (!token) throw new Error('Missing "github-token" (use ${{ github.token }} or a PAT)');
-    if (!user) throw new Error('Missing "user" (or GITHUB_REPOSITORY_OWNER)');
-    stats = summarize(await fetchActivity({ token, user }), { exclude });
-    // The stats card and the unlockable cars both need the profile numbers: ask once.
-    let profile;
-    loadProfile = () => (profile ??= fetchProfile({ token, user }));
-    loadDepartures = () => fetchDepartures({ token, user });
-    loadYear = (year) => fetchYear({ token, user, year, today: now });
+    if (repo) {
+      const onNotice = (message) => console.log(`::notice::${message}`);
+      stats = summarize(await fetchRepoActivity({ token, repo, onNotice }), { exclude });
+      let profile;
+      loadProfile = () => (profile ??= fetchRepoProfile({ token, repo }));
+      loadDepartures = () => fetchRepoReleases({ token, repo });
+    } else {
+      const user = input('user') || process.env.GITHUB_REPOSITORY_OWNER;
+      if (!user) throw new Error('Missing "user" (or GITHUB_REPOSITORY_OWNER)');
+      stats = summarize(await fetchActivity({ token, user }), { exclude });
+      // The stats card and the unlockable cars both need the profile numbers: ask once.
+      let profile;
+      loadProfile = () => (profile ??= fetchProfile({ token, user }));
+      loadDepartures = () => fetchDepartures({ token, user });
+      loadYear = (year) => fetchYear({ token, user, year, today: now });
+    }
   }
   // The year in review: `review-year`, or the current year so far (the last one in January). A year
   // that can't be reviewed stops the run before anything is fetched.
@@ -173,10 +194,14 @@ async function main() {
   }
 
   mkdirSync(outDir, { recursive: true });
+  // A repository's files carry "repo" in the name (train-repo.svg, card-repo-stats.svg...), so one
+  // workflow can draw a profile and a repository into the same folder.
+  const trainName = repo ? 'train-repo' : 'train';
+  const cardName = repo ? 'card-repo' : 'card';
   const variants =
     theme === 'both'
-      ? [['light', 'train-light.svg'], ['dark', 'train-dark.svg'], ['auto', 'train.svg']]
-      : [[theme, 'train.svg']];
+      ? [['light', `${trainName}-light.svg`], ['dark', `${trainName}-dark.svg`], ['auto', `${trainName}.svg`]]
+      : [[theme, `${trainName}.svg`]];
   const files = [];
   const write = (name, svg) => {
     const path = join(outDir, name);
@@ -190,14 +215,16 @@ async function main() {
   if (calendar) {
     const lead = buildSpec(stats, options).tracks[0];
     for (const [t, name] of variants) {
-      const file = name.replace('train', 'train-calendar');
+      const file = name.replace(trainName, `${trainName}-calendar`);
       write(file, renderCalendar(stats, { model: lead.model, stripe: lead.stripe, label: lead.label, language, theme: t }));
     }
   }
 
-  // The year in review: a poster of one calendar year, with the same train. Like the cards, if it
-  // fails the scene still stands: warn and carry on.
-  if (yearInReview) {
+  // The year in review: a poster of one calendar year, with the same train. It reads a user's year, so
+  // in repo mode there is nothing to draw. Like the cards, if it fails the scene still stands: warn and carry on.
+  if (yearInReview && repo) {
+    console.log('::notice::year-in-review is a poster of a user, so it is skipped in repo mode');
+  } else if (yearInReview) {
     try {
       const review = buildReview(await loadYear(reviewYear), { year: reviewYear, exclude });
       // The special car is judged on that year: its longest streak, and the profile's stars and PRs.
@@ -211,7 +238,7 @@ async function main() {
       }
       const lead = buildSpec(review, { ...options, unlock: null }).tracks[0];
       for (const [t, name] of variants) {
-        const file = name.replace('train', 'year-in-review');
+        const file = name.replace(trainName, 'year-in-review');
         write(file, renderReview(review, { ...cardStyle, theme: t, model: lead.model, stripe: lead.stripe }));
       }
     } catch (err) {
@@ -222,10 +249,14 @@ async function main() {
   // Profile cards. If they fail the scene still stands: warn and carry on.
   if (cards.size) {
     try {
-      if (cards.has('stats')) write('card-stats.svg', renderStatsCard(await loadProfile(), cardStyle));
-      if (cards.has('languages')) write('card-languages.svg', renderLangsCard(stats.languages, cardStyle));
+      if (cards.has('stats')) {
+        const profile = await loadProfile();
+        write(`${cardName}-stats.svg`, repo ? renderRepoStatsCard({ ...profile, commits: stats.total }, cardStyle) : renderStatsCard(profile, cardStyle));
+      }
+      if (cards.has('languages')) write(`${cardName}-languages.svg`, renderLangsCard(stats.languages, cardStyle));
       if (cards.has('departures')) {
-        write('card-departures.svg', renderDeparturesCard(await loadDepartures(), stats.user, { ...cardStyle, now }));
+        const board = await loadDepartures();
+        write(`${cardName}-departures.svg`, renderDeparturesCard(board, repo ? repo.full : stats.user, { ...cardStyle, now, repo: !!repo }));
       }
     } catch (err) {
       console.log(`::warning::Could not generate the cards: ${err.message}`);
@@ -235,7 +266,7 @@ async function main() {
   const main = buildSpec(stats, options).tracks[0];
   const modelId = typeof main.model === 'string' ? main.model : main.model.id;
   console.log(
-    `${stats.user}: ${stats.total} contributions, streak ${stats.streak}, yesterday ${stats.yesterday} -> ` +
+    `${stats.fullName ?? stats.user}: ${stats.total} ${repo ? 'commits' : 'contributions'}, streak ${stats.streak}, yesterday ${stats.yesterday} -> ` +
       `${main.cars} car(s) ${modelId}, state ${stats.state}${options.unlock ? `, ${options.unlock} car unlocked` : ''}`,
   );
 

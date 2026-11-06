@@ -95,7 +95,7 @@ export function renderScene(spec) {
   let svg = '';
 
   const stars = starsLayers(W, used);
-  const backdrop = paintBackdrop(W, H, tracks, user, spec.skyline ?? null);
+  const backdrop = paintBackdrop(W, H, tracks, user, spec.skyline ?? null, spec.seed ?? user);
   // Season or holiday of spec.date (see seasons.js); no date or a plain day adds nothing.
   const kind = spec.date ? decorationFor(spec.date, spec.hemisphere) : null;
   const decor = kind && decorLayers(kind, { W, H, tracks, user, backdrop }, used);

@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · AI leaderboard</title>
+<meta name="description" content="Which AI built git-trains: every task the conductor handed to Codex or Antigravity, with how often each model passed its gates on the first try, how long it took and how many tokens it used.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/leaderboard/">
+<meta property="og:title" content="git-trains · AI leaderboard">
+<meta property="og:description" content="Which AI built git-trains: every task the conductor handed to Codex or Antigravity, with how often each model passed its gates on the first try, how long it took and how many tokens it used.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* The AI leaderboard: docs/leaderboard.json, aggregated here by board.js. */
+:root {
+  --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
+  --green: #1b8638; --yellow: #c98f00; --chip: #e7ece8; --bad: #a33a2c; --good: #1b7a35; --button-ink: #ffffff;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --bad: #f08a7a; --good: #5fd07e; --button-ink: #101412; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+  --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --bad: #f08a7a; --good: #5fd07e; --button-ink: #101412; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
+a { color: var(--green); text-underline-offset: 2px; }
+:is(a, button, select, summary):focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+button, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+code { font: 0.86em var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding: 40px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 56px;
+}
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: clamp(34px, 6vw, 56px); }
+h2 { font-size: clamp(24px, 3.2vw, 30px); }
+h3 { font-size: 19px; }
+p { margin: 0; max-width: 66ch; }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.muted { color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+/* Buttons and segmented controls, as on the home page. */
+.btn { display: inline-block; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px/1.3 var(--body); text-decoration: none; }
+.btn:hover { border-color: var(--green); }
+.btn.main { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 6px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1.4 var(--mono); }
+.seg button:hover { border-color: var(--green); }
+.seg button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+.select { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font: 500 13px/1.4 var(--mono); max-width: 100%; }
+
+/* Header. */
+.hero { display: grid; gap: 16px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; }
+.hero-text { display: grid; gap: 12px; }
+.pitch { font-size: clamp(17px, 2.1vw, 19px); line-height: 1.5; max-width: 52ch; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Totals. */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0; }
+.tile { display: grid; gap: 2px; align-content: start; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.tile dt { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tile dd { margin: 0; font: 600 clamp(26px, 4vw, 34px)/1.1 var(--display); }
+.tile .sub { font-size: 13px; color: var(--muted); }
+
+/* Section controls. */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.tally { font: 13px/1.5 var(--mono); color: var(--muted); }
+
+/* Tables. They turn into stacked cards on narrow screens. */
+.table-box { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 11px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font: 500 11px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td b { font-weight: 600; }
+.sub { display: block; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.num { white-space: nowrap; }
+
+.model-cell { min-width: 176px; }
+.model { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 10px; align-items: baseline; }
+.rank { grid-row: span 2; min-width: 1.4em; font: 600 22px/1.1 var(--display); color: var(--green); }
+.pass b { font-size: 16px; }
+.bar-track { display: block; height: 6px; margin: 5px 0 3px; border-radius: 3px; background: var(--chip); overflow: hidden; min-width: 70px; }
+.bar-track i { display: block; height: 100%; background: var(--green); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { display: inline-block; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; font: 500 12px/1.5 var(--mono); white-space: nowrap; }
+.chip.fb { border-style: dashed; color: var(--muted); }
+.falls { display: grid; gap: 6px; }
+.falls p { font-size: 13px; line-height: 1.45; max-width: none; }
+.falls .dir { font: 500 11px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.dash { color: var(--muted); }
+
+/* The log. */
+.tries { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.tries li { display: grid; grid-template-columns: 1.3em minmax(0, 1fr); gap: 0 4px; }
+.mark { font-weight: 600; }
+.pass-mark { color: var(--good); }
+.fail-mark { color: var(--bad); }
+.error-mark { color: var(--muted); }
+.result { font-weight: 600; }
+.result.ok { color: var(--good); }
+.result.no { color: var(--bad); }
+.result.err { color: var(--muted); }
+.more { justify-self: start; }
+.empty { padding: 28px; text-align: center; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
+.empty p { margin: 0 auto; }
+
+/* The Medellín benchmark and how it is measured. */
+.verdicts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; padding: 0; margin: 0; list-style: none; }
+.verdict { display: grid; gap: 6px; align-content: start; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; height: 100%; }
+.verdict:hover { border-color: var(--green); }
+.verdict .who { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.verdict p { font-size: 14px; }
+.notes { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 72ch; }
+.code { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow-x: auto; font: 13px/1.6 var(--mono); }
+footer { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+@media (max-width: 900px) {
+  .verdicts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .stack, .stack tbody { display: block; }
+  .stack tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; padding: 14px; border-bottom: 1px solid var(--line); }
+  .stack tbody tr:last-child { border-bottom: 0; }
+  .stack td { display: block; padding: 0; border: 0; min-width: 0; }
+  .stack td[data-label]::before { content: attr(data-label); display: block; font: 500 11px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .stack td.wide { grid-column: 1 / -1; }
+  .stack td.wide.nolabel::before, .stack td.model-cell::before { display: none; }
+  .models-table .model-cell, .models-table .pass { grid-column: 1 / -1; }
+  .models-table .pass { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0 12px; }
+  .models-table .pass::before { grid-column: 1 / -1; }
+  .models-table .pass .bar-track { margin: 0; }
+  .log-table tr { grid-template-columns: minmax(0, 1fr) auto; }
+  .log-table td.when-task { grid-column: 1; }
+  .log-table td.result-cell { grid-column: 2; text-align: right; }
+  .log-table td.tries-cell { grid-column: 1 / -1; }
+  .log-table td.span-half { grid-column: auto; }
+}
+@media (max-width: 560px) {
+  .wrap { gap: 44px; padding-top: 28px; }
+  .verdicts { grid-template-columns: minmax(0, 1fr); }
+  .tile { padding: 12px; }
+  .stack tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .models-table .pass, .models-table .model-cell { grid-column: 1 / -1; }
+  .log-table tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .log-table td.when-task, .log-table td.result-cell { grid-column: 1 / -1; text-align: left; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="stripe" aria-hidden="true"></div>
+    <nav class="eyebrow" aria-label="Site"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../studio/">studio</a> · <a href="../gallery/">gallery</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>AI leaderboard</h1>
+        <p class="pitch">Which AI built git-trains? Every task the <a href="https://github.com/Cracksmity/git-trains/tree/main/tools/conductor">conductor</a> handed to another model, scored by its own checks: how often each one passed on the first try, how long it took and how many tokens it used.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#models">See the models</a>
+        <a class="btn" href="../docs/leaderboard.json">The data (JSON)</a>
+      </div>
+    </div>
+  </header>
+
+  <noscript><p class="empty">The leaderboard is drawn in the browser from <a href="../docs/leaderboard.json">docs/leaderboard.json</a>, so it needs JavaScript.</p></noscript>
+
+  <dl class="tiles" id="tiles" aria-label="Totals"></dl>
+
+  <section id="models" aria-labelledby="models-h">
+    <header>
+      <h2 id="models-h">Models</h2>
+      <p>One row per model. Only attempts that were judged count: a run that crashed before the model did anything is not a verdict on it. With so few tasks a rate is a hint, not a ranking to bet on.</p>
+    </header>
+    <div class="bar">
+      <div class="seg" id="sort" role="group" aria-label="Sort the models by">
+        <button data-v="firstTry" aria-pressed="true">Best first try</button>
+        <button data-v="tasks" aria-pressed="false">Most tasks</button>
+        <button data-v="speed" aria-pressed="false">Fastest</button>
+        <button data-v="tokens" aria-pressed="false">Fewest tokens</button>
+      </div>
+    </div>
+    <div id="models-box" class="table-box" hidden>
+      <table class="stack models-table">
+        <caption class="sr-only">Models, with their tasks, first-try pass rate, median time, tokens, routes and fallbacks</caption>
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Tasks</th>
+            <th scope="col">First-try pass</th>
+            <th scope="col" title="Median time of the attempts that passed">Median time</th>
+            <th scope="col" title="Input plus output tokens, as each CLI reports them">Tokens</th>
+            <th scope="col">Routes</th>
+            <th scope="col">Fallbacks</th>
+          </tr>
+        </thead>
+        <tbody id="models-body"></tbody>
+      </table>
+    </div>
+    <p class="muted" id="models-state" role="status">Loading the runs…</p>
+  </section>
+
+  <section id="log" aria-labelledby="log-h">
+    <header>
+      <h2 id="log-h">Every task</h2>
+      <p>Newest first. A task run lists each attempt in order: when a model keeps failing its checks, the conductor retries it and then hands the task to the next model.</p>
+    </header>
+    <div class="bar">
+      <div class="seg" id="result" role="group" aria-label="Show">
+        <button data-v="all" aria-pressed="true">All</button>
+        <button data-v="pass" aria-pressed="false">Passed</button>
+        <button data-v="other" aria-pressed="false">Not passed</button>
+      </div>
+      <label class="tally">Model <select class="select" id="model-filter"><option value="">Any</option></select></label>
+      <span class="tally" id="tally" aria-live="polite"></span>
+    </div>
+    <div id="log-box" class="table-box" hidden>
+      <table class="stack log-table">
+        <caption class="sr-only">Every task the conductor ran, newest first</caption>
+        <thead>
+          <tr>
+            <th scope="col">Task</th>
+            <th scope="col">Attempts</th>
+            <th scope="col">Time</th>
+            <th scope="col">Tokens</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+    <button class="btn more" id="more" hidden>Show more</button>
+  </section>
+
+  <section id="medellin" aria-labelledby="medellin-h">
+    <header>
+      <h2 id="medellin-h">Before the conductor: Medellín in ten runs</h2>
+      <p>The routes start from a head-to-head: ten runs in Claude Code, Codex and Antigravity designed the same Medellín Metro train and skyline from one brief. It is the one place where the Claude models sit next to the others, because the conductor itself only drives Codex and Antigravity.</p>
+    </header>
+    <ul class="verdicts">
+      <li><a class="verdict" href="../benchmarks/medellin/#gpt-6-astra"><span class="who">GPT-6 Astra · Codex</span><h3>Most complete</h3><p>A train with all four CAF features and every landmark drawn, in 4 min 48 s. GPT-6.1 Sol did the same.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#gpt-6.1-terra"><span class="who">GPT-6.1 Terra · Codex</span><h3>Most efficient</h3><p>A 4/4 train in 2 min 13 s with 3.6k output tokens. Its skyline was incomplete.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#sonnet"><span class="who">Sonnet 5.5 · two tools</span><h3>The tool matters</h3><p>The same prompt scored 4/4 in Claude Code and 1/4 in Antigravity.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#haiku"><span class="who">Haiku 5.5 · Claude Code</span><h3>Most tokens</h3><p>81.8k output tokens, 70k of them reasoning, for a plainer train.</p></a></li>
+    </ul>
+    <div class="cta"><a class="btn" href="../benchmarks/medellin/">Read the whole benchmark</a></div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <header>
+      <h2 id="how-h">How it is measured</h2>
+    </header>
+    <ul class="notes">
+      <li><b>A run</b> is one attempt at a task. The conductor gives the model the task, then runs the task's checks (tests, link and translation gates). If one fails, the failure goes back to the model for another try; after the allowed tries, the task climbs to the next model on its route.</li>
+      <li><b>First-try pass</b> is the share of a model's first attempts that passed every check. A model that only ever got the tasks the one before it failed will look worse than it is.</li>
+      <li><b>Crashed</b> runs, where the agent exited before doing anything (a usage limit, a CLI error), are listed in the log but not counted anywhere else.</li>
+      <li><b>Median time</b> is that of the attempts that passed. A failure that ends in seconds is not a fast job.</li>
+      <li><b>Tokens</b> are input plus output as each CLI reports them; input counts everything the model read, cache included. Reasoning tokens are reported on their own and not added again. Compare tokens within one tool.</li>
+      <li><b>Routes</b> are the kinds of task: <code>mechanical</code>, <code>design</code>, <code>research</code> and <code>bulk</code>. A dashed chip means the model only ran there as a fallback.</li>
+    </ul>
+    <p>The file keeps only the date, task id, route, backend, model, effort, attempt, pass or fail with the name of the check that failed, seconds and tokens. Never prompts, file paths or the machine's user name. To add your own runs:</p>
+    <pre class="code"><code>npm run leaderboard</code></pre>
+    <p class="muted">It merges the conductor logs of every checkout on your machine into <code>docs/leaderboard.json</code>, skipping runs it already has, so several machines can add theirs. Then open a pull request.</p>
+  </section>
+
+  <footer>
+    <a href="https://github.com/Cracksmity/git-trains/tree/main/tools/conductor">Conductor</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/scripts/leaderboard.js">scripts/leaderboard.js</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
+    <span>MIT license</span>
+  </footer>
+</div>
+
+<script type="module">
+import {
+  parseRuns, summarize, totals, taskRuns, outcome, SORTS,
+  modelName, backendName, reasons, fmtSeconds, fmtTokens, fmtPercent, fmtDate,
+} from './board.js';
+
+const $ = (id) => document.getElementById(id);
+// Small element builder. Everything from the data goes in as text, never as HTML.
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v === true ? '' : v);
+  el.append(...kids.flat().filter((k) => k !== null && k !== undefined && k !== false));
+  return el;
+}
+const plural = (n, one, many = `${one}s`) => `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
+const dash = () => h('span', { class: 'dash' }, '–');
+
+let runs = [];
+let models = [];
+let launches = [];
+let sort = 'firstTry';
+let result = 'all';
+let model = '';
+let shown = 25;
+
+// --- Totals.
+function renderTiles() {
+  const t = totals(runs);
+  const tile = (label, value, sub) => [h('div', { class: 'tile' }, h('dt', {}, label), h('dd', {}, value), sub ? h('span', { class: 'sub' }, sub) : null)];
+  $('tiles').replaceChildren(
+    ...tile('Tasks', String(t.tasks), `${plural(t.runs, 'run')} by ${plural(t.models, 'model')}`),
+    ...tile('Attempts', String(t.attempts), t.errors ? `${t.errors} more crashed before they started` : 'judged by their checks'),
+    ...tile('First-try pass', t.firstTry.total ? fmtPercent(t.firstTry.passed / t.firstTry.total) : '–', `${t.firstTry.passed} of ${t.firstTry.total} first attempts`),
+    ...tile('Tokens', `${t.tokens.partial ? '≥' : ''}${fmtTokens(t.tokens.total)}`, t.since ? `${fmtDate(t.since)} to ${fmtDate(t.until)}` : ''),
+  );
+}
+
+// --- Models.
+function modelRow(m, rank) {
+  const efforts = Object.entries(m.efforts).map(([e, n]) => `${e} ×${n}`).join(', ');
+  const rate = m.firstTry.rate;
+  const name = (slug) => modelName(slug);
+  const out = m.fellBackTo.map((f) => h('p', {}, h('span', { class: 'dir' }, 'Handed on to '), name(f.to), ' on ', h('code', {}, f.task), h('span', { class: 'sub' }, reasons(f.because))));
+  const inn = m.tookOver.map((f) => h('p', {}, h('span', { class: 'dir' }, 'Took over from '), name(f.from), ' on ', h('code', {}, f.task)));
+  return h('tr', {},
+    h('td', { class: 'model-cell', 'data-label': 'Model' }, h('div', { class: 'model' },
+      h('span', { class: 'rank' }, String(rank)),
+      h('b', {}, m.name),
+      h('span', { class: 'sub' }, [m.backends.map(backendName).join(', '), efforts].filter(Boolean).join(' · ')))),
+    h('td', { 'data-label': 'Tasks' }, h('b', {}, String(m.tasks)),
+      h('span', { class: 'sub' }, plural(m.attempts, 'attempt') + (m.errors ? `, ${m.errors} crashed` : ''))),
+    h('td', { class: 'pass', 'data-label': 'First-try pass' },
+      h('b', {}, fmtPercent(rate)),
+      h('span', { class: 'bar-track', 'aria-hidden': 'true' }, h('i', { style: `width:${rate === null ? 0 : Math.round(rate * 100)}%` })),
+      h('span', { class: 'sub' }, `${m.firstTry.passed}/${m.firstTry.total}`)),
+    h('td', { 'data-label': 'Median time', title: m.medianAllSeconds === null ? null : `All judged attempts: ${fmtSeconds(m.medianAllSeconds)}` },
+      m.medianSeconds === null ? dash() : h('b', { class: 'num' }, fmtSeconds(m.medianSeconds)),
+      h('span', { class: 'sub' }, m.medianSeconds === null ? 'no passing attempt' : 'of passing attempts')),
+    h('td', { 'data-label': 'Tokens', title: `Input ${m.tokens.input.toLocaleString('en-US')}, output ${m.tokens.output.toLocaleString('en-US')}; reasoning ${m.tokens.reasoning.toLocaleString('en-US')} is reported separately and not added` },
+      h('b', { class: 'num' }, `${m.tokens.partial ? '≥' : ''}${fmtTokens(m.tokens.total)}`),
+      h('span', { class: 'sub' }, `in ${fmtTokens(m.tokens.input)} · out ${fmtTokens(m.tokens.output)}`)),
+    h('td', { class: 'wide', 'data-label': 'Routes' }, m.routes.length
+      ? h('div', { class: 'chips' }, m.routes.map((r) => h('span', { class: `chip${r.asFallback ? ' fb' : ''}`, title: `${plural(r.attempts, 'attempt')} on ${plural(r.tasks, 'task')}${r.asFallback ? ', only as a fallback' : ''}` }, `${r.route} ${r.attempts}`)))
+      : dash()),
+    h('td', { class: 'wide', 'data-label': 'Fallbacks' }, out.length || inn.length ? h('div', { class: 'falls' }, out, inn) : dash()),
+  );
+}
+function renderModels() {
+  const rows = [...models].filter((m) => m.attempts > 0).sort(SORTS[sort]);
+  $('models-body').replaceChildren(...rows.map((m, i) => modelRow(m, i + 1)));
+  $('models-box').hidden = rows.length === 0;
+}
+$('sort').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  sort = b.dataset.v;
+  for (const x of $('sort').children) x.setAttribute('aria-pressed', String(x === b));
+  renderModels();
+});
+
+// --- The log: one row per task run, newest first.
+function resultOf(t) {
+  const judged = t.attempts.filter((a) => outcome(a) !== 'error');
+  if (!judged.length) return { text: 'Crashed', cls: 'err' };
+  if (t.passed) return t.attempts.length === 1 ? { text: 'Passed first try', cls: 'ok' } : { text: `Passed after ${plural(t.attempts.length - 1, 'failed attempt')}`, cls: 'ok' };
+  return { text: 'Not passed', cls: 'no' };
+}
+function logRow(t) {
+  const r = resultOf(t);
+  const lines = t.attempts.map((a) => {
+    const o = outcome(a);
+    const mark = o === 'pass' ? ['✓', 'pass-mark', 'passed'] : o === 'fail' ? ['✗', 'fail-mark', 'failed'] : ['–', 'error-mark', 'crashed'];
+    return h('li', {},
+      h('span', { class: `mark ${mark[1]}`, 'aria-hidden': 'true' }, mark[0]),
+      h('span', {}, h('span', { class: 'sr-only' }, `${mark[2]}: `), modelName(a.model),
+        h('span', { class: 'muted' }, ` · try ${a.attempt} · ${fmtSeconds(a.seconds)}${a.effort ? ` · ${a.effort}` : ''}`),
+        o === 'fail' ? h('span', { class: 'sub' }, reasons(a.failed)) : null));
+  });
+  return h('tr', {},
+    h('td', { class: 'when-task wide nolabel' }, h('b', {}, t.task), h('span', { class: 'sub' }, `${fmtDate(t.at)} · ${t.route}`)),
+    h('td', { class: 'tries-cell wide', 'data-label': 'Attempts' }, h('ol', { class: 'tries' }, lines)),
+    h('td', { class: 'span-half', 'data-label': 'Time' }, h('span', { class: 'num' }, fmtSeconds(t.seconds))),
+    h('td', { class: 'span-half', 'data-label': 'Tokens' }, h('span', { class: 'num' }, t.tokens.total ? `${t.tokens.partial ? '≥' : ''}${fmtTokens(t.tokens.total)}` : '–')),
+    h('td', { class: 'result-cell' }, h('span', { class: `result ${r.cls}` }, r.text)),
+  );
+}
+function renderLog() {
+  const rows = launches.filter((t) => {
+    if (model && !t.attempts.some((a) => a.model === model)) return false;
+    const passed = t.passed;
+    return result === 'all' || (result === 'pass' ? passed : !passed);
+  });
+  $('log-body').replaceChildren(...rows.slice(0, shown).map(logRow));
+  $('log-box').hidden = rows.length === 0;
+  $('more').hidden = rows.length <= shown;
+  $('more').textContent = `Show ${Math.min(25, rows.length - shown)} more`;
+  $('tally').textContent = plural(rows.length, 'task run');
+}
+$('result').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  result = b.dataset.v;
+  shown = 25;
+  for (const x of $('result').children) x.setAttribute('aria-pressed', String(x === b));
+  renderLog();
+});
+$('model-filter').addEventListener('change', (e) => { model = e.target.value; shown = 25; renderLog(); });
+$('more').addEventListener('click', () => { shown += 25; renderLog(); });
+
+// --- Load.
+function fail(message) {
+  $('models-state').textContent = message;
+  $('models-state').className = 'empty';
+  $('log').hidden = true;
+}
+try {
+  const res = await fetch('../docs/leaderboard.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  runs = parseRuns(await res.text()).runs;
+  if (!runs.length) throw new Error('empty');
+  models = summarize(runs);
+  launches = taskRuns(runs).reverse();
+  for (const m of models.filter((x) => x.attempts > 0).sort(SORTS.tasks)) $('model-filter').append(h('option', { value: m.model }, m.name));
+  renderTiles();
+  renderModels();
+  renderLog();
+  $('models-state').hidden = true;
+} catch (err) {
+  fail(`Could not load docs/leaderboard.json (${err.message}). If you opened this file straight from disk, serve the repository instead: npm run preview, then open /leaderboard/.`);
+}
+</script>
+</body>
+</html>

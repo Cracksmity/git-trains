@@ -640,6 +640,18 @@ test('a year that cannot be reviewed, or a bad toggle, stops the run with a clea
   }
 });
 
+test('in repo mode there is no user to review: the poster is skipped with a notice and the rest is written', () => {
+  const r = runAction({ 'INPUT_YEAR-IN-REVIEW': 'true', INPUT_REPO: 'octocat/hello-world', INPUT_THEME: 'light' });
+  try {
+    assert.equal(r.r.status, 0, r.r.stdout);
+    assert.match(r.r.stdout, /::notice::year-in-review is a poster of a user, so it is skipped in repo mode/);
+    assert.ok(r.has('train-repo.svg'));
+    assert.ok(!r.has('year-in-review.svg') && !r.has('train-repo-year-in-review.svg'));
+  } finally {
+    r.done();
+  }
+});
+
 test('the action.yml declares the two inputs, off and empty by default', () => {
   const yml = readFileSync(new URL('../action.yml', import.meta.url), 'utf8');
   assert.match(yml, /\n  year-in-review:\n    description: [^\n]*year-in-review\.svg[^\n]*\n    default: "false"\n/);

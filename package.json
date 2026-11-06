@@ -16,6 +16,7 @@
     "docs": "node scripts/docs.js",
     "export": "node scripts/export.js",
     "community": "node scripts/community.js",
+    "leaderboard": "node scripts/leaderboard.js",
     "test": "node --test"
   },
   "repository": {

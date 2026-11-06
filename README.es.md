@@ -16,7 +16,7 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
   <img alt="El calendario de contribuciones del autor hoy, recorrido por el mismo tren" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-light.svg">
 </picture>
 
-<sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
+<sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**. ¿Lo quieres para un proyecto en vez de un perfil? Mira [En el README de un repositorio](#en-el-readme-de-un-repositorio).</sub>
 
 ## Qué significa cada parte
 
@@ -183,6 +183,7 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `exclude-languages` | | Lenguajes a dejar fuera, separados por comas, por ejemplo `HTML, Jupyter Notebook` |
 | `scale` | `2` | Tamaño de cada píxel (1 a 6) |
 | `user` | dueño del repo | Usuario a dibujar |
+| `repo` | | `owner/name`: dibuja un repositorio en vez de un usuario (ver [En el README de un repositorio](#en-el-readme-de-un-repositorio)); `user` se ignora |
 | `github-token` | `github.token` | Usa un PAT para contar contribuciones privadas |
 | `output-dir` | `dist` | Carpeta de salida |
 | `cards` | `none` | Tarjetas de perfil: `stats`, `languages`, `departures` o `both` (estadísticas y lenguajes); también una lista, p. ej. `stats, departures` (ver abajo) |
@@ -333,6 +334,60 @@ Si la consulta de estadísticas falla (por ejemplo, por un límite de la API), l
 
 Los caracteres giran hasta su sitio al cargar la tarjeta, solo con CSS, y respeta `prefers-reduced-motion`. Con `language: en` dice `DEPARTURES`, `TIME`, `DESTINATION`, `PLATFORM`, `STATUS`. Usa los mismos inputs `color-*` y `border` que las otras tarjetas, pero parte de un panel propio: `color-background` es el panel, `color-title` la barra de título, los encabezados y `ABORDANDO`, `color-text` los caracteres, `color-icon` el estado `A TIEMPO` y el trenecito, y `color-ring` el estado `RETRASADO`. No salen los forks ni tu repositorio de perfil (el que se llama como tú): el workflow que dibuja estas imágenes hace commit en él cada día y siempre saldría primero.
 
+## En el README de un repositorio
+
+Un tren no es solo para perfiles. Con `repo: owner/name` describe **un repositorio**, así que cualquier proyecto puede tener un tren vivo en su README: crece con los commits del último año, lleva el color del lenguaje principal del repositorio y corre tan rápido como se movió ayer.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-dark.svg">
+  <img alt="El tren de este mismo repositorio hoy, dibujado en modo repo por el workflow de este repositorio" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-light.svg">
+</picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-calendar-dark.svg">
+  <img alt="El calendario de commits de este repositorio hoy, con su tren recorriéndolo" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-repo-calendar-light.svg">
+</picture>
+
+<sub>Ese es **este** repositorio, `Cracksmity/git-trains`, en modo repo: [el mismo workflow](.github/workflows/train.yml) que dibuja el tren del autor más arriba lo dibuja también a él, cada mañana.</sub>
+
+```yaml
+      - uses: actions/checkout@v5
+      - uses: Cracksmity/git-trains@v1
+        with:
+          repo: ${{ github.repository }} # o cualquier owner/name público, por ejemplo facebook/react
+          output-dir: out
+          calendar: true
+          cards: stats, departures
+```
+
+Basta el `GITHUB_TOKEN` por defecto: lee cualquier repositorio público y aquel en el que corre el workflow. Un workflow completo que publica las imágenes en una rama propia (para que el historial del repositorio no se llene de commits de imágenes) está en [examples/workflow-repo.yml](examples/workflow-repo.yml). Luego, en el README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/OWNER/REPO/train/train-repo-dark.svg">
+  <img alt="El tren de este repositorio" src="https://raw.githubusercontent.com/OWNER/REPO/train/train-repo-light.svg">
+</picture>
+```
+
+Lo demás funciona como en un perfil (`mode: multi`, `train`, `skyline`, `seasons`, `language`, `exclude-languages`...). Lo que cambia:
+
+| | Un perfil | Un repositorio |
+| --- | --- | --- |
+| Vagones, velocidad y racha | Tus contribuciones | Los commits de la rama principal (último año), los días con commits y los de ayer |
+| Franja y leyenda | El lenguaje de tus repositorios | Los lenguajes del propio repositorio |
+| Cartel de la estación y letrero LED | Tu usuario | El nombre del repositorio |
+| La ciudad | Generada con tu usuario | Generada con `owner/name`: el mismo nombre de repositorio con otro dueño es otra ciudad |
+| `calendar: true` | Calendario de contribuciones | Calendario de commits, con la leyenda `... COMMITS` |
+| `cards: stats` | Estrellas, commits, PRs, issues, repos en los que contribuiste | Estrellas, forks, commits (último año), issues abiertos y colaboradores, con el mismo anillo de rango |
+| `cards: departures` | Tus repositorios con el push más reciente | Las últimas versiones (releases), con las etiquetas que no tienen release detrás |
+| Vagones desbloqueables | Tu racha, tus estrellas y tus PRs | Los del propio repositorio: su racha de commits, sus estrellas y sus pull requests |
+| Archivos | `train*.svg`, `card-*.svg` | `train-repo*.svg`, `card-repo-*.svg`: un mismo workflow puede dibujar un perfil y un repositorio en la misma carpeta |
+
+![Estadísticas del repositorio](docs/card-repo-stats.svg) ![Salidas del repositorio](docs/card-repo-departures.svg)
+
+En el panel de salidas HORA es cuándo se publicó la versión, DESTINO su etiqueta (tag), ANDÉN dice `VERSIÓN`, `PREVERSIÓN` o `ETIQUETA`, y ESTADO se lee como en los repositorios: `ABORDANDO` es una versión de hoy, `SALIÓ` una de hace más de un mes. Un repositorio sin versiones ni etiquetas tiene el panel vacío. Aquí las tarjetas muestran números de ejemplo; el rango de la tarjeta de estadísticas es el del perfil, leído para un proyecto (los forks cuentan donde cuentan los seguidores).
+
+**De dónde salen los números.** La actividad de commits viene del endpoint de estadísticas de GitHub (`/stats/commit_activity`), que responde `202` mientras lo calcula, normalmente la primera vez que alguien lo pide. La Action vuelve a pedirlo unas cuantas veces, con una pausa; si los datos no llegan, cuenta los commits uno a uno (los últimos 1.000 como mucho) y deja un aviso en el log, así que el tren se dibuja igual. Solo cuenta la rama principal, y los bots cuentan como los cuenta GitHub. Los lenguajes vienen de `/languages` y el resto de los números de una consulta GraphQL, así que cada ejecución hace unas cinco peticiones. Si las tarjetas no se pueden leer, la Action deja un `::warning::` y conserva el tren, como con los perfiles.
+
 ## Cómo funciona
 
 - Sin dependencias ni paso de build: JavaScript que corre directo en el runner (Node 24).
@@ -343,7 +398,7 @@ Los caracteres giran hasta su sitio al cargar la tarjeta, solo con CSS, y respet
 
 ## Hecho con un director de IAs
 
-Este proyecto lo construye una IA que dirige a otras. [tools/conductor](tools/conductor) le pasa cada tarea a Codex o a Antigravity (Gemini) según su tipo, la corre en un worktree de git aislado, revisa el resultado con filtros (tests, el validador, enlaces, traducción), le devuelve los fallos y sube a un modelo más fuerte cuando uno sigue fallando. El reparto sale de la [comparativa de Medellín](https://cracksmity.github.io/git-trains/benchmarks/medellin/), donde diez corridas de IA diseñaron el mismo tren y skyline.
+Este proyecto lo construye una IA que dirige a otras. [tools/conductor](tools/conductor) le pasa cada tarea a Codex o a Antigravity (Gemini) según su tipo, la corre en un worktree de git aislado, revisa el resultado con filtros (tests, el validador, enlaces, traducción), le devuelve los fallos y sube a un modelo más fuerte cuando uno sigue fallando. El reparto sale de la [comparativa de Medellín](https://cracksmity.github.io/git-trains/benchmarks/medellin/), donde diez corridas de IA diseñaron el mismo tren y skyline. Cada intento queda registrado, y la [tabla de posiciones de las IAs](https://cracksmity.github.io/git-trains/leaderboard/) muestra qué modelo hizo qué tarea: cuántas veces pasó a la primera, cuánto tardó y cuántos tokens usó.
 
 ## Desarrollo
 
@@ -353,6 +408,7 @@ npm run sample     # escribe SVG con datos de muestra en ./sample
 npm test           # tests
 npm run docs       # regenera los SVG de docs/
 npm run community  # revisa community/ y regenera community/index.json para la galería
+npm run leaderboard # une los registros del conductor en docs/leaderboard.json para la tabla de posiciones
 node scripts/sheet.js sheet.png 5 3 0                                # hoja PNG ampliada de todos los modelos
 node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json   # ...o de un tren en JSON
 ```
