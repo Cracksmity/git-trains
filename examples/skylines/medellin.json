@@ -569,5 +569,137 @@
       "w": 26,
       "h": 62
     }
-  ]
+  ],
+  "region": {
+    "name": "Antioquia coffee country",
+    "description": "Coffee farmhouses, guadua and shade trees on the steep green slopes around the Aburra Valley. Guayacan flowers mark a dry spell; coffee blossoms follow rain.",
+    "source": "Museum of Antioquia: domestic architecture; Corantioquia: community plant nurseries; Medellin Botanical Garden: yellow trumpet trees; Cenicafe: solar coffee dryers.",
+    "terrain": "mountains",
+    "accents": [
+      {
+        "name": "Painted veranda timber",
+        "light": "#3e8079",
+        "dark": "#25423f"
+      },
+      {
+        "name": "Guayacan yellow flowers",
+        "light": "#e6c44c",
+        "dark": "#706132"
+      },
+      {
+        "name": "Translucent solar dryer cover",
+        "light": "#d5dece",
+        "dark": "#686d65"
+      },
+      {
+        "name": "Ochre coffee drying bed",
+        "light": "#b99a61",
+        "dark": "#5b4d35"
+      }
+    ],
+    "houses": [
+      {
+        "name": "Coffee-country farmhouse with shaded front veranda",
+        "rows": [
+          ".....rrrrr.....",
+          "...rrrrrrrrr...",
+          ".rrrrrrrrrrrrr.",
+          "rrrrrrrrrrrrrrr",
+          ".1ttttttttttt1.",
+          ".1##w###t##w#1.",
+          ".1##w###t##w#1.",
+          ".1111111111111.",
+          ".1.1.1.1.1.1.1.",
+          ".ttttttttttttt."
+        ]
+      }
+    ],
+    "trees": [
+      {
+        "name": "Guadua bamboo with three jointed canes",
+        "rows": [
+          "....l...",
+          "...ld...",
+          "ll.l..l.",
+          ".dll.ldl",
+          "..lll.d.",
+          "ld.ldll.",
+          ".llld.ld",
+          ".l..l.l.",
+          ".d..d.d.",
+          ".l..l.l.",
+          ".l..l.l.",
+          ".d..l.d.",
+          ".l..d.l.",
+          ".l..l.l.",
+          ".d..l.d.",
+          ".l..l.l."
+        ]
+      },
+      {
+        "name": "Guayacan yellow trumpet tree in flower",
+        "rows": [
+          "..22..22...",
+          ".222.2222..",
+          "22l2.22l.22",
+          ".22ttt.222.",
+          "22.tt.tt22.",
+          ".2..ttt..2.",
+          "....tt.....",
+          "....tt.....",
+          "....tt.....",
+          "....tt.....",
+          "....tt.....",
+          "...ttt.....",
+          "...tttt...."
+        ]
+      },
+      {
+        "name": "Broad coffee-farm shade tree",
+        "rows": [
+          "....llll.....",
+          "..llllllld...",
+          ".lllllllddd..",
+          "lllllldlldddd",
+          "llldlldddddd.",
+          ".llddtddddd..",
+          "...ttttt.....",
+          "....ttt......",
+          ".....tt......",
+          ".....tt......",
+          ".....tt......",
+          "....tttt.....",
+          "....tttt.....",
+          "...tt.ttt...."
+        ]
+      }
+    ],
+    "plants": [
+      {
+        "name": "Arabica coffee shrub with paired leaf tiers and white blossoms",
+        "rows": [
+          "..lll..",
+          ".llldd.",
+          "ll#tldd",
+          "..ltl..",
+          "llltl#d",
+          ".llddd.",
+          "...t..."
+        ]
+      }
+    ],
+    "landmark": {
+      "name": "Coffee solar dryer with arched cover and ochre bed",
+      "place": "village",
+      "rows": [
+        "....33333....",
+        "..333###333..",
+        ".333#####333.",
+        "33t#######t33",
+        "t3t3333333t3t",
+        "t44444444444t",
+        "ttttttttttttt"
+      ]
+    }
+  }
 }
