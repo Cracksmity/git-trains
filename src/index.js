@@ -3,7 +3,7 @@
 
 import { appendFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fetchActivity, fetchProfile, fetchDepartures } from './github.js';
+import { fetchActivity, fetchProfile, fetchDepartures, fetchYear } from './github.js';
 import { parseRepo, fetchRepoActivity, fetchRepoProfile, fetchRepoReleases } from './repo.js';
 import { summarize } from './stats.js';
 import {
@@ -13,6 +13,7 @@ import {
   sampleRepoStats,
   sampleRepoProfile,
   sampleReleases,
+  sampleYear,
   SAMPLE_NOW,
 } from './sample.js';
 import { buildSpec, LANGUAGES } from './compose.js';
@@ -21,6 +22,7 @@ import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from './cards.j
 import { renderDeparturesCard } from './departures.js';
 import { unlockFor } from './unlocks.js';
 import { renderCalendar } from './calendar.js';
+import { buildReview, parseReviewYear, renderReview } from './review.js';
 import { parseCustomModel } from './custom.js';
 import { parseSkyline } from './skyline.js';
 import { HEMISPHERES } from './seasons.js';
@@ -139,6 +141,7 @@ async function main() {
   };
   const exclude = list(input('exclude-languages'));
   const calendar = input('calendar', 'false') === 'true';
+  const yearInReview = oneOf('year-in-review', input('year-in-review', 'false'), BOOLEANS) === 'true';
   const unlocks = input('unlocks', 'true') !== 'false';
   // Repo mode: with `repo: owner/name` the train describes that repository, not a user (see repo.js).
   const repoIn = input('repo');
@@ -147,11 +150,13 @@ async function main() {
   let stats;
   let loadProfile;
   let loadDepartures;
+  let loadYear;
   let now = new Date();
   if (sample) {
     stats = repo ? sampleRepoStats({ exclude }) : sampleStats({ exclude });
     loadProfile = async () => (repo ? sampleRepoProfile() : sampleProfile());
     loadDepartures = async () => (repo ? sampleReleases() : sampleDepartures());
+    loadYear = async (year) => sampleYear(year, SAMPLE_NOW);
     now = SAMPLE_NOW;
   } else {
     const token = input('github-token') || process.env.GITHUB_TOKEN;
@@ -170,8 +175,12 @@ async function main() {
       let profile;
       loadProfile = () => (profile ??= fetchProfile({ token, user }));
       loadDepartures = () => fetchDepartures({ token, user });
+      loadYear = (year) => fetchYear({ token, user, year, today: now });
     }
   }
+  // The year in review: `review-year`, or the current year so far (the last one in January). A year
+  // that can't be reviewed stops the run before anything is fetched.
+  const reviewYear = yearInReview ? parseReviewYear(input('review-year'), now) : null;
 
   // Special cars the profile earned (a 100-day streak, 100+ stars, 500+ PRs). They need
   // the profile numbers; if those can't be read the scene still stands, without them.
@@ -208,6 +217,32 @@ async function main() {
     for (const [t, name] of variants) {
       const file = name.replace(trainName, `${trainName}-calendar`);
       write(file, renderCalendar(stats, { model: lead.model, stripe: lead.stripe, label: lead.label, language, theme: t }));
+    }
+  }
+
+  // The year in review: a poster of one calendar year, with the same train. It reads a user's year, so
+  // in repo mode there is nothing to draw. Like the cards, if it fails the scene still stands: warn and carry on.
+  if (yearInReview && repo) {
+    console.log('::notice::year-in-review is a poster of a user, so it is skipped in repo mode');
+  } else if (yearInReview) {
+    try {
+      const review = buildReview(await loadYear(reviewYear), { year: reviewYear, exclude });
+      // The special car is judged on that year: its longest streak, and the profile's stars and PRs.
+      if (unlocks) {
+        try {
+          const { stars, prs } = await loadProfile();
+          review.unlock = unlockFor({ streak: review.streak, stars, prs });
+        } catch (err) {
+          console.log(`::notice::Could not check the unlockable cars for the year in review: ${err.message}`);
+        }
+      }
+      const lead = buildSpec(review, { ...options, unlock: null }).tracks[0];
+      for (const [t, name] of variants) {
+        const file = name.replace(trainName, 'year-in-review');
+        write(file, renderReview(review, { ...cardStyle, theme: t, model: lead.model, stripe: lead.stripe }));
+      }
+    } catch (err) {
+      console.log(`::warning::Could not generate the year in review: ${err.message}`);
     }
   }
 

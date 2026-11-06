@@ -1,0 +1,13 @@
+{
+  "name": "review-art",
+  "route": "design",
+  "promptFile": "review-art.md",
+  "allow": ["src/review-art.js"],
+  "gates": [
+    "node --check src/review-art.js",
+    "node tools/conductor/gates/theme-colors.js src/review-art.js TONES",
+    "node --test test/review-art.test.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 40
+}

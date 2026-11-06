@@ -11,6 +11,7 @@ import {
   sampleRepoStats,
   sampleRepoProfile,
   sampleReleases,
+  sampleYear,
   SAMPLE_NOW,
 } from '../src/sample.js';
 import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from '../src/cards.js';
@@ -20,6 +21,8 @@ import { MODELS } from '../src/models.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
 import { renderCalendar } from '../src/calendar.js';
+import { buildReview, renderReview } from '../src/review.js';
+import { unlockFor } from '../src/unlocks.js';
 
 const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/trains/${name}.json`, 'utf8')));
 const newYork = example('new-york');
@@ -76,6 +79,18 @@ const calendars = [
 ];
 for (const [name, stats, opts] of calendars) {
   const svg = renderCalendar(stats, opts);
+  writeFileSync(`docs/${name}.svg`, svg);
+  console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
+}
+
+// The year in review: the sample's 2025 (a whole year) the way the Action draws it, with the car the
+// sample profile earned: once with the train that year earned, once in Spanish with the steam engine.
+for (const [name, train, language] of [['example-year-in-review', 'auto', 'en'], ['example-year-in-review-es', steam, 'es']]) {
+  const review = buildReview(sampleYear(2025), { year: 2025 });
+  const { stars, prs } = sampleProfile();
+  review.unlock = unlockFor({ streak: review.streak, stars, prs });
+  const lead = buildSpec(review, { train, language }).tracks[0];
+  const svg = renderReview(review, { language, theme: 'auto', model: lead.model, stripe: lead.stripe });
   writeFileSync(`docs/${name}.svg`, svg);
   console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }

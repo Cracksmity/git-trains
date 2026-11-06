@@ -70,6 +70,39 @@ With the default `theme: both`, add this to your README:
 
 The Action also writes `train-calendar.svg`. With a single theme, it writes only that calendar file. See also the [steam example](docs/example-calendar-steam.svg).
 
+## Year in review
+
+Set `year-in-review: true` to write a poster of one calendar year of your activity, drawn as a train journey.
+
+![Year in review, with a train running the line and a station per month](docs/example-year-in-review.svg)
+
+What's on it:
+
+- **Your year in four numbers:** contributions, active days, the longest streak (with its dates) and the busiest day.
+- **A route map:** a rail line with one station per month, as tall as that month was busy (the busiest month flies a flag). Your train runs the line, the same model as the scene (`train`: a catalog model, your own JSON or a steam locomotive) with as many cars as that year's total earns, in your top language's stripe. It stops at every station for as long as the month was busy and goes through the months with nothing. With reduced motion it stands at the last station.
+- **The busiest month and your top languages** of that year: the primary languages of the repositories you committed to, ranked by commits (`exclude-languages` applies; up to four).
+- **The special car** if you earned one (see [Unlockable cars](#unlockable-cars)), riding behind the cab with a line saying which. For the poster it is earned on that year: its longest streak, plus your profile's stars and pull requests.
+
+```yaml
+      - uses: Cracksmity/git-trains@v1
+        with:
+          year-in-review: true
+          review-year: 2025 # optional
+```
+
+**Which year?** `review-year` takes a year from 2008 to the current one. Left empty it is the **current year so far**, except in **January**, when the new year has barely begun and the poster shows the **year that just ended**. (UTC, like everything else here.) A year in progress covers the days up to the day the Action runs.
+
+It follows `theme`, `language` and `border`, and takes the same five colors as the cards (`color-background`, `color-title`, `color-icon`, `color-text`, `color-ring`): the background, the headings and big numbers, the rails and icons, the text, and the stations. With the default `theme: both` add this to your README:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="dist/year-in-review-dark.svg">
+  <img alt="My year in review" src="dist/year-in-review-light.svg">
+</picture>
+```
+
+The Action also writes `year-in-review.svg` (automatic); with a single theme it writes only that file. It makes one extra API request (plus the profile request the unlockable cars already use). If it fails, the Action logs a `::warning::` and still writes everything else. [In Spanish](docs/example-year-in-review-es.svg) with `language: es`.
+
 ## Seasons and holidays
 
 The scene follows the calendar, so your profile feels alive all year. On the day the Action runs (UTC) it adds a few pixels of decoration on their own layers, behind the train, and still stops with reduced motion:
@@ -138,6 +171,8 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka` or the path to [your own skyline](#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
 | `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
+| `year-in-review` | `false` | `true` also writes `year-in-review.svg`: a poster of one calendar year, drawn as a train journey (see [Year in review](#year-in-review)) |
+| `review-year` | current year | The year the poster shows (2008 to the current one). Empty: the current year so far, or the year that just ended in January |
 | `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](#seasons-and-holidays)) |
 | `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto` |
