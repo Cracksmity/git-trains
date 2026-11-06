@@ -2,8 +2,8 @@
 // node scripts/docs.js
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { renderScene } from '../src/scene.js';
-import { buildSpec } from '../src/compose.js';
+import { renderScene } from '../src/scene/render.js';
+import { buildSpec } from '../src/scene/spec.js';
 import {
   sampleStats,
   sampleProfile,
@@ -13,16 +13,18 @@ import {
   sampleReleases,
   sampleYear,
   SAMPLE_NOW,
-} from '../src/sample.js';
-import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from '../src/cards.js';
-import { renderDeparturesCard } from '../src/departures.js';
-import { buildTrain, TRAIN_H } from '../src/train.js';
-import { MODELS } from '../src/models.js';
-import { parseCustomModel } from '../src/custom.js';
-import { parseSkyline } from '../src/skyline.js';
-import { renderCalendar } from '../src/calendar.js';
-import { buildReview, renderReview } from '../src/review.js';
-import { unlockFor } from '../src/unlocks.js';
+} from '../src/demo/sample.js';
+import { renderStatsCard, renderRepoStatsCard, renderLangsCard } from '../src/cards/profile.js';
+import { renderDeparturesCard } from '../src/cards/departures.js';
+import { buildTrain } from '../src/trains/render.js';
+import { TRAIN_H } from '../src/trains/geometry.js';
+import { MODELS } from '../src/trains/models.js';
+import { parseCustomModel } from '../src/trains/parse.js';
+import { parseSkyline } from '../src/landscape/skyline-parse.js';
+import { renderCalendar } from '../src/calendar/render.js';
+import { buildReview } from '../src/review/data.js';
+import { renderReview } from '../src/review/render.js';
+import { unlockFor } from '../src/activity/unlocks.js';
 
 const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/trains/${name}.json`, 'utf8')));
 const newYork = example('new-york');

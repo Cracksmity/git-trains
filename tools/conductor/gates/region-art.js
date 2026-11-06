@@ -14,7 +14,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
-const { parseSkyline } = await import(pathToFileURL(resolve(root, 'src/skyline.js')));
+const { parseSkyline } = await import(pathToFileURL(resolve(root, 'src/landscape/skyline-parse.js')).href);
 
 const problems = [];
 let checked = 0;

@@ -14,7 +14,7 @@ What changed in the project, to apply while translating:
 - Built-in skylines: `nueva-york` -> `new-york`; the procedural city is `city` (was `ciudad`).
 - Action inputs: `tren` -> `train`, `fondo` -> `skyline`. People save their files as `.github/train.json` and `.github/skyline.json`, and use `train: .github/train.json` / `skyline: .github/skyline.json`.
 - Example files moved: `examples/tren-nueva-york.json` -> `examples/trains/new-york.json`, `examples/tren-vapor.json` -> `examples/trains/steam.json`, `examples/tren-osaka.json` -> `examples/trains/osaka.json`, `examples/tren-medellin.json` -> `examples/trains/medellin.json`, `examples/fondo-cdmx.json` -> `examples/skylines/mexico-city.json`, `examples/fondo-medellin.json` -> `examples/skylines/medellin.json`.
-- The validator's error messages are in English now (see `src/custom.js` and `src/skyline.js`). Where a guide quotes an error message, quote the new English wording.
+- The validator's error messages are in English now (see `src/trains/parse.js` and `src/landscape/skyline-parse.js`). Where a guide quotes an error message, quote the new English wording.
 - Notes keys: `description`, `author`, `source`, `inspiration` (the Spanish ones still work, but show the English ones).
 
 Hard requirements (the tests check them):

@@ -10,8 +10,8 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
-const { parseCustomModel } = await import(pathToFileURL(resolve(root, 'src/custom.js')));
-const { parseSkyline } = await import(pathToFileURL(resolve(root, 'src/skyline.js')));
+const { parseCustomModel } = await import(pathToFileURL(resolve(root, 'src/trains/parse.js')).href);
+const { parseSkyline } = await import(pathToFileURL(resolve(root, 'src/landscape/skyline-parse.js')).href);
 
 const problems = [];
 let checked = 0;

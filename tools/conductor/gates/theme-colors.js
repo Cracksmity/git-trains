@@ -2,7 +2,7 @@
 // Gate: a file draws only with theme colors ('@name'). Fixed colors (#hex,
 // rgb(), rgba()) may live in one object, which holds the light and dark values.
 //
-//   node tools/conductor/gates/theme-colors.js src/decor.js DECOR_THEMES
+//   node tools/conductor/gates/theme-colors.js src/scene/decor.js DECOR_THEMES
 //
 // A heuristic, not a parser: the object starts at `const <NAME> = {` and ends where its
 // braces close. Comments are ignored.

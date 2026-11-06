@@ -7,7 +7,7 @@
 
 import { readFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { DesignError, design } from './design.js';
+import { DesignError, design } from '../src/cli/design.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 

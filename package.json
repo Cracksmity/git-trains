@@ -18,11 +18,25 @@
     "logo": "node scripts/logo.js",
     "community": "node scripts/community.js",
     "leaderboard": "node scripts/leaderboard.js",
-    "test": "node --test"
+    "test": "node --test \"tests/**/*.test.js\"",
+    "lint": "eslint .",
+    "typecheck": "tsc --project tsconfig.json",
+    "check": "npm run lint && npm run typecheck && npm test && npm run check:architecture && npm run check:docs",
+    "check:architecture": "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "check:docs": "node scripts/checks/docs.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cracksmity/git-trains.git"
   },
-  "homepage": "https://github.com/Cracksmity/git-trains#readme"
+  "homepage": "https://github.com/Cracksmity/git-trains#readme",
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "minimatch": "11.0.1"
+  }
 }

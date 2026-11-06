@@ -48,7 +48,7 @@ A task is a JSON file:
   "route": "mechanical",
   "promptFile": "guides-en.md",
   "allow": ["docs/ai/**", "docs/ia/**"],
-  "gates": ["node --test test/custom.test.js", "node tools/conductor/gates/links.js docs/ai"],
+  "gates": ["node --test tests/trains/custom.test.js", "node tools/conductor/gates/links.js docs/ai"],
   "attempts": 2,
   "timeoutMin": 25
 }

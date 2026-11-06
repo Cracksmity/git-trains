@@ -4,12 +4,12 @@
 //   node scripts/region-sheet.js examples/skylines/guadalajara.json sheet.png 8
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { Grid } from '../src/pixel.js';
-import { parseSkyline } from '../src/skyline.js';
-import { THEMES } from '../src/scenery.js';
-import { SYMBOL_COLORS, applyRegionTheme, paintSprite, regionParts } from '../src/region.js';
-import { drawText, textWidth } from '../src/font.js';
-import { png } from './export.js';
+import { Grid } from '../src/graphics/pixel.js';
+import { parseSkyline } from '../src/landscape/skyline-parse.js';
+import { THEMES } from '../src/scene/themes.js';
+import { SYMBOL_COLORS, applyRegionTheme, paintSprite, regionParts } from '../src/landscape/region-render.js';
+import { drawText, textWidth } from '../src/graphics/font.js';
+import { png } from '../tools/export/png.js';
 
 const [input, out = 'region-sheet.png', scaleArg = '6'] = process.argv.slice(2);
 if (!input) {
@@ -43,7 +43,7 @@ const hex = (c) => {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
 const px = new Uint8Array(W * scale * H * scale * 4);
-for (const [mode, x0] of [['light', 0], ['dark', W / 2]]) {
+for (const [mode, x0] of /** @type {Array<[string, number]>} */ ([['light', 0], ['dark', W / 2]])) {
   const theme = THEMES[mode];
   const g = new Grid(W / 2, H);
   g.rect(0, 0, W / 2, H, '@haze');

@@ -2,11 +2,11 @@
   "name": "seasons-art",
   "route": "design",
   "promptFile": "seasons-art.md",
-  "allow": ["src/decor.js"],
+  "allow": ["src/scene/decor.js"],
   "gates": [
-    "node --check src/decor.js",
-    "node tools/conductor/gates/theme-colors.js src/decor.js DECOR_THEMES",
-    "node --test test/seasons.test.js",
+    "node --check src/scene/decor.js",
+    "node tools/conductor/gates/theme-colors.js src/scene/decor.js DECOR_THEMES",
+    "node --test tests/activity/seasons.test.js",
     "npm test"
   ],
   "attempts": 2,

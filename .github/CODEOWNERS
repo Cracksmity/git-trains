@@ -5,4 +5,12 @@
 /src/ @Cracksmity
 /studio/ @Cracksmity
 /scripts/ @Cracksmity
+/assets/ @Cracksmity
+/config/ @Cracksmity
+/tools/ @Cracksmity
+/tests/ @Cracksmity
+/package.json @Cracksmity
+/package-lock.json @Cracksmity
+/eslint.config.js @Cracksmity
+/tsconfig.json @Cracksmity
 /SECURITY.md @Cracksmity

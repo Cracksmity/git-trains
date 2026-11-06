@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src/**/*.js", "config/**/*.js", "tools/**/*.js", "scripts/**/*.js", "bin/**/*.js", "assets/**/*.js"],
+  "exclude": ["node_modules", ".scratch", ".claude", "output", "sample", "muestra", "reference"]
+}

@@ -1,0 +1,123 @@
+
+/* Home of the GitHub Pages site. The scenes are drawn here, in the browser, by src/. */
+:root {
+  --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
+  --green: #1b8638; --yellow: #c98f00; --chip: #e7ece8; --button-ink: #ffffff;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+    --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --button-ink: #101412; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d;
+  --green: #47c06a; --yellow: #f0c23a; --chip: #222b25; --button-ink: #101412; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
+a { color: var(--green); text-underline-offset: 2px; }
+:is(a, button, input):focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+button { cursor: pointer; font: inherit; color: inherit; }
+img, canvas { display: block; max-width: 100%; }
+code { font: 0.86em var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding: 44px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 80px;
+}
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.1; text-wrap: balance; }
+h2 { font-size: clamp(26px, 3.4vw, 32px); }
+h3 { font-size: 20px; }
+p { margin: 0; max-width: 66ch; }
+section { display: grid; gap: 18px; }
+section > header { display: grid; gap: 8px; }
+.muted { color: var(--muted); }
+.stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
+.scene { width: 100%; height: auto; image-rendering: pixelated; border-radius: 6px; background: var(--chip); }
+
+/* Buttons and segmented controls, as in the playground. */
+.btn { display: inline-block; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px/1.3 var(--body); text-decoration: none; }
+.btn:hover { border-color: var(--green); }
+.btn.main { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 6px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font: 500 13px/1.4 var(--mono); }
+.seg button:hover { border-color: var(--green); }
+.seg button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--button-ink); }
+
+/* Hero: name, pitch and the live scene. */
+.hero { display: grid; gap: 22px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; }
+.hero-text { display: grid; gap: 14px; }
+h1 { font-size: clamp(48px, 10vw, 88px); line-height: 0.95; letter-spacing: -0.01em; }
+.pitch { font-size: clamp(18px, 2.3vw, 21px); line-height: 1.45; max-width: 34ch; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.hero figure { margin: 0; display: grid; gap: 12px; }
+.hero figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 14px; color: var(--muted); }
+.hero figcaption .label { color: var(--ink); font-weight: 500; }
+
+/* How to read a train: a close-up with hotspots, and the same parts as a list. */
+.closeup { position: relative; overflow: hidden; border-radius: 6px; background: var(--chip); }
+.closeup img { position: absolute; max-width: none; image-rendering: pixelated; }
+.spot { position: absolute; padding: 0; border: 0; background: transparent; border-radius: 2px; }
+.spot.on { background: color-mix(in srgb, var(--yellow) 22%, transparent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--green); z-index: 5; }
+.hint { font-size: 14px; color: var(--muted); }
+.parts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.parts button { width: 100%; height: 100%; display: grid; gap: 4px; align-content: start; text-align: left; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+.parts button:hover, .parts button.on { border-color: var(--green); }
+.parts button.on { box-shadow: inset 4px 0 0 var(--green); }
+.parts b { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.parts span { font-size: 14px; color: var(--muted); }
+.swatch { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+
+/* Models. */
+.models { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.model { display: grid; gap: 8px; align-content: start; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.model canvas { width: 100%; height: auto; image-rendering: pixelated; margin-bottom: 4px; }
+.model p { font-size: 14px; color: var(--muted); }
+.model .when { color: var(--ink); }
+
+/* Cities. */
+.city-bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 20px; }
+.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.field input { width: min(240px, 100%); padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 14px var(--mono); }
+
+/* Get it in 60 seconds. */
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; display: grid; gap: 26px; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 12px; }
+.steps > li::before { content: counter(step); grid-row: span 2; font: 600 28px/1 var(--display); color: var(--green); }
+.steps > li > * { grid-column: 2; }
+.steps > li > p { padding-top: 3px; }
+.code { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.code-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); color: var(--muted); }
+.code-head button { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); font: 500 12px var(--mono); }
+.code-head button:hover { border-color: var(--green); }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 13px/1.6 var(--mono); tab-size: 2; }
+.code pre code { background: none; padding: 0; font: inherit; }
+
+/* Destinations. */
+.places { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.place { display: grid; gap: 8px; align-content: start; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
+.place:hover { border-color: var(--green); }
+.place p { font-size: 15px; }
+.place .go { font: 500 13px var(--mono); color: var(--green); }
+footer { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+@media (max-width: 860px) {
+  .models, .places { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  /* The close-up stays in view while you tap down the list of parts. */
+  .closeup { position: sticky; top: 8px; z-index: 10; box-shadow: 0 0 0 8px var(--bg); }
+}
+@media (max-width: 560px) {
+  .wrap { gap: 60px; padding-top: 28px; }
+  .models, .places { grid-template-columns: minmax(0, 1fr); }
+  .steps > li { grid-template-columns: 28px minmax(0, 1fr); }
+  .steps > li::before { font-size: 24px; }
+}

@@ -2,11 +2,18 @@
   "name": "calendar-docs",
   "route": "mechanical",
   "promptFile": "calendar-docs.md",
-  "allow": ["README.md", "README.es.md", "CHANGELOG.md", "test/calendar-edge.test.js"],
+  "allow": [
+    "README.md",
+    "README.es.md",
+    "CHANGELOG.md",
+    "tests/calendar/calendar-edge.test.js",
+    "docs/usage.md",
+    "docs/es/usage.md"
+  ],
   "gates": [
     "npm test",
     "node tools/conductor/gates/links.js README.md README.es.md CHANGELOG.md",
-    "node -e \"const fs=require('fs'); for (const f of ['README.md','README.es.md']) { const t=fs.readFileSync(f,'utf8'); for (const need of ['calendar: true','train-calendar-light.svg','docs/example-calendar.svg']) if(!t.includes(need)){console.log(f+' is missing '+need);process.exit(1)} } const c=fs.readFileSync('CHANGELOG.md','utf8'); if(!c.includes('## Unreleased')||!c.includes('## 1.0.0 (2026-11-04)')){console.log('CHANGELOG headings');process.exit(1)}\""
+    "node -e \"const fs=require('fs'); for (const f of ['docs/usage.md','docs/es/usage.md']) { const t=fs.readFileSync(f,'utf8'); for (const need of ['calendar: true','train-calendar-light.svg','example-calendar.svg']) if(!t.includes(need)){console.log(f+' is missing '+need);process.exit(1)} } const c=fs.readFileSync('CHANGELOG.md','utf8'); if(!c.includes('## Unreleased')||!c.includes('## 1.0.0 (2026-11-04)')){console.log('CHANGELOG headings');process.exit(1)}\""
   ],
   "attempts": 2,
   "timeoutMin": 25

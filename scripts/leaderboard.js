@@ -17,7 +17,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
-import { mergeRuns, parseRuns, serialize } from '../leaderboard/board.js';
+import { mergeRuns, parseRuns, serialize } from '../src/leaderboard/model.js';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 export const BOARD = join(ROOT, 'docs', 'leaderboard.json');

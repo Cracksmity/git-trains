@@ -2,10 +2,13 @@
   "name": "skyline-editor",
   "route": "design",
   "promptFile": "skyline-editor.md",
-  "allow": ["studio/skyline-editor.js", "test/skyline-editor.test.js"],
+  "allow": [
+    "src/studio/skyline/**",
+    "tests/studio/skyline-editor.test.js"
+  ],
   "gates": [
-    "node --check studio/skyline-editor.js",
-    "node -e \"import('./studio/skyline-editor.js').then((m)=>{ if(typeof m.mountSkylineEditor!=='function'||typeof m.formatSkyline!=='function'){console.log('missing exports');process.exit(1)} })\"",
+    "node --check src/studio/skyline/controller.js",
+    "node -e \"Promise.all([import('./src/studio/skyline/controller.js'),import('./src/studio/skyline/format.js')]).then(([controller,format])=>{if(typeof controller.mountSkylineEditor!=='function'||typeof format.formatSkyline!=='function')process.exit(1)})\"",
     "npm test"
   ],
   "attempts": 2,

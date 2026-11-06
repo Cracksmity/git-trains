@@ -9,7 +9,7 @@
   "gates": [
     "node tools/conductor/gates/region-only.js examples/skylines/mexico-city.json examples/skylines/medellin.json",
     "node tools/conductor/gates/region-art.js examples/skylines/mexico-city.json:mountains examples/skylines/medellin.json:mountains",
-    "node --test test/custom.test.js test/region.test.js test/skyline-editor.test.js test/studio.test.js test/share.test.js"
+    "node --test tests/trains/custom.test.js tests/landscape/region.test.js tests/studio/skyline-editor.test.js tests/studio/studio.test.js tests/sharing/share.test.js"
   ],
   "attempts": 2,
   "timeoutMin": 45,
