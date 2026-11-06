@@ -39,7 +39,9 @@ function installStyles() {
   document.head.append(el('style', {
     id: 'skyline-editor-style',
     textContent: `
-      .se-canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; touch-action: none; cursor: grab; }
+      .se-canvas { display: block; width: 100%; max-width: none; height: auto; image-rendering: pixelated; touch-action: pan-y; cursor: grab; }
+      .se-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 4px 18px; margin-top: 10px; }
+      .se-tools .field { margin: 0; }
       .se-canvas:active { cursor: grabbing; }
       .se-building-list.seg { display: grid; max-height: 220px; overflow-y: auto; }
       .se-building-list button { text-align: left; overflow-wrap: anywhere; }
@@ -61,6 +63,7 @@ export function mountSkylineEditor(root, { initialText } = {}) {
   let sceneUrl;
   let revision = 0;
   let drag = null;
+  let zoom = 'auto';
   let canvasSky = null;
   let canvasIndices = [];
   let hits = new Grid(SCENE_W, GY0);
@@ -177,9 +180,40 @@ export function mountSkylineEditor(root, { initialText } = {}) {
   for (const [key, label] of [['train', 'Train band'], ['sign', 'Station sign'], ['sun', 'Sun or moon']]) {
     guideControls.append(check(label, view[key], (value) => { view[key] = value; drawCanvas(); }));
   }
+  // Zoom: "auto" fits the canvas to its column unless that makes scene pixels
+  // smaller than 1.5 screen pixels (phones, narrow columns); then it shows 2×
+  // and the canvas scrolls sideways. A button the user picks wins over auto.
+  const wrap = el('div', { className: 'zoomwrap se-wrap' }, canvas);
+  const zoomSeg = el('div', { className: 'seg', role: 'group', ariaLabel: 'Zoom' });
+  const zoomOptions = [['fit', 'Fit'], [2, '2×'], [3, '3×'], [4, '4×']];
+  for (const [value, label] of zoomOptions) {
+    zoomSeg.append(button(label, () => { zoom = value; applyZoom(); revealSelected(); }));
+  }
+  function applyZoom() {
+    const fit = (wrap.clientWidth - 20) / SCENE_W;
+    const scale = zoom === 'auto' ? (fit >= 1.5 ? 'fit' : 2) : zoom;
+    canvas.style.width = scale === 'fit' ? '' : `${SCENE_W * scale}px`;
+    zoomOptions.forEach(([value], i) => zoomSeg.children[i].setAttribute('aria-pressed', String(value === scale)));
+  }
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => applyZoom()).observe(wrap);
+  applyZoom();
+  // Scroll the zoomed canvas so the selected building is in view.
+  function revealSelected() {
+    const box = bounds[selected];
+    if (!box || wrap.scrollWidth <= wrap.clientWidth) return;
+    const c = canvas.getBoundingClientRect();
+    const scale = c.width / SCENE_W;
+    const origin = c.left - wrap.getBoundingClientRect().left + wrap.scrollLeft;
+    const left = origin + box.left * scale;
+    const right = origin + (box.right + 1) * scale;
+    if (left < wrap.scrollLeft + 10 || right > wrap.scrollLeft + wrap.clientWidth - 10) {
+      wrap.scrollLeft = (left + right) / 2 - wrap.clientWidth / 2;
+    }
+  }
   const workSection = section('The scene',
-    el('p', { className: 'hint', textContent: '448 × 88 pixels. Click a building to select it; drag left or right to move it. Arrow keys move one pixel (Shift: ten). The train covers rows 63–88.' }),
-    el('div', { className: 'zoomwrap' }, canvas), guideControls,
+    el('p', { className: 'hint', textContent: '448 × 88 pixels. Click a building to select it; drag left or right to move it. Arrow keys move one pixel (Shift: ten). When zoomed in, drag the empty sky to scroll. The train covers rows 63–88.' }),
+    wrap,
+    el('div', { className: 'se-tools' }, field('Zoom', zoomSeg), guideControls),
   );
   const addBlock = button('Add block', () => addBuilding({ x: nextX(), w: 16, h: 40, layer: 'near' }));
   const addDrawing = button('Add drawing', () => addBuilding({ x: nextX(), layer: 'near', rows: Array(40).fill('#'.repeat(12)) }));
@@ -251,6 +285,7 @@ export function mountSkylineEditor(root, { initialText } = {}) {
     selected = draft.buildings.length - 1;
     update();
     renderBuilding();
+    revealSelected();
   }
 
   function renderList() {
@@ -262,6 +297,7 @@ export function mountSkylineEditor(root, { initialText } = {}) {
         renderList();
         renderBuilding();
         drawCanvas();
+        revealSelected();
       });
       node.setAttribute('aria-pressed', String(index === selected));
       return node;
@@ -509,11 +545,33 @@ export function mountSkylineEditor(root, { initialText } = {}) {
     const rect = canvas.getBoundingClientRect();
     return [Math.floor((event.clientX - rect.left) * SCENE_W / rect.width), Math.floor((event.clientY - rect.top) * GY0 / rect.height)];
   };
+  // The building under the pointer, or failing that the nearest one within
+  // about 10 screen pixels, so thin towers stay easy to grab on a small canvas.
+  function pick(x, y) {
+    const exact = hits.get(x, y);
+    if (exact && object(buildings()[exact - 1])) return exact;
+    const reach = Math.ceil(10 * SCENE_W / canvas.getBoundingClientRect().width);
+    let best = 0;
+    let bestDistance = Infinity;
+    bounds.forEach((box, index) => {
+      if (!box || !object(buildings()[index])) return;
+      const distance = Math.max(box.left - x, x - box.right, box.top - y, y - box.bottom, 0);
+      if (distance <= reach && distance < bestDistance) { best = index + 1; bestDistance = distance; }
+    });
+    return best;
+  }
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || drag) return;
     const [x, y] = point(event);
-    const hit = hits.get(x, y);
-    if (!hit || !object(buildings()[hit - 1])) return;
+    const hit = pick(x, y);
+    if (!hit) {
+      // Empty sky: pan the zoomed canvas instead.
+      if (wrap.scrollWidth <= wrap.clientWidth) return;
+      event.preventDefault();
+      drag = { id: event.pointerId, pan: true, clientX: event.clientX, scroll: wrap.scrollLeft };
+      canvas.setPointerCapture(event.pointerId);
+      return;
+    }
     event.preventDefault();
     selected = hit - 1;
     drag = { id: event.pointerId, x, start: buildings()[selected].x };
@@ -532,6 +590,7 @@ export function mountSkylineEditor(root, { initialText } = {}) {
   }
   canvas.addEventListener('pointermove', (event) => {
     if (drag?.id !== event.pointerId) return;
+    if (drag.pan) { wrap.scrollLeft = drag.scroll - (event.clientX - drag.clientX); return; }
     const [x] = point(event);
     moveBuilding(clamp(drag.start + x - drag.x, -40, 447));
   });
@@ -548,6 +607,7 @@ export function mountSkylineEditor(root, { initialText } = {}) {
     if (!Number.isInteger(building?.x) || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
     event.preventDefault();
     moveBuilding(clamp(building.x + (event.key === 'ArrowLeft' ? -1 : 1) * (event.shiftKey ? 10 : 1), -40, 447));
+    revealSelected();
   });
 
   function load(text) {

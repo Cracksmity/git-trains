@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- The studio's skyline canvas no longer shrinks to tiny buildings on a phone or in a narrow column. It zooms (Fit, 2×, 3×, 4×; 2× by default when fitting would draw scene pixels smaller than 1.5 screen pixels) and scrolls sideways: drag the empty sky to pan, and picking a building from the list scrolls to it. A click within about 10 screen pixels of a thin tower grabs it.
+
 ## 1.1.0 (2026-11-05)
 
 Nothing from 1.0 breaks: no input or output file changes name. Seasons and unlockable cars are on by default (turn them off with `seasons: false` and `unlocks: false`); everything else is opt-in.
