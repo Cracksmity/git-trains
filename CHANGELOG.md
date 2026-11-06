@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-11-05)
+
+Nothing from 1.0 breaks: no input or output file changes name. Seasons and unlockable cars are on by default (turn them off with `seasons: false` and `unlocks: false`); everything else is opt-in.
 
 ### Added
 
