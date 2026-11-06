@@ -20,6 +20,11 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
 
 <sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**. ¿Lo quieres para un proyecto en vez de un perfil? Mira [En el README de un repositorio](#en-el-readme-de-un-repositorio).</sub>
 
+- **Calendario de contribuciones:** mira un tren en miniatura recorrer tu [cuadrícula de contribuciones](docs/es/usage.md#modo-calendario).
+- **Tarjetas y resumen anual:** muestra [estadísticas, lenguajes y salidas](docs/es/usage.md#tarjetas-de-perfil), o convierte tu año en un [póster de un viaje en tren](docs/es/usage.md#resumen-del-año).
+- **Modelos y escenas:** elige [trenes incluidos](docs/es/reference.md#modelos) y [skylines de ciudades](docs/es/customization.md#skylines-de-ciudades), con decoración estacional y temas claro y oscuro.
+- **Tu propio tren y ciudad:** edita diseños en el [studio](https://cracksmity.github.io/git-trains/studio/), usa JSON personalizado y explora diseños de la comunidad en la [galería](https://cracksmity.github.io/git-trains/gallery/).
+
 ## Uso rápido
 
 Crea `.github/workflows/train.yml` en tu repositorio de perfil (el que se llama igual que tu usuario):
@@ -58,6 +63,8 @@ Luego agrega esto a tu `README.md` para que siga el tema claro u oscuro de GitHu
 
 Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ejemplo completo, con todas las opciones comentadas, en [examples/workflow.yml](examples/workflow.yml).
 
+El calendario de la demostración es opcional: agrega `calendar: true` a las opciones `with:` del Action y usa el [ejemplo para insertarlo](docs/es/usage.md#modo-calendario) en tu README.
+
 ## Documentación
 
 - [Escenas, calendarios, tarjetas y modo repositorio](docs/es/usage.md)
@@ -73,29 +80,16 @@ Requisito: Node.js 24 o posterior con npm. El Action y el CLI no tienen dependen
 git clone https://github.com/Cracksmity/git-trains.git
 cd git-trains
 npm ci
+npm run preview
 ```
 
-Ejecuta `npm run preview` para abrir el playground, `npm run sample` para generar SVG de muestra y `npm run check` para verificar el proyecto. No hay compilación.
+Abre la URL local que aparece en la terminal para usar el playground. Ejecuta `npm run sample` para generar SVG de muestra y `npm run check` para verificar el proyecto. No hay compilación.
 
 La arquitectura separa las reglas de actividad, gráficos, trenes y paisajes, acceso a GitHub e interfaces. Consulta [arquitectura](docs/architecture.md), [comandos](scripts/README.md), [contribuciones](CONTRIBUTING.md) e [instrucciones para agentes](AGENTS.md).
 
-<a id="qué-significa-cada-parte"></a>[Qué significa cada parte](docs/es/usage.md#qué-significa-cada-parte)
-<a id="vagones-desbloqueables"></a>[Vagones desbloqueables](docs/es/usage.md#vagones-desbloqueables)
-<a id="modo-calendario"></a>[Modo calendario](docs/es/usage.md#modo-calendario)
-<a id="resumen-del-año"></a>[Resumen del año](docs/es/usage.md#resumen-del-año)
-<a id="estaciones-y-fiestas"></a>[Estaciones y fiestas](docs/es/usage.md#estaciones-y-fiestas)
-<a id="tarjetas-de-perfil"></a>[Tarjetas de perfil](docs/es/usage.md#tarjetas-de-perfil)
-<a id="en-el-readme-de-un-repositorio"></a>[En el README de un repositorio](docs/es/usage.md#en-el-readme-de-un-repositorio)
-<a id="cómo-funciona"></a>[Cómo funciona](docs/es/usage.md#cómo-funciona)
-<a id="opciones"></a>[Opciones](docs/es/reference.md#opciones)
-<a id="modelos"></a>[Modelos](docs/es/reference.md#modelos)
-<a id="haz-tu-propio-tren-a-mano-o-con-ia"></a>[Haz tu propio tren (a mano o con IA)](docs/es/customization.md#haz-tu-propio-tren-a-mano-o-con-ia)
-<a id="skylines-de-ciudades"></a>[Skylines de ciudades](docs/es/customization.md#skylines-de-ciudades)
-<a id="diseña-desde-la-terminal"></a>[Diseña desde la terminal](docs/es/customization.md#diseña-desde-la-terminal)
-<a id="comparte-tu-ciudad"></a>[Comparte tu ciudad](docs/es/customization.md#comparte-tu-ciudad)
-<a id="hecho-con-un-director-de-ias"></a>[Hecho con un director de IAs](docs/es/development.md#hecho-con-un-director-de-ias)
-<a id="desarrollo"></a>[Desarrollo](docs/es/development.md#desarrollo)
-<a id="créditos"></a>[Créditos](docs/es/development.md#créditos)
-<a id="licencia"></a>[Licencia](docs/es/development.md#licencia)
-<a id="el-campo-de-una-región"></a>[El campo de una región](docs/es/customization.md#el-campo-de-una-región)
-<a id="panel-de-salidas"></a>[Panel de salidas](docs/es/usage.md#panel-de-salidas)
+## Índice por temas
+
+- **Actividad y resultados:** <a id="qué-significa-cada-parte"></a>[Qué significa cada parte](docs/es/usage.md#qué-significa-cada-parte) · <a id="vagones-desbloqueables"></a>[Vagones desbloqueables](docs/es/usage.md#vagones-desbloqueables) · <a id="modo-calendario"></a>[Modo calendario](docs/es/usage.md#modo-calendario) · <a id="resumen-del-año"></a>[Resumen del año](docs/es/usage.md#resumen-del-año) · <a id="estaciones-y-fiestas"></a>[Estaciones y fiestas](docs/es/usage.md#estaciones-y-fiestas) · <a id="tarjetas-de-perfil"></a>[Tarjetas de perfil](docs/es/usage.md#tarjetas-de-perfil) · <a id="panel-de-salidas"></a>[Panel de salidas](docs/es/usage.md#panel-de-salidas) · <a id="en-el-readme-de-un-repositorio"></a>[En el README de un repositorio](docs/es/usage.md#en-el-readme-de-un-repositorio).
+- **Configuración:** <a id="opciones"></a>[Opciones](docs/es/reference.md#opciones) · <a id="modelos"></a>[Modelos](docs/es/reference.md#modelos).
+- **Diseños personalizados:** <a id="haz-tu-propio-tren-a-mano-o-con-ia"></a>[Haz tu propio tren (a mano o con IA)](docs/es/customization.md#haz-tu-propio-tren-a-mano-o-con-ia) · <a id="skylines-de-ciudades"></a>[Skylines de ciudades](docs/es/customization.md#skylines-de-ciudades) · <a id="el-campo-de-una-región"></a>[El campo de una región](docs/es/customization.md#el-campo-de-una-región) · <a id="diseña-desde-la-terminal"></a>[Diseña desde la terminal](docs/es/customization.md#diseña-desde-la-terminal) · <a id="comparte-tu-ciudad"></a>[Comparte tu ciudad](docs/es/customization.md#comparte-tu-ciudad).
+- **Sobre el proyecto:** <a id="cómo-funciona"></a>[Cómo funciona](docs/es/usage.md#cómo-funciona) · <a id="hecho-con-un-director-de-ias"></a>[Hecho con un director de IAs](docs/es/development.md#hecho-con-un-director-de-ias) · <a id="desarrollo"></a>[Desarrollo](docs/es/development.md#desarrollo) · <a id="créditos"></a>[Créditos](docs/es/development.md#créditos) · <a id="licencia"></a>[Licencia](docs/es/development.md#licencia).
