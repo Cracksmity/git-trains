@@ -1,6 +1,8 @@
-# git-trains
+<p align="center"><img src="docs/logo.svg" alt="git-trains logo" width="128" height="128"></p>
 
-[English](README.md) · **Español**
+<h1 align="center">git-trains</h1>
+
+<p align="center"><a href="README.md">English</a> · <b>Español</b></p>
 
 [![CI](https://github.com/Cracksmity/git-trains/actions/workflows/ci.yml/badge.svg)](https://github.com/Cracksmity/git-trains/actions/workflows/ci.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)

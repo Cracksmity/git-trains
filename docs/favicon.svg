@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" shape-rendering="crispEdges" role="img">
+<title>git-trains</title>
+<rect rx="12" x="0" y="0" width="120" height="120" fill="#0b1026"/>
+<rect x="32" y="20" width="24" height="8" fill="#f1f3f8"/>
+<rect x="24" y="28" width="8" height="16" fill="#f1f3f8"/>
+<rect x="48" y="28" width="8" height="16" fill="#f1f3f8"/>
+<rect x="32" y="44" width="24" height="8" fill="#f1f3f8"/>
+<rect x="48" y="52" width="8" height="8" fill="#f1f3f8"/>
+<rect x="32" y="60" width="24" height="8" fill="#f1f3f8"/>
+<rect x="72" y="12" width="8" height="40" fill="#f1f3f8"/>
+<rect x="64" y="20" width="24" height="8" fill="#f1f3f8"/>
+<rect x="80" y="44" width="16" height="8" fill="#f1f3f8"/>
+<rect x="20" y="90" width="80" height="4" fill="#f5c518"/>
+<rect x="14" y="86" width="12" height="12" fill="#34d058"/>
+<rect x="54" y="86" width="12" height="12" fill="#34d058"/>
+<rect x="94" y="86" width="12" height="12" fill="#34d058"/>
+</svg>
