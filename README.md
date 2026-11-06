@@ -152,6 +152,8 @@ Any train fits in a small JSON file: colors, stripes, doors, and the front drawn
           skyline: new-york
 ```
 
+Prefer one command? [Design from your terminal](#design-from-your-terminal) runs your AI CLI and the validator for you, retries included.
+
 If something doesn't add up (a mistyped color, an extra row), the Action stops and lists **every** problem in the log; paste them back to the AI so it fixes them. In the [playground](https://cracksmity.github.io/git-trains/preview/) (or locally with `npm run preview`) you can paste the JSON and see it right away, with the same messages.
 
 ![New York subway](docs/example-new-york.svg)
@@ -184,6 +186,36 @@ Between the tracks of `mode: multi` there is a strip of countryside (a village a
 ![Guadalajara with its countryside](docs/example-guadalajara.svg)
 
 A `region` holds small pixel drawings (`houses`, `trees`, `plants` and one `landmark`, written row by row like the buildings), a `terrain` behind them (`hills`, `mountains`, `plains` or `sea`) and up to four `accents`: extra colors with a light and a dark value each, so they follow the theme like everything else. Without a `region` the countryside is exactly what it was. `osaka` and `new-york` come with theirs, and so do the examples for Mexico City, Medellín, Guadalajara and Malmö. To research and draw yours, paste [docs/ai/region.md](docs/ai/region.md) into your AI along with your city (and your skyline JSON, if you already have one). `node scripts/region-sheet.js examples/skylines/guadalajara.json sheet.png` draws the pieces zoomed in, by day and at night.
+
+## Design from your terminal
+
+Already use Codex, Antigravity or Claude Code? Let it do the whole loop for you: it writes the JSON, the validator checks it, and any problems go back to the AI until it passes.
+
+```bash
+npx github:Cracksmity/git-trains design train "Osaka Metro 400 series" --photo train.jpg
+npx github:Cracksmity/git-trains design skyline "Lisbon"
+```
+
+From a clone, `node bin/git-trains.js design ...` does the same. It needs Node 24 and one of these CLIs installed and signed in (it uses your own subscription, nothing else to sign up for): `codex`, `agy` (Antigravity) or `claude`. By default it takes the first one that answers `--version`, in that order.
+
+What happens:
+
+1. It builds a prompt from the AI guide ([train](docs/ai/train.md) or [skyline](docs/ai/skyline.md)) plus your description and photos.
+2. It runs the CLI headless, **read-only, in an empty temporary folder**: Codex in its read-only sandbox, Claude Code with only the Read tool (for photos), Antigravity with a hook that refuses every command. Only the final answer is read, so your files are never touched and nothing runs with `--dangerously-skip-permissions`.
+3. It pulls the JSON out of the answer and checks it with the same validator as the Action. If there are problems, the list goes back to the AI for another try, up to `--tries`.
+4. When it passes, it writes `.github/train.json` (or `.github/skyline.json`), draws a small picture in the terminal (half-block characters, in a truecolor terminal) and prints a [studio](https://cracksmity.github.io/git-trains/studio/) link that carries the whole file, so you can tweak it by hand.
+
+| Option | Meaning |
+| --- | --- |
+| `--photo <file>` | A photo to design from (png, jpg, webp, gif; up to 20 MB). Repeat it for several. |
+| `--ai codex\|gemini\|claude` | Which CLI to use (`gemini` runs `agy`). Default: the first one installed. |
+| `--model <slug>` | The model for that CLI, for example `gpt-6.1-terra`. Default: the CLI's own. |
+| `--out <file>` | Where to write it. Default `.github/train.json` or `.github/skyline.json`. |
+| `--tries <n>` | Attempts, each one fed the validator's problems. Default 3. |
+| `--force` | Replace `--out` if it exists. Without it, an existing file is never overwritten. |
+| `--no-preview` | Skip the picture in the terminal. |
+
+If no try passes, nothing is written to `--out`: the last answer is saved next to it as `<out>.draft` and the remaining problems are printed, ready to paste back to an AI, open in the studio or retry with more `--tries`. Every try is a full AI run, and strong models can think for several minutes, so a run can take a while.
 
 ## Share your city
 
