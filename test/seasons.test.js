@@ -236,7 +236,7 @@ function runSample(env) {
 
 test('seasons: false keeps the scene plain, and the inputs are checked', () => {
   const plain = renderScene(buildSpec(sampleStats(), { theme: 'dark', skyline: parseSkyline('city') }));
-  assert.equal(runSample({ INPUT_SEASONS: 'false' }).svg, plain);
+  assert.equal(runSample({ INPUT_SEASONS: 'false', INPUT_UNLOCKS: 'false' }).svg, plain);
   assert.match(runSample({ INPUT_SEASONS: 'sometimes' }).stdout, /Unknown seasons: "sometimes"/);
   assert.match(runSample({ INPUT_HEMISPHERE: 'east' }).stdout, /Unknown hemisphere: "east"/);
   const south = runSample({ INPUT_HEMISPHERE: 'south' });
