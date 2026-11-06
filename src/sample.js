@@ -41,6 +41,21 @@ export function sampleStats(overrides = {}) {
   );
 }
 
+// The moment the sample departures board is read at, so the card never changes.
+export const SAMPLE_NOW = new Date('2026-11-02T16:40:00Z');
+
+// Sample repositories for the departures board: one of each status at SAMPLE_NOW.
+export function sampleDepartures() {
+  return [
+    { name: 'git-trains', pushedAt: '2026-11-02T15:12:00Z', language: 'JavaScript' },
+    { name: 'station-api', pushedAt: '2026-11-01T22:47:00Z', language: 'TypeScript' },
+    { name: 'signal-box', pushedAt: '2026-10-29T08:20:00Z', language: 'Rust' },
+    { name: 'timetable-cli', pushedAt: '2026-10-20T17:05:00Z', language: 'Python' },
+    { name: 'ticket-office', pushedAt: '2026-10-06T11:30:00Z', language: 'Luau' },
+    { name: 'old-depot', pushedAt: '2026-08-14T09:00:00Z', language: 'Go' },
+  ];
+}
+
 // Sample profile figures for the cards.
 export function sampleProfile() {
   return {

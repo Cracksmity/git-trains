@@ -77,6 +77,8 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | tunnels-art | design | GPT-6-Astra (xhigh) drew the calendar's hills and stone portals on the first attempt in 314 s. Its opaque backdrop matched only GitHub's default backgrounds, so on review the train layer was clipped instead and the backdrop dropped. |
 | calendar-docs | mechanical | GPT-6.1-Terra wrote the calendar sections of both READMEs, the changelog entry and five edge-case tests on the first attempt in 127 s. |
 | skyline-editor | design | GPT-6-Astra (xhigh) built the studio's skyline editor (580 lines: scene canvas with drag and guides, buildings list, stacked tops, pixel grid for drawn landmarks, share links) on the first attempt in 508 s, from the train editor as the model to follow. |
+| special-cars | design | GPT-6-Astra (xhigh) drew the dining, observation and mail cars on the first attempt in 202 s (7k output tokens), from a stub that fixed the contract and tests that checked round windows, a glass roof and no windows. Reviewed on six models, a one-car train and a steam train: it looks right on all of them. |
+| departures-board | design | GPT-6-Astra (xhigh) designed the split-flap departures card on the first attempt in 386 s (11k output tokens): tiles with a seam, a CSS flip that ends in the final look, reduced motion, 20 KB. It rendered its own screenshots with headless Edge. |
 
 ## Antigravity in headless mode
 

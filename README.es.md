@@ -31,6 +31,22 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
 
 Tu racha no se rompe a primera hora: si hoy todavía no hay actividad, cuenta desde ayer.
 
+## Vagones desbloqueables
+
+Algunos logros añaden un vagón especial a tu tren, justo detrás de la cabina. Solo se muestra uno: el más raro que hayas conseguido.
+
+![El vagón comedor, el vagón mirador y el vagón postal](docs/example-cars.svg)
+
+| Consigues | Vagón | Cómo es |
+| --- | --- | --- |
+| Más de 500 pull requests | **Vagón postal** | Sin ventanas: una puerta corrediza de carga, un sobre y una franja con el color de tu lenguaje principal |
+| Una racha de 100 días | **Vagón comedor** | Ventanas redondas que brillan y una lamparita en el techo |
+| Más de 100 estrellas en tus repositorios | **Vagón mirador** | Un techo de cristal elevado y ventanas panorámicas |
+
+Los vagones se dibujan con la paleta del tren al que se unen, y el título de la imagen añade una línea que dice cuál conseguiste. La racha es la actual, así que el vagón comedor se va si la racha se rompe. Un vagón especial cuenta como un vagón más: en un tren de 6 vagones ocupa el lugar del último vagón normal para que el tren siga cabiendo en la escena.
+
+Necesitan los números de tu perfil (estrellas y pull requests), lo que supone una petición más a la API en cada ejecución. Si falla, la Action registra un `::notice::` y dibuja el tren sin ellos. Pon `unlocks: false` para desactivarlos.
+
 ## Modo calendario
 
 Con `calendar: true` la Action también escribe un calendario de contribuciones junto al tren. Una versión mini de tu tren recorre las semanas en zigzag, come las celdas con contribuciones y crece hasta tener el mismo largo que el tren de la escena. También funciona con trenes propios y de vapor. La franja, las ventanas y la velocidad siguen tu actividad; el texto muestra tus contribuciones y tu racha. También se aplican `language` y `label`. El calendario sigue el tema elegido y deja el tren estacionado si se prefiere reducir el movimiento.
@@ -108,7 +124,8 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `user` | dueño del repo | Usuario a dibujar |
 | `github-token` | `github.token` | Usa un PAT para contar contribuciones privadas |
 | `output-dir` | `dist` | Carpeta de salida |
-| `cards` | `none` | Tarjetas de perfil: `stats`, `languages` o `both` (ver abajo) |
+| `cards` | `none` | Tarjetas de perfil: `stats`, `languages`, `departures` o `both` (estadísticas y lenguajes); también una lista, p. ej. `stats, departures` (ver abajo) |
+| `unlocks` | `true` | Añade un vagón especial cuando lo consigues (ver [Vagones desbloqueables](#vagones-desbloqueables)); `false` se ahorra la petición extra a la API |
 | `rank` | `letter` | Centro del anillo de la tarjeta de estadísticas: `letter` (S, A+, B...) o `github` (el logo) |
 | `border` | `true` | Borde de las tarjetas |
 | `max-languages` | `6` | Lenguajes en la tarjeta de lenguajes (1 a 10) |
@@ -229,6 +246,21 @@ Con `cards: both` la Action también escribe `card-stats.svg` y `card-languages.
 ![Estadísticas](docs/card-stats.svg) ![Lenguajes](docs/card-languages.svg)
 
 Si la consulta de estadísticas falla (por ejemplo, por un límite de la API), la Action deja un `::warning::` y sigue: el tren se genera igual. El rango es una aproximación (una mezcla ponderada de commits, PRs, issues, reseñas, estrellas y seguidores).
+
+### Panel de salidas
+
+`cards: departures` escribe `card-departures.svg`: un panel de estación de paletas giratorias con tus seis repositorios públicos con el push más reciente. `cards` acepta una lista: `cards: stats, departures` escribe las dos y `cards: both, departures` las tres (`both` sigue significando estadísticas y lenguajes).
+
+![Panel de salidas](docs/card-departures.svg)
+
+| Columna | Qué muestra |
+| --- | --- |
+| HORA | Cuándo hiciste el último push: `HH:MM` (UTC) si fue hoy, si no la fecha |
+| DESTINO | El nombre del repositorio |
+| ANDÉN | Su lenguaje principal |
+| ESTADO | `ABORDANDO` (push de hoy), `A TIEMPO` (últimos 7 días), `RETRASADO` (últimos 30 días) o `SALIÓ` (más antiguo) |
+
+Los caracteres giran hasta su sitio al cargar la tarjeta, solo con CSS, y respeta `prefers-reduced-motion`. Con `language: en` dice `DEPARTURES`, `TIME`, `DESTINATION`, `PLATFORM`, `STATUS`. Usa los mismos inputs `color-*` y `border` que las otras tarjetas, pero parte de un panel propio: `color-background` es el panel, `color-title` la barra de título, los encabezados y `ABORDANDO`, `color-text` los caracteres, `color-icon` el estado `A TIEMPO` y el trenecito, y `color-ring` el estado `RETRASADO`. No salen los forks ni tu repositorio de perfil (el que se llama como tú): el workflow que dibuja estas imágenes hace commit en él cada día y siempre saldría primero.
 
 ## Cómo funciona
 
