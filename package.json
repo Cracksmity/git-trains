@@ -15,6 +15,7 @@
     "sample": "node src/index.js --sample",
     "docs": "node scripts/docs.js",
     "export": "node scripts/export.js",
+    "logo": "node scripts/logo.js",
     "community": "node scripts/community.js",
     "leaderboard": "node scripts/leaderboard.js",
     "test": "node --test"

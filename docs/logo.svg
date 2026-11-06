@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" shape-rendering="crispEdges" role="img">
+<title>git-trains</title>
+<rect rx="12" x="0" y="0" width="120" height="120" fill="#0b1026"/>
+<rect x="10" y="30" width="88" height="48" fill="#f1f3f8"/>
+<rect x="98" y="34" width="4" height="44" fill="#f1f3f8"/>
+<rect x="102" y="40" width="4" height="38" fill="#f1f3f8"/>
+<rect x="106" y="50" width="4" height="28" fill="#f1f3f8"/>
+<rect x="18" y="36" width="64" height="30" fill="#1a2347"/>
+<rect x="36" y="41" width="12" height="4" fill="#f5c518"/>
+<rect x="32" y="45" width="4" height="8" fill="#f5c518"/>
+<rect x="44" y="45" width="4" height="8" fill="#f5c518"/>
+<rect x="36" y="53" width="12" height="4" fill="#f5c518"/>
+<rect x="44" y="57" width="4" height="4" fill="#f5c518"/>
+<rect x="36" y="61" width="12" height="4" fill="#f5c518"/>
+<rect x="56" y="37" width="4" height="20" fill="#f5c518"/>
+<rect x="52" y="41" width="12" height="4" fill="#f5c518"/>
+<rect x="60" y="53" width="8" height="4" fill="#f5c518"/>
+<rect x="10" y="70" width="88" height="4" fill="#34d058"/>
+<rect x="20" y="90" width="76" height="4" fill="#8b93b8"/>
+<rect x="16" y="86" width="12" height="12" fill="#34d058"/>
+<rect x="48" y="86" width="12" height="12" fill="#34d058"/>
+<rect x="80" y="86" width="12" height="12" fill="#34d058"/>
+</svg>
