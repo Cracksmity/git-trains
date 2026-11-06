@@ -15,7 +15,7 @@ Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente d
 3. En el workflow usa `train: .github/train.json`.
 
 ```yaml
-      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           train: .github/train.json
           skyline: new-york

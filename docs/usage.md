@@ -36,7 +36,7 @@ Set `calendar: true` to write a contribution calendar alongside the train. A min
 ![Contribution calendar with a white metro](example-calendar.svg)
 
 ```yaml
-      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           calendar: true
 ```
@@ -65,7 +65,7 @@ What's on it:
 - **The special car** if you earned one (see [Unlockable cars](#unlockable-cars)), riding behind the cab with a line saying which. For the poster it is earned on that year: its longest streak, plus your profile's stars and pull requests.
 
 ```yaml
-      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           year-in-review: true
           review-year: 2025 # optional
@@ -145,7 +145,7 @@ A train isn't only for profiles. With `repo: owner/name` it describes **a reposi
 
 ```yaml
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: Cracksmity/git-trains@5171f5f238c4609b276c8718b4764f59ba49b398 # security fixes after v1.1.1
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           repo: ${{ github.repository }} # or any public owner/name, for example facebook/react
           output-dir: out
