@@ -4,6 +4,9 @@
   "description": "A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.",
   "type": "module",
   "license": "MIT",
+  "bin": {
+    "git-trains": "bin/git-trains.js"
+  },
   "engines": {
     "node": ">=24"
   },

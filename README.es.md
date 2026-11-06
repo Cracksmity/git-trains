@@ -181,6 +181,8 @@ Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente d
           language: es
 ```
 
+¿Prefieres un solo comando? [Diseña desde la terminal](#diseña-desde-la-terminal) ejecuta tu CLI de IA y el validador por ti, con reintentos incluidos.
+
 Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene y lista **todos** los problemas en el log; pégaselos a la IA para que los corrija. En el [playground](https://cracksmity.github.io/git-trains/preview/) (o localmente con `npm run preview`) puedes pegar el JSON y verlo al instante, con los mismos mensajes.
 
 ![Metro de Nueva York](docs/example-new-york.svg)
@@ -203,6 +205,36 @@ Detrás del tren hay una ciudad. Por defecto se genera a partir de tu usuario: e
 Un skyline es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para los monumentos con forma propia. No tiene colores propios: usa los del tema, así que cambia solo entre claro y oscuro y de noche se encienden las ventanas. Para hacer el tuyo, pega [docs/ai/skyline.md](docs/ai/skyline.md) en tu IA con la ciudad que quieres o una foto. Ejemplos en [examples/skylines](examples/skylines) (Ciudad de México, Medellín).
 
 ![Osaka](docs/example-osaka.svg)
+
+## Diseña desde la terminal
+
+¿Ya usas Codex, Antigravity o Claude Code? Deja que haga todo el ciclo por ti: escribe el JSON, el validador lo revisa y los problemas vuelven a la IA hasta que pasa.
+
+```bash
+npx github:Cracksmity/git-trains design train "Osaka Metro 400 series" --photo tren.jpg
+npx github:Cracksmity/git-trains design skyline "Lisboa"
+```
+
+Desde un clon, `node bin/git-trains.js design ...` hace lo mismo. Necesita Node 24 y una de estas CLI instalada y con sesión iniciada (usa tu propia suscripción, no hay que registrarse en nada más): `codex`, `agy` (Antigravity) o `claude`. Por defecto toma la primera que responda a `--version`, en ese orden.
+
+Qué pasa:
+
+1. Arma un prompt con la guía para IA ([tren](docs/ai/train.md) o [skyline](docs/ai/skyline.md)) más tu descripción y tus fotos.
+2. Ejecuta la CLI sin interfaz, **solo lectura y en una carpeta temporal vacía**: Codex en su sandbox de solo lectura, Claude Code con la herramienta Read únicamente (para las fotos) y Antigravity con un hook que rechaza cualquier comando. Solo se lee la respuesta final, así que tus archivos nunca se tocan y nada corre con `--dangerously-skip-permissions`.
+3. Saca el JSON de la respuesta y lo revisa con el mismo validador que la Action. Si hay problemas, la lista vuelve a la IA para otro intento, hasta `--tries`.
+4. Cuando pasa, escribe `.github/train.json` (o `.github/skyline.json`), dibuja una imagen pequeña en la terminal (caracteres de medio bloque, en una terminal con color verdadero) e imprime un enlace al [estudio](https://cracksmity.github.io/git-trains/studio/) que lleva el archivo completo, para que lo retoques a mano.
+
+| Opción | Qué hace |
+| --- | --- |
+| `--photo <archivo>` | Una foto de la que partir (png, jpg, webp, gif; hasta 20 MB). Repítela para varias. |
+| `--ai codex\|gemini\|claude` | Qué CLI usar (`gemini` ejecuta `agy`). Por defecto, la primera instalada. |
+| `--model <slug>` | El modelo de esa CLI, por ejemplo `gpt-6.1-terra`. Por defecto, el de la propia CLI. |
+| `--out <archivo>` | Dónde escribirlo. Por defecto `.github/train.json` o `.github/skyline.json`. |
+| `--tries <n>` | Intentos, cada uno con los problemas del validador. Por defecto 3. |
+| `--force` | Reemplaza `--out` si existe. Sin esto, un archivo existente nunca se sobrescribe. |
+| `--no-preview` | Omite la imagen en la terminal. |
+
+Si ningún intento pasa, no se escribe nada en `--out`: la última respuesta queda al lado como `<out>.draft` y se imprimen los problemas que faltan, listos para pegarlos a una IA, abrirlos en el estudio o reintentar con más `--tries`. Cada intento es una ejecución completa de la IA y los modelos fuertes pueden pensar varios minutos, así que una corrida puede tardar.
 
 ## Comparte tu ciudad
 
