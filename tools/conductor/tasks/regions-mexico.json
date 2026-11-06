@@ -1,0 +1,24 @@
+{
+  "name": "regions-mexico",
+  "route": "design",
+  "promptFile": "regions-mexico.md",
+  "allow": [
+    "examples/skylines/mexico-city.json",
+    "examples/skylines/medellin.json"
+  ],
+  "gates": [
+    "node tools/conductor/gates/region-only.js examples/skylines/mexico-city.json examples/skylines/medellin.json",
+    "node tools/conductor/gates/region-art.js examples/skylines/mexico-city.json:mountains examples/skylines/medellin.json:mountains",
+    "node --test test/custom.test.js test/region.test.js test/skyline-editor.test.js test/studio.test.js test/share.test.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "why": "Run on GPT-6.1-Sol, the design route second rung, at the user request"
+    }
+  ]
+}

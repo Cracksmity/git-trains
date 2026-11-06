@@ -232,7 +232,8 @@ test('the built-in skylines, the examples and the guide are valid', () => {
 test('a skyline changes the city but not the rest of the scenery', () => {
   const H = sceneHeight(1);
   const plain = paintBackdrop(SCENE_W, H, tracks, 'octocat');
-  const ny = paintBackdrop(SCENE_W, H, tracks, 'octocat', parseSkyline('new-york'));
+  // Without its region: the region's plants replace some of the bushes (see region.test.js).
+  const ny = paintBackdrop(SCENE_W, H, tracks, 'octocat', parseSkyline({ ...SKYLINES['new-york'], region: undefined }));
   // From the embankment down (bushes, ballast, signal) everything stays the same.
   for (let y = GY0 - 8; y < H; y++) {
     for (let x = 0; x < SCENE_W; x++) {

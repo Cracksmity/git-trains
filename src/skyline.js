@@ -7,6 +7,8 @@
 // problems are reported together. See docs/ai/skyline.md.
 
 import { rng } from './pixel.js';
+import { parseRegion } from './region.js';
+import { REGIONS } from './regions.js';
 import { CustomError, NOTE_KEYS, isInt, isObj, unknownKeys } from './validate.js';
 
 const MAX_H = 84; // the city ends at row 88; leave 4 rows of sky
@@ -21,6 +23,7 @@ export const SKYLINES = {
   'new-york': {
     name: 'New York',
     fill: false,
+    region: REGIONS['new-york'],
     buildings: [
       // Background: Midtown and Lower Manhattan in a lighter shade.
       { x: -2, w: 16, h: 22, layer: 'far' },
@@ -126,6 +129,7 @@ export const SKYLINES = {
   osaka: {
     name: 'Osaka',
     fill: true,
+    region: REGIONS.osaka,
     buildings: [
       // Five-story pagoda of Shitenn?-ji.
       {
@@ -534,7 +538,7 @@ export function parseSkyline(raw) {
   }
   const errors = [];
   if (!isObj(raw)) throw new CustomError('The skyline', ['the file must be a JSON object { ... }']);
-  unknownKeys(raw, ['name', 'fill', 'buildings', ...NOTE_KEYS], 'skyline', errors);
+  unknownKeys(raw, ['name', 'fill', 'buildings', 'region', ...NOTE_KEYS], 'skyline', errors);
   const fill = raw.fill ?? true;
   if (typeof fill !== 'boolean') errors.push('fill: true (fills the gaps with the procedural city) or false');
   const list = raw.buildings;
@@ -542,11 +546,13 @@ export function parseSkyline(raw) {
     errors.push(`buildings: a list of 1 to ${MAX_BUILDINGS} buildings`);
   }
   const buildings = Array.isArray(list) ? list.map((b, i) => parseBuilding(b, i, errors)) : [];
+  const region = raw.region === undefined ? undefined : parseRegion(raw.region, errors);
   if (errors.length) throw new CustomError('The skyline', errors);
   return {
     name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim().slice(0, 40) : 'Custom skyline',
     fill,
     buildings,
+    ...(region ? { region } : {}),
   };
 }
 

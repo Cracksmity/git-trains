@@ -56,5 +56,145 @@
     { "name": "Torre Reforma", "x": 228, "w": 12, "h": 60 },
     { "name": "Torre BBVA", "x": 244, "w": 14, "h": 52, "top": "flat" },
     { "name": "Torre Mayor", "x": 262, "w": 14, "h": 50, "top": [{ "type": "pyramid", "h": 3, "tip": 8 }] }
-  ]
+  ],
+  "region": {
+    "name": "Valley of Mexico",
+    "description": "Volcanic highlands around Milpa Alta and the willow-lined chinampas of the southern basin. Nopals represent the upland fields, away from canal margins.",
+    "source": "UNAM Revista INVI: Milpa Alta rural housing; FAO: Chinampas Agricultural System; UNAM eFloraMex: Salix bonplandiana; CONAFOR: Mexico City's old ahuehuetes.",
+    "terrain": "mountains",
+    "accents": [
+      {
+        "name": "Volcanic stone",
+        "light": "#79736b",
+        "dark": "#3e3b37"
+      },
+      {
+        "name": "Flat clay tiles",
+        "light": "#a76049",
+        "dark": "#54362c"
+      },
+      {
+        "name": "Opuntia pads and willow foliage",
+        "light": "#6d9255",
+        "dark": "#37472e"
+      },
+      {
+        "name": "Blue-gray canal water",
+        "light": "#658d97",
+        "dark": "#35474d"
+      }
+    ],
+    "houses": [
+      {
+        "name": "Milpa Alta volcanic-stone house with recessed door",
+        "rows": [
+          "....2222....",
+          "..22222222..",
+          "222222222222",
+          ".tttttttttt.",
+          ".1111111111.",
+          ".1w11tttt11.",
+          ".1111t1tt11.",
+          ".11#1t1tt11.",
+          ".1111tttt11."
+        ]
+      }
+    ],
+    "trees": [
+      {
+        "name": "Ahuejote chinampa willow",
+        "rows": [
+          "..3..",
+          ".33..",
+          ".33d.",
+          ".33d.",
+          "333dd",
+          "333dd",
+          "333dd",
+          ".33d.",
+          ".33d.",
+          ".33d.",
+          ".3td.",
+          "..t..",
+          "..t..",
+          "..t..",
+          "..t..",
+          "..t.."
+        ]
+      },
+      {
+        "name": "Ahuehuete Montezuma cypress with flared trunk",
+        "rows": [
+          "....333......",
+          "..333333.33..",
+          ".3333333333..",
+          "33333333dd33.",
+          "33333d3ddddd3",
+          "d3333tddddddd",
+          "d33dtttdddd.d",
+          ".d.dttt.ddd.d",
+          "...t.ttt.d...",
+          ".....ttt.....",
+          ".....ttt.....",
+          "....tttt.....",
+          "....ttttt....",
+          "...ttttttt...",
+          "..ttt.ttttt.."
+        ]
+      },
+      {
+        "name": "Tall upland opuntia",
+        "rows": [
+          "....3....",
+          "...33d...",
+          "....d..3.",
+          ".3..t.33d",
+          "33d.3..d.",
+          ".d.33dtt.",
+          ".tt.d....",
+          "...tt....",
+          "...tt....",
+          "..tttt..."
+        ]
+      }
+    ],
+    "plants": [
+      {
+        "name": "Low cultivated nopal",
+        "rows": [
+          "...3...",
+          "..33d..",
+          "33.d...",
+          "33dt.3.",
+          ".dtt33d",
+          "..tt.d.",
+          "...ttt.",
+          "...tt.."
+        ]
+      },
+      {
+        "name": "Low milpa maize row",
+        "rows": [
+          "..3...3...3..",
+          ".333.333.333.",
+          "3.3d3.3d3.3d.",
+          ".333.333.333.",
+          "..3d..3d..3d.",
+          "..t...t...t.."
+        ]
+      }
+    ],
+    "landmark": {
+      "name": "Raised chinampa crop bed and canal with edge stakes",
+      "place": "village",
+      "rows": [
+        ".t.3.3.3.3.t...",
+        ".t333333333t444",
+        ".ttttttttttt444",
+        ".ttttttttttt444",
+        "444444444444444",
+        "444444444444444"
+      ]
+    }
+  }
 }

@@ -6,6 +6,7 @@ import { Grid, rng } from './pixel.js';
 import { TRAIN_H } from './train.js';
 import { drawText, textWidth, clean } from './font.js';
 import { paintSkyline, skylineColumns } from './skyline.js';
+import { applyRegionTheme, regionParts, paintSprite, spriteWidth, regionRng, pickOne, ridgeHeight, SNOW_LINE } from './region.js';
 
 export { rng };
 
@@ -242,24 +243,105 @@ export function paintBands(g, tracks) {
   });
 }
 
-// Foreground of those strips: village (odd k) or forest (even k).
-function paintBandFront(g, W, y1, k, rand) {
-  const top = (x) => y1 - hillH(x, NEAR, k * 1.7) + 1;
-
-  const taken = [];
-  if (k % 2 === 1) {
-    for (let x = 14 + Math.floor(rand() * 20); x < W - 24; x += 38 + Math.floor(rand() * 30)) {
-      const w = 9 + 2 * Math.floor(rand() * 3);
-      house(g, x, top(x + (w >> 1)) + 2, w);
-      taken.push([x - 4, x + w + 4]);
+// The far ridge of a region's terrain in strip k, painted over the strip's backdrop.
+// bandsLayer (the hills) is drawn without knowing the skyline, so this goes on the
+// scenery grid, which is painted after it: mountains stand behind the default far hills
+// (only what rises above them is added), plains and sea replace them with haze.
+function paintTerrain(g, W, y1, k, terrain) {
+  const nearTop = (x) => y1 - hillH(x, NEAR, k * 1.7) + 1;
+  for (let x = 0; x < W; x++) {
+    const ridgeTop = y1 - ridgeHeight(terrain, x, k) + 1;
+    const farTop = y1 - hillH(x, FAR, k) + 1;
+    const near = nearTop(x);
+    if (terrain === 'mountains') {
+      const snow = Math.min(3, y1 - ridgeTop + 1 - SNOW_LINE + 1);
+      for (let y = ridgeTop; y < Math.min(farTop, near); y++) g.set(x, y, y - ridgeTop < snow ? '@cloud' : '@city2');
+      continue;
+    }
+    for (let y = Math.min(farTop, ridgeTop); y < near; y++) {
+      if (y < ridgeTop) g.set(x, y, '@haze');
+      else if (terrain === 'sea') g.set(x, y, (x * 7 + y * 13 + k * 5) % 23 === 0 && y > ridgeTop + 1 ? '@cloud' : '@sea');
+      else g.set(x, y, '@hill2');
     }
   }
-  const step = k % 2 === 1 ? 11 : 8;
+}
+
+// Ground under a drawing: its lowest column of the near hill, so it never floats.
+function groundFor(top, cx, w) {
+  let y = -Infinity;
+  for (let x = cx - (w >> 1); x < cx - (w >> 1) + w; x++) y = Math.max(y, top(x));
+  return y;
+}
+
+// Foreground of those strips: village (odd k) or forest (even k). With a region, its
+// houses, trees, plants and landmark are drawn instead of the usual ones; the random
+// numbers are drawn exactly as before (the region only chooses with its own stream),
+// so the ballast, signals and bushes of the scene do not move.
+function paintBandFront(g, W, y1, k, rand, region = null, pick = null) {
+  const top = (x) => y1 - hillH(x, NEAR, k * 1.7) + 1;
+  const village = k % 2 === 1;
+  if (region && region.terrain !== 'hills') paintTerrain(g, W, y1, k, region.terrain);
+
+  // Spans taken by houses and the landmark: trees and plants keep out of them.
+  const solid = [];
+  const free = (a, b) => !solid.some(([x0, x1]) => a <= x1 + 1 && b >= x0 - 1);
+  const lm = region?.landmark;
+  if (lm && village) {
+    const w = spriteWidth(lm);
+    const cx = 24 + Math.floor(pick() * (W - 48));
+    if (lm.place === 'far') {
+      paintSprite(g, lm, cx, groundFor(top, cx, w) + 1, { clip: (x, y) => y < top(x) });
+    } else {
+      paintSprite(g, lm, cx, groundFor(top, cx, w) + 1);
+      solid.push([cx - (w >> 1), cx - (w >> 1) + w - 1]);
+    }
+  }
+
+  const taken = [];
+  if (village) {
+    for (let x = 14 + Math.floor(rand() * 20); x < W - 24; x += 38 + Math.floor(rand() * 30)) {
+      const w = 9 + 2 * Math.floor(rand() * 3);
+      taken.push([x - 4, x + w + 4]);
+      if (!region?.houses.length) {
+        house(g, x, top(x + (w >> 1)) + 2, w);
+        continue;
+      }
+      const sprite = pickOne(region.houses, pick);
+      const flip = pick() < 0.5;
+      const sw = spriteWidth(sprite);
+      const cx = x + (w >> 1);
+      const left = cx - (sw >> 1);
+      if (!free(left, left + sw - 1)) continue;
+      paintSprite(g, sprite, cx, groundFor(top, cx, sw) + 1, { flip });
+      solid.push([left, left + sw - 1]);
+    }
+  }
+  const step = village ? 11 : 8;
+  let lastRight = -Infinity; // trees may overlap a little, not pile up
   for (let x = 4; x < W; x += step + Math.floor(rand() * 9)) {
     if (taken.some(([a, b]) => x >= a && x <= b)) continue;
     const base = top(x) + 1;
-    if (rand() < 0.55) pine(g, x, base, 9 + Math.floor(rand() * (k % 2 === 1 ? 5 : 11)));
-    else roundTree(g, x, base, 3 + Math.floor(rand() * 2));
+    const pineRoll = rand() < 0.55;
+    const size = rand();
+    if (!region) {
+      if (pineRoll) pine(g, x, base, 9 + Math.floor(size * (village ? 5 : 11)));
+      else roundTree(g, x, base, 3 + Math.floor(size * 2));
+      continue;
+    }
+    const plant = village && region.plants.length && pick() < 0.35;
+    const pool = plant ? region.plants : region.trees;
+    if (!pool.length) {
+      if (pineRoll) pine(g, x, base, 9 + Math.floor(size * (village ? 5 : 11)));
+      else roundTree(g, x, base, 3 + Math.floor(size * 2));
+      continue;
+    }
+    const sprite = pickOne(pool, pick);
+    const flip = pick() < 0.5;
+    const sw = spriteWidth(sprite);
+    const left = x - (sw >> 1);
+    if (!free(left, left + sw - 1) || left < lastRight - 3) continue;
+    paintSprite(g, sprite, x, groundFor(top, x, sw) + 1, { flip });
+    lastRight = left + sw - 1;
   }
 }
 
@@ -345,6 +427,10 @@ export function seedFor(user) {
 export function paintBackdrop(W, H, tracks, user, skyline = null) {
   const g = new Grid(W, H);
   const rand = rng(seedFor(user));
+  // The region's countryside (see region.js). Its colors join THEMES for this scene only.
+  const region = skyline?.region ? regionParts(skyline.region) : null;
+  applyRegionTheme(THEMES, region);
+  const pick = region ? regionRng(seedFor(user)) : null;
 
   // City. With a custom skyline the random city is still calculated, on separate
   // grids, so it consumes the same random numbers and the rest of the scenery
@@ -372,12 +458,19 @@ export function paintBackdrop(W, H, tracks, user, skyline = null) {
   // Slope with bushes in front of the city.
   g.rect(0, GY0 - 3, W, 3, '@hill');
   for (let x = 2; x < W; x += 5 + Math.floor(rand() * 9)) {
-    bush(g, x, GY0 - 2, 4 + Math.floor(rand() * 5), 3 + Math.floor(rand() * 3), rand() < 0.5 ? '@tree' : '@tree2');
+    const w = 4 + Math.floor(rand() * 5);
+    const h = 3 + Math.floor(rand() * 3);
+    const color = rand() < 0.5 ? '@tree' : '@tree2';
+    if (region?.plants.length && pick() < 0.5) {
+      paintSprite(g, pickOne(region.plants, pick), x + (w >> 1), GY0 - 2, { flip: pick() < 0.5 });
+    } else {
+      bush(g, x, GY0 - 2, w, h, color);
+    }
   }
 
   tracks.forEach((t, k) => {
     const gy = GY0 + PITCH * k;
-    if (k > 0) paintBandFront(g, W, gy - 1, k, rand);
+    if (k > 0) paintBandFront(g, W, gy - 1, k, rand, region, pick);
 
     // Ballast specks (ballast and sleepers are in railsLayer).
     for (let x = 0; x < W; x++) {

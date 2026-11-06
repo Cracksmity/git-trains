@@ -49,6 +49,7 @@ y = 88  ground (the base of all buildings)
 | `name` | display name |
 | `fill` | `true` (default): fill gaps with generic low buildings. `false`: draw only what you specify |
 | `buildings` | list of 1 to 120 buildings |
+| `region` | optional: the countryside around the city (its houses, trees, plants, landmark and terrain); see [region.md](region.md) |
 
 ### A shaped building (`w`, `h`, `top`)
 
@@ -142,6 +143,10 @@ Mexico City: Popocat?petl in the background, Bellas Artes, the Angel, Torre Lati
   ]
 }
 ```
+
+## The countryside (optional)
+
+Between the tracks, git-trains also draws countryside. A skyline can bring its region's own (Japanese farmhouses and cherry trees for Osaka, adobe houses and agave for Guadalajara) in an optional `region` block. Do not draw it here: if the person asks for it, tell them to paste [region.md](region.md) into their AI along with this skyline.
 
 ---
 
