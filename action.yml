@@ -39,6 +39,12 @@ inputs:
   exclude-languages:
     description: "Comma-separated languages to leave out of the stripe and the cards, for example: HTML, Jupyter Notebook."
     default: ""
+  seasons:
+    description: "true dresses the scene for the season or holiday of the day it runs: snow in winter, blossom in spring, leaves in autumn, Día de Muertos, Christmas, Hacktoberfest and New Year. false keeps it plain."
+    default: "true"
+  hemisphere:
+    description: "north or south: which hemisphere the seasons follow (spring in the south is September to November). Holidays keep their dates."
+    default: north
   calendar:
     description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."
     default: "false"

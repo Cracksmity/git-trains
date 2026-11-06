@@ -20,6 +20,8 @@ import {
   railsLayer,
   paintBackdrop,
 } from './scenery.js';
+import { decorationFor } from './seasons.js';
+import { decorLayers } from './decor.js';
 
 export { SCENE_W, sceneHeight };
 
@@ -93,14 +95,20 @@ export function renderScene(spec) {
   let svg = '';
 
   const stars = starsLayers(W, used);
+  const backdrop = paintBackdrop(W, H, tracks, user, spec.skyline ?? null);
+  // Season or holiday of spec.date (see seasons.js); no date or a plain day adds nothing.
+  const kind = spec.date ? decorationFor(spec.date, spec.hemisphere) : null;
+  const decor = kind && decorLayers(kind, { W, H, tracks, user, backdrop }, used);
   svg +=
     skyLayer(W, used) +
     celestialLayer(W, used) +
     `<g class="tw twa">${stars.a}</g><g class="tw twb">${stars.b}</g>` +
     `<g class="cl">${cloudsLayer(W, used)}</g>` +
+    (decor?.back ?? '') +
     bandsLayer(W, tracks, used) +
     railsLayer(W, tracks, used) +
-    paintBackdrop(W, H, tracks, user, spec.skyline ?? null).paths(used);
+    backdrop.paths(used) +
+    (decor?.front ?? '');
   used.add('shadow');
 
   trains.forEach(({ train, dir, st, moving, y0, rest, from, to, steps, delay, puff }, k) => {
@@ -145,7 +153,7 @@ export function renderScene(spec) {
   });
 
   const themeVars = (name) =>
-    Object.entries(THEMES[name]).map(([key, v]) => `--${key}:${v}`).join(';');
+    Object.entries({ ...THEMES[name], ...decor?.vars[name] }).map(([key, v]) => `--${key}:${v}`).join(';');
   const rootCss =
     theme === 'auto'
       ? `:root{${themeVars('light')}}@media (prefers-color-scheme:dark){:root{${themeVars('dark')}}}`
@@ -178,6 +186,6 @@ export function renderScene(spec) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W * scale}" height="${H * scale}" ` +
     `shape-rendering="crispEdges" role="img" aria-label="${safeTitle}">` +
-    `<title>${safeTitle}</title><style>${rootCss}${classCss}${shared}${css.join('')}</style>${svg}</svg>`
+    `<title>${safeTitle}</title><style>${rootCss}${classCss}${shared}${css.join('')}${decor?.css ?? ''}</style>${svg}</svg>`
   );
 }

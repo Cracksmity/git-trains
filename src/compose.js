@@ -26,6 +26,8 @@ const TEXT = {
 // opts.mode: 'single' (one train in your top language) or 'multi' (3 tracks, one train per language).
 // opts.skyline: a skyline already validated by parseSkyline, or null for the procedural city.
 // opts.language: 'en' or 'es' (LED sign word and title); opts.label overrides the sign word.
+// opts.date: a day (Date or YYYY-MM-DD) that dresses the scene for its season or holiday (see seasons.js);
+//   without it the scene stays plain. opts.hemisphere: 'north' (default) or 'south'. opts.seasons: false ignores the date.
 export function buildSpec(stats, opts = {}) {
   const { train = 'auto', mode = 'single', theme = 'auto', language = 'en', scale = 2, skyline = null } = opts;
   if (!MODES.includes(mode)) throw new Error(`Unknown mode: "${mode}". Options: ${MODES.join(', ')}`);
@@ -62,5 +64,6 @@ export function buildSpec(stats, opts = {}) {
     title: text.title(stats),
     skyline,
     tracks,
+    ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),
   };
 }

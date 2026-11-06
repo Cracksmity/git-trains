@@ -54,6 +54,30 @@ Con `theme: both` (el valor por defecto), agrega esto a tu README:
 
 La Action también escribe `train-calendar.svg`. Con un solo tema, escribe únicamente ese archivo de calendario. Mira también el [ejemplo de vapor](docs/example-calendar-steam.svg).
 
+## Estaciones y fiestas
+
+La escena sigue el calendario, así que tu perfil se siente vivo todo el año. El día que corre la Action (UTC) añade unos pocos píxeles de decoración en capas propias, detrás del tren, y también se detiene si se prefiere reducir el movimiento:
+
+| Cuándo | Qué lleva la escena |
+| --- | --- |
+| Invierno (dic – feb) | nieve ligera cayendo, nieve en los techos y en el suelo |
+| Primavera (mar – may) | unos pétalos rosas a la deriva |
+| Verano (jun – ago) | nada: la escena de siempre |
+| Otoño (sep – nov) | hojas naranjas |
+| 1 – 30 oct · Hacktoberfest | una calabaza pequeña junto al semáforo |
+| 31 oct – 2 nov · Día de Muertos | papel picado color cempasúchil colgado a lo largo de la vía |
+| 15 dic – 6 ene · Navidad | luces parpadeantes en el cable |
+| 31 dic – 1 ene · Año Nuevo | fuegos artificiales detrás de la ciudad |
+
+| | |
+| --- | --- |
+| <img alt="La escena del tren con nieve cayendo y nieve en los techos" src="docs/example-winter.svg"><br><sub>Invierno (20 ene)</sub> | <img alt="La escena del tren con pétalos rosas a la deriva" src="docs/example-spring.svg"><br><sub>Primavera (10 abr)</sub> |
+| <img alt="La escena del tren con papel picado de cempasúchil a lo largo del cable" src="docs/example-muertos.svg"><br><sub>Día de Muertos (1 nov)</sub> | <img alt="La escena del tren con luces parpadeantes en el cable" src="docs/example-christmas.svg"><br><sub>Navidad (20 dic)</sub> |
+
+Una fiesta gana a la estación, y cuando dos fiestas se solapan gana la más corta (Año Nuevo sobre Navidad, Día de Muertos sobre Hacktoberfest). Las estaciones son las del hemisferio norte: con `hemisphere: south` se invierten (la primavera empieza en septiembre; las fiestas conservan sus fechas), y con `seasons: false` la escena queda sin adornos todo el año. Un día sin decoración dibuja exactamente el mismo SVG de antes.
+
+Para ver cualquier día, usa el selector de fecha del **[playground](https://cracksmity.github.io/git-trains/preview/)**. En código, `buildSpec(stats, { date: '2026-12-24', hemisphere: 'north' })` viste la escena para ese día (`date` es un `Date` o un texto `YYYY-MM-DD`).
+
 ## Uso rápido
 
 Crea `.github/workflows/train.yml` en tu repositorio de perfil (el que se llama igual que tu usuario):
@@ -100,6 +124,8 @@ Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ej
 | `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
+| `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](#estaciones-y-fiestas)) |
+| `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
