@@ -2,6 +2,9 @@
 
 import { MODEL_ORDER, getModel } from './models.js';
 import { DEFAULT_COLOR } from './languages.js';
+import { trainWidth } from './train.js';
+import { SCENE_W } from './scenery.js';
+import { UNLOCK_IDS, unlockThreshold } from './unlocks.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -13,10 +16,20 @@ const TEXT = {
   en: {
     label: 'STREAK',
     title: (s) => `${s.user}'s train: ${s.cars} car${s.cars === 1 ? '' : 's'}, ${s.streak}-day streak`,
+    unlock: {
+      dining: (n) => `Dining car unlocked: ${n}-day streak`,
+      observation: (n) => `Observation car unlocked: ${n}+ stars`,
+      mail: (n) => `Mail car unlocked: ${n}+ pull requests`,
+    },
   },
   es: {
     label: 'RACHA',
     title: (s) => `Tren de ${s.user}: ${s.cars} ${s.cars === 1 ? 'vagón' : 'vagones'}, racha de ${s.streak} día${s.streak === 1 ? '' : 's'}`,
+    unlock: {
+      dining: (n) => `Vagón comedor desbloqueado: racha de ${n} días`,
+      observation: (n) => `Vagón mirador desbloqueado: más de ${n} estrellas`,
+      mail: (n) => `Vagón postal desbloqueado: más de ${n} pull requests`,
+    },
   },
 };
 
@@ -26,9 +39,16 @@ const TEXT = {
 // opts.mode: 'single' (one train in your top language) or 'multi' (3 tracks, one train per language).
 // opts.skyline: a skyline already validated by parseSkyline, or null for the procedural city.
 // opts.language: 'en' or 'es' (LED sign word and title); opts.label overrides the sign word.
+// opts.unlock: the special car the profile earned (see unlocks.js), or null. It joins the
+//   main train right behind the cab and adds a line to the title. Next to a full-length
+//   train it takes the place of the last regular car, so the train still fits the scene.
 export function buildSpec(stats, opts = {}) {
   const { train = 'auto', mode = 'single', theme = 'auto', language = 'en', scale = 2, skyline = null } = opts;
+  const unlock = opts.unlock ?? null;
   if (!MODES.includes(mode)) throw new Error(`Unknown mode: "${mode}". Options: ${MODES.join(', ')}`);
+  if (unlock && !UNLOCK_IDS.includes(unlock)) {
+    throw new Error(`Unknown unlock: "${unlock}". Options: ${UNLOCK_IDS.join(', ')}`);
+  }
   const text = TEXT[language] ?? TEXT.en;
   const label = opts.label || text.label;
 
@@ -55,11 +75,18 @@ export function buildSpec(stats, opts = {}) {
         : `${l.name} - ${stats.total}`,
   }));
 
+  if (unlock) {
+    const lead = tracks[0];
+    const model = typeof lead.model === 'string' ? getModel(lead.model) : lead.model;
+    lead.extra = unlock;
+    while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
+  }
+
   return {
     theme,
     scale,
     user: stats.user,
-    title: text.title(stats),
+    title: unlock ? `${text.title(stats)}\n${text.unlock[unlock](unlockThreshold(unlock))}` : text.title(stats),
     skyline,
     tracks,
   };

@@ -44,6 +44,19 @@ query($login: String!) {
   }
 }`;
 
+// The public repositories pushed most recently (the departures board). Forks stay out,
+// as in the other queries; 30 leaves room for the ones fetchDepartures drops.
+const DEPARTURES_QUERY = `
+query($login: String!) {
+  user(login: $login) {
+    login
+    repositories(first: 30, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC,
+                 orderBy: { field: PUSHED_AT, direction: DESC }) {
+      nodes { name pushedAt primaryLanguage { name } }
+    }
+  }
+}`;
+
 // GraphQL answers 502/503/504 now and then on heavy queries, and the network can
 // blip: those are retried with backoff. Anything else (bad token, unknown user)
 // fails right away.
@@ -119,4 +132,16 @@ export async function fetchProfile({ token, user, fetchImpl = fetch, retryDelay 
     contributed: u.repositoriesContributedTo.totalCount,
     reviews: u.contributionsCollection.totalPullRequestReviewContributions,
   };
+}
+
+// The departures board: the `limit` public repositories pushed most recently, newest first.
+// Returns [{ name, pushedAt (ISO 8601, UTC), language (primary language name or null) }].
+// The profile repository (the one named like the user) is left out: the workflow that
+// draws these cards commits to it every day, so it would always sit at the top of the board.
+export async function fetchDepartures({ token, user, limit = 6, fetchImpl = fetch, retryDelay }) {
+  const u = await graphql({ token, query: DEPARTURES_QUERY, user, fetchImpl, retryDelay });
+  return u.repositories.nodes
+    .filter((r) => r.pushedAt && r.name.toLowerCase() !== u.login.toLowerCase())
+    .slice(0, limit)
+    .map((r) => ({ name: r.name, pushedAt: r.pushedAt, language: r.primaryLanguage?.name ?? null }));
 }
