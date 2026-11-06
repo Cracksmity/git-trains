@@ -6,7 +6,7 @@ Read these first, in this order:
 
 1. `docs/ai/region.md`: the format, the symbols, the limits, where each part is drawn, and one complete worked example (Córdoba). This is your specification.
 2. `docs/research/regions.md`: the research for the eight regions, with, for each house, plant and landmark: its size in pixels (width x height), its colors as hex, and its distinctive detail. Draw from it: same sizes (within about 2 px), same colors, same detail.
-3. `src/region.js` (the validator and the painter) and the `paintBandFront` / `paintTerrain` functions of `src/scenery.js` (how the drawings are placed). Do not edit them.
+3. `src/landscape/region-parse.js` (the validator and the painter) and the `paintBandFront` / `paintTerrain` functions of `src/scene/backdrop.js` (how the drawings are placed). Do not edit them.
 
 ## Looking at your work
 
@@ -22,7 +22,7 @@ node scripts/export.js --skyline <skyline id or path.json> --mode multi --theme 
 
 `.scratch/` is git-ignored. Iterate: draw, render, look, fix. The scene shows each strip 40 px tall and the train on the track below covers its lower 25 px, so what people see is the top half of every drawing: put the identifying shape (the roof, the crown, the sails) up there. Houses, trees and plants are mirrored at random.
 
-For a built-in skyline id (`osaka`, `new-york`) the region is read from `src/regions.js`; for a file it is the `region` key.
+For a built-in skyline id (`osaka`, `new-york`) the region is read from `src/landscape/regions.js`; for a file it is the `region` key.
 
 ## What good looks like
 
@@ -35,7 +35,7 @@ For a built-in skyline id (`osaka`, `new-york`) the region is read from `src/reg
 
 ## Hard rules
 
-- Only edit the files your task allows. The rest of the repository (including `src/scene.js`, `src/cards.js`, `src/github.js`, `src/index.js`, `studio/`, `bin/`) is off limits.
+- Only edit the files your task allows. The rest of the repository (including `src/scene/render.js`, `src/cards/profile.js`, `src/github/user.js`, `src/index.js`, `studio/`, `bin/`) is off limits.
 - No letters, signs or logos in any drawing.
 - Each drawing: all rows, a last row with pixels (the ground), only the symbols `. # w r t l d 1 2 3 4`, and no accent that is not defined. The validator (`parseSkyline`) lists every problem; the gates run it.
 - Every drawing is within its limit: houses up to 24 x 16, trees 20 x 22, plants 16 x 12, landmark 32 x 28. Aim for the researched sizes, not the limits.

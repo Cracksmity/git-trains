@@ -8,7 +8,7 @@ on:
     - cron: "0 6 * * *"
   push:
     branches: [main]
-    paths: ["src/**", "action.yml", ".github/workflows/train.yml"]
+    paths: ["src/**", "config/**", "action.yml", ".github/workflows/train.yml"]
   workflow_dispatch:
 
 permissions:

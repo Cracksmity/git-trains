@@ -6,10 +6,11 @@
 // node scripts/sheet.js cars.png 4 3 0 metro-orange,bullet a dining
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { buildTrain, TRAIN_H } from '../src/train.js';
-import { MODEL_ORDER, getModel } from '../src/models.js';
-import { parseCustomModel } from '../src/custom.js';
-import { png } from './export.js';
+import { buildTrain } from '../src/trains/render.js';
+import { TRAIN_H } from '../src/trains/geometry.js';
+import { MODEL_ORDER, getModel } from '../src/trains/models.js';
+import { parseCustomModel } from '../src/trains/parse.js';
+import { png } from '../tools/export/png.js';
 
 const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a', extraArg = ''] = process.argv.slice(2);
 const scale = Number(scaleArg);

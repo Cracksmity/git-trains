@@ -8,7 +8,7 @@ import { extname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const PUBLIC_DIRS = new Set(['preview', 'studio', 'src', 'gallery', 'community', 'leaderboard', 'docs', 'examples', 'benchmarks', 'comparativa']);
+const PUBLIC_DIRS = new Set(['preview', 'studio', 'src', 'gallery', 'community', 'leaderboard', 'docs', 'examples', 'benchmarks', 'comparativa', 'assets']);
 const PUBLIC_FILES = new Set(['index.html', 'README.md', 'README.es.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'LICENSE']);
 
 const TYPES = {
@@ -63,5 +63,5 @@ export function createPreviewServer({ root: directory = root } = {}) {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const port = Number(process.argv[2] || process.env.PORT || 4173);
   const server = createPreviewServer();
-  server.listen(port, '127.0.0.1', () => console.log(`Playground at http://127.0.0.1:${server.address().port}`));
+  server.listen(port, '127.0.0.1', () => console.log(`Playground at http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`));
 }

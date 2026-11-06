@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to make the trains better. Everything runs on plain Node 24 with no dependencies.
+Everything runs on plain Node 24 with no runtime dependencies. Run `npm ci` once to install the pinned lint and type-check tools, then `npm run check` before proposing changes. See the [architecture](docs/architecture.md) and [command reference](scripts/README.md).
 
 ```bash
 npm test           # the whole suite, about a second
@@ -13,8 +13,8 @@ npm run community  # checks community/ and rebuilds community/index.json
 
 ## Ground rules
 
-- **No dependencies, no build step.** The Action runs `src/index.js` directly on the runner.
-- **Pixel art in code.** Trains and skylines are drawn on a grid (`src/pixel.js`); no bitmaps go into the SVG.
+- **No runtime dependencies, no build step.** The Action runs `src/index.js` directly on the runner. Development tooling is pinned in the lockfile.
+- **Pixel art in code.** Trains and skylines are drawn on a grid (`src/graphics/pixel.js`); no bitmaps go into the SVG.
 - **Outside JSON is data.** Custom trains and skylines are validated field by field, and every problem is reported in one list, worded so a person can paste it back to an AI. Keep new fields to that standard.
 - **No logos or lettering** from real operators: colors and shapes only.
 - **English** for code, comments, messages and docs. User-facing texts have an `es` version (cards, sign word, image title, `README.es.md`).
@@ -22,12 +22,12 @@ npm run community  # checks community/ and rebuilds community/index.json
 ## Adding a model to the catalog
 
 1. Design it as a custom train first (see [docs/ai/train.md](docs/ai/train.md)) and check it in the playground.
-2. Add it to `MODELS` in [src/models.js](src/models.js), with the same keys as the JSON, and to `MODEL_ORDER` if it should take part in the `auto` evolution.
+2. Add it to `MODELS` in [src/trains/models.js](src/trains/models.js), with the same keys as the JSON, and to `MODEL_ORDER` if it should take part in the `auto` evolution.
 3. `npm test` checks that it builds with 1 to 6 cars in both directions, fits the scene and has a cab at each end.
 
 ## Adding a built-in skyline
 
-Add it to `SKYLINES` in [src/skyline.js](src/skyline.js). Keep tall towers away from `x < 90` (the station sign) and remember the train covers the bottom ~25 rows.
+Add it to `SKYLINES` in [src/landscape/skyline-parse.js](src/landscape/skyline-parse.js). Keep tall towers away from `x < 90` (the station sign) and remember the train covers the bottom ~25 rows.
 
 ## Sharing your city or train
 
@@ -39,7 +39,7 @@ Add it to the community depot: a pull request with one file, `community/trains/<
 
 - `npm test` passes.
 - After a visual change, `npm run docs` and commit the regenerated `docs/*.svg` (CI checks they are up to date). If it shows in the share images too, `npm run export -- social`.
-- Changed a layer or an animation in `src/scene.js` or `src/scenery.js`? `scripts/export.js` paints the same grids and samples the same timing for PNG and GIF: keep them in step (`test/export.test.js` checks the basics).
+- Changed a layer or an animation in `src/scene/render.js` or `src/scene/backdrop.js`? `scripts/export.js` paints the same grids and samples the same timing for PNG and GIF: keep them in step (`tests/tooling/export.test.js` checks the basics).
 - If you changed an input, a model or a skyline id, update `README.md` and `README.es.md`.
 
 ## Working with the conductor

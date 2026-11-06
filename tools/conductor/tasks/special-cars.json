@@ -2,11 +2,11 @@
   "name": "special-cars",
   "route": "design",
   "promptFile": "special-cars.md",
-  "allow": ["src/cars.js"],
+  "allow": ["src/trains/special-cars.js"],
   "gates": [
-    "node --test test/unlocks.test.js",
+    "node --test tests/activity/unlocks.test.js",
     "npm test",
-    "node -e \"const t=require('fs').readFileSync('src/cars.js','utf8').replace(/\\/\\/.*$/gm,''); const ok=new Set(['#ffd86b','#f2d98d','#ffb02e','#fff4b0']); const bad=(t.match(/#[0-9a-fA-F]{3,8}\\b/g)||[]).filter(h=>!ok.has(h.toLowerCase())); if(bad.length){console.log('fixed colors in src/cars.js: '+bad.join(', ')+' (paint from the model palette)');process.exit(1)}\""
+    "node -e \"const t=require('fs').readFileSync('src/trains/special-cars.js','utf8').replace(/\\/\\/.*$/gm,''); const ok=new Set(['#ffd86b','#f2d98d','#ffb02e','#fff4b0']); const bad=(t.match(/#[0-9a-fA-F]{3,8}\\b/g)||[]).filter(h=>!ok.has(h.toLowerCase())); if(bad.length){console.log('fixed colors in src/trains/special-cars.js: '+bad.join(', ')+' (paint from the model palette)');process.exit(1)}\""
   ],
   "attempts": 2,
   "timeoutMin": 40

@@ -6,7 +6,7 @@
 // Both share the palette of the trains: night blue, white body, yellow stripe, green signal.
 
 import { writeFileSync } from 'node:fs';
-import { png } from './export.js';
+import { png } from '../tools/export/png.js';
 
 const C = {
   night: '#0b1026',

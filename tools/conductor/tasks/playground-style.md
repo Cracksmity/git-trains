@@ -1,4 +1,4 @@
-Restyle the playground, `preview/index.html`, so it looks like the rest of the site.
+Restyle the playground, `preview/index.html` and `assets/preview/style.css`, so it looks like the rest of the site.
 
 Right now it uses system fonts, a beige background and an orange accent, so it looks like a different project from the home page (`index.html`) and the benchmark (`benchmarks/medellin/index.html`). Read those two pages first and adopt their visual system:
 
@@ -13,6 +13,6 @@ Right now it uses system fonts, a beige background and an orange accent, so it l
 
 Rules:
 
-- Change only `preview/index.html`, and inside it only the `<head>` (styles, fonts) and the HTML markup. **Do not touch the `<script>` block at all**: not a character. The scripts find elements by `id` and by `data-*` attributes, so keep every `id` and every `data-*` attribute; you may add wrappers and classes.
+- Change only `preview/index.html` and `assets/preview/style.css`, and inside it only the `<head>` (styles, fonts) and the HTML markup. **Do not touch the `<script>` block at all**: not a character. The scripts find elements by `id` and by `data-*` attributes, so keep every `id` and every `data-*` attribute; you may add wrappers and classes.
 - Keep all the visible text as it is, in English; you may add the eyebrow line.
 - No new libraries or frameworks; plain CSS.

@@ -1,8 +1,8 @@
-Draw the seasonal and holiday decorations of the git-trains scene, and animate them, in `src/decor.js`.
+Draw the seasonal and holiday decorations of the git-trains scene, and animate them, in `src/scene/decor.js`.
 
-Context: git-trains draws a GitHub profile as an animated pixel-art SVG: a train running in front of a city. Everything is pixel art built on `Grid`s (`src/pixel.js`) and animated with CSS inside the SVG, 1 px at a time. Read first: `src/scene.js` (how layers and CSS are assembled; look at the clouds `.cl`, the twinkling stars `.tw`/`.twa`/`.twb` and the wheels `.wa`/`.wb`), `src/scenery.js` (sky, clouds, the city, rails, signal, overhead wire, station sign, and the theme colors in `THEMES`), `src/pixel.js` (`Grid`, `rng`), `src/seasons.js` (which decoration applies on which day) and `test/seasons.test.js` (the tests your code must pass: read them closely, they define what "done" is).
+Context: git-trains draws a GitHub profile as an animated pixel-art SVG: a train running in front of a city. Everything is pixel art built on `Grid`s (`src/graphics/pixel.js`) and animated with CSS inside the SVG, 1 px at a time. Read first: `src/scene/render.js` (how layers and CSS are assembled; look at the clouds `.cl`, the twinkling stars `.tw`/`.twa`/`.twb` and the wheels `.wa`/`.wb`), `src/scene/backdrop.js` (sky, clouds, the city, rails, signal, overhead wire, station sign, and the theme colors in `THEMES`), `src/graphics/pixel.js` (`Grid`, `rng`), `src/activity/seasons.js` (which decoration applies on which day) and `tests/activity/seasons.test.js` (the tests your code must pass: read them closely, they define what "done" is).
 
-`src/decor.js` is already wired in: `renderScene` calls `decorLayers(kind, scene, used)` when the day has a decoration and puts the result in the SVG. Today it is a stub that draws nothing. Keep its exports and signature (`DECORATIONS`, `DECOR_THEMES`, `decorLayers`) and make it real. Edit only `src/decor.js`.
+`src/scene/decor.js` is already wired in: `renderScene` calls `decorLayers(kind, scene, used)` when the day has a decoration and puts the result in the SVG. Today it is a stub that draws nothing. Keep its exports and signature (`DECORATIONS`, `DECOR_THEMES`, `decorLayers`) and make it real. Edit only `src/scene/decor.js`.
 
 ## The contract
 
@@ -12,7 +12,7 @@ Context: git-trains draws a GitHub profile as an animated pixel-art SVG: a train
 - `front`: SVG string drawn over the city, the rails and the ground, but BEHIND the trains (the train is always the star and is never covered). Everything else goes here.
 - `css`: extra CSS: your `@keyframes` and rules. It is appended to the scene's `<style>`.
 - `vars`: `{ light: {...}, dark: {...} }` with the entries of `DECOR_THEMES` that you used (the colors you added to the theme). Build it from `used` or from the names you painted.
-- `kind` is a key of `DECORATIONS` (`src/seasons.js`): `winter`, `spring`, `autumn`, `muertos`, `christmas`, `hacktoberfest`, `newyear`. Anything else throws.
+- `kind` is a key of `DECORATIONS` (`src/activity/seasons.js`): `winter`, `spring`, `autumn`, `muertos`, `christmas`, `hacktoberfest`, `newyear`. Anything else throws.
 - Build every layer from a `Grid` and call `grid.paths(used)`, which emits the `<path class="c-name">` elements and records the color names in `used`. Wrap layers in `<g class="...">` to animate them. Hand-written SVG shapes are not needed.
 - Colors are theme colors only: `'@name'` with a key of `DECOR_THEMES`, which you define with the same keys for `light` and `dark` (hex or rgba values; the scene's light sky is pale blue `#bfe0f5`..`#f4fafe`, the dark sky is navy `#070b1e`..`#1d2e5c`; pick values that read on both). No fixed hex colors anywhere else in the file (a gate checks it). The scene turns each name into a CSS variable and a `.c-name` class by itself.
 - Everything is deterministic: use `rng(seed)` from `pixel.js` with a fixed seed; the same day must always draw the same SVG.
@@ -28,7 +28,7 @@ Context: git-trains draws a GitHub profile as an animated pixel-art SVG: a train
 - Station sign, only when the user name is not empty (track 0 only): a board with the name at `x = 14`, `y = 10`, height 13 and width `textWidth(clean(user).replace(/ /g, '').slice(0, 16)) + 8` (`font.js`), on a mast at x = 24..25 down to y = 88. When `user` is empty there is no sign.
 - Sun/moon at (392, 20), radius ~6, rays to 10.
 - Ground: ballast from `gy + 2` to `gy + 11`, rails at `gy` and `gy + 1`.
-- Trains come in all sorts: the six models in `src/models.js` (some with a pantograph, some without) and 1 to 3 tracks (multi mode). Every decoration must look right on all of them, so adapt to `track.overhead` and to a missing sign. `test/seasons.test.js` renders every decoration with every model.
+- Trains come in all sorts: the six models in `src/trains/models.js` (some with a pantograph, some without) and 1 to 3 tracks (multi mode). Every decoration must look right on all of them, so adapt to `track.overhead` and to a missing sign. `tests/activity/seasons.test.js` renders every decoration with every model.
 
 ## The decorations (few pixels, pixel art, subtle; the scene is still about the train)
 
@@ -53,6 +53,6 @@ Aim for clean shapes and 2 or 3 tones per object, no noise. If you want to see i
 
 ## Hard rules
 
-- Edit only `src/decor.js`. Do not touch `src/scene.js`, `src/scenery.js`, `src/seasons.js` or the tests: if you think the contract is wrong, say so in your final message instead.
+- Edit only `src/scene/decor.js`. Do not touch `src/scene/render.js`, `src/scene/backdrop.js`, `src/activity/seasons.js` or the tests: if you think the contract is wrong, say so in your final message instead.
 - No dependencies, plain ES modules, comments in English, explain the non-obvious (why a layer is `back`, where the fallbacks go).
-- The gates: `node --check src/decor.js`, `node tools/conductor/gates/theme-colors.js src/decor.js DECOR_THEMES` (no fixed colors outside `DECOR_THEMES`), `node --test test/seasons.test.js` and `npm test` must pass.
+- The gates: `node --check src/scene/decor.js`, `node tools/conductor/gates/theme-colors.js src/scene/decor.js DECOR_THEMES` (no fixed colors outside `DECOR_THEMES`), `node --test tests/activity/seasons.test.js` and `npm test` must pass.
