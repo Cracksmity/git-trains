@@ -51,9 +51,20 @@ export const CALENDAR_THEMES = {
   },
 };
 
+// repoTitle: repo mode (see repo.js) counts commits, and the calendar belongs to the repository.
 const TEXT = {
-  en: { word: 'contributions', title: (u) => `${u}'s contribution calendar, with their train running through it` },
-  es: { word: 'contribuciones', title: (u) => `Calendario de contribuciones de ${u}, con su tren recorriéndolo` },
+  en: {
+    word: 'contributions',
+    title: (u) => `${u}'s contribution calendar, with their train running through it`,
+    repoWord: 'commits',
+    repoTitle: (r) => `Commit calendar of ${r}, with its train running through it`,
+  },
+  es: {
+    word: 'contribuciones',
+    title: (u) => `Calendario de contribuciones de ${u}, con su tren recorriéndolo`,
+    repoWord: 'commits',
+    repoTitle: (r) => `Calendario de commits de ${r}, con su tren recorriéndolo`,
+  },
 };
 
 // days: [{ date: 'YYYY-MM-DD', count }] ascending. Returns the cells laid out
@@ -183,7 +194,8 @@ export function renderCalendar(stats, opts = {}) {
   // Caption at double size: who and how much on the left, the streak on the right.
   const capY = GY + gridH + 7;
   const cap = new Grid(Math.ceil(W / 2), 6);
-  drawText(cap, `${stats.user ?? ''} - ${stats.total ?? 0} ${text.word}`, Math.round(LEFT / 2), 0, '@text');
+  const repo = stats.kind === 'repo';
+  drawText(cap, `${stats.user ?? ''} - ${stats.total ?? 0} ${repo ? text.repoWord : text.word}`, Math.round(LEFT / 2), 0, '@text');
   const led = `${label} ${stats.streak ?? 0}`;
   const lw = textWidth(led);
   const ledX = Math.floor(RIGHT / 2) - lw - 2;
@@ -255,7 +267,7 @@ export function renderCalendar(stats, opts = {}) {
     .join('');
   const reduced = '@media (prefers-reduced-motion:reduce){.tr>g,.ce>path{animation:none!important}}';
 
-  const title = text.title(stats.user ?? '').replace(/[<&>"]/g, '');
+  const title = (repo ? text.repoTitle(stats.fullName ?? stats.user ?? '') : text.title(stats.user ?? '')).replace(/[<&>"]/g, '');
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" ` +
     `shape-rendering="crispEdges" role="img" aria-label="${title}">` +

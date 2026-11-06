@@ -16,6 +16,7 @@ const TEXT = {
   en: {
     label: 'STREAK',
     title: (s) => `${s.user}'s train: ${s.cars} car${s.cars === 1 ? '' : 's'}, ${s.streak}-day streak`,
+    repoTitle: (s) => `Train for ${s.fullName}: ${s.cars} car${s.cars === 1 ? '' : 's'}, ${s.streak}-day commit streak`,
     unlock: {
       dining: (n) => `Dining car unlocked: ${n}-day streak`,
       observation: (n) => `Observation car unlocked: ${n}+ stars`,
@@ -25,6 +26,7 @@ const TEXT = {
   es: {
     label: 'RACHA',
     title: (s) => `Tren de ${s.user}: ${s.cars} ${s.cars === 1 ? 'vagón' : 'vagones'}, racha de ${s.streak} día${s.streak === 1 ? '' : 's'}`,
+    repoTitle: (s) => `Tren de ${s.fullName}: ${s.cars} ${s.cars === 1 ? 'vagón' : 'vagones'}, racha de commits de ${s.streak} día${s.streak === 1 ? '' : 's'}`,
     unlock: {
       dining: (n) => `Vagón comedor desbloqueado: racha de ${n} días`,
       observation: (n) => `Vagón mirador desbloqueado: más de ${n} estrellas`,
@@ -84,11 +86,14 @@ export function buildSpec(stats, opts = {}) {
     while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
   }
 
+  // Repo mode (see repo.js): the title names the repository, and the city is seeded with its full name.
+  const title = stats.kind === 'repo' ? text.repoTitle(stats) : text.title(stats);
   return {
     theme,
     scale,
     user: stats.user,
-    title: unlock ? `${text.title(stats)}\n${text.unlock[unlock](unlockThreshold(unlock))}` : text.title(stats),
+    ...(stats.seed ? { seed: stats.seed } : {}),
+    title: unlock ? `${title}\n${text.unlock[unlock](unlockThreshold(unlock))}` : title,
     skyline,
     tracks,
     ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),

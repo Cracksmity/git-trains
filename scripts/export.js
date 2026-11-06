@@ -115,7 +115,7 @@ export function rasterScene(spec, theme = spec.theme === 'dark' ? 'dark' : 'ligh
     stars: starsGrids(W),
     clouds: cloudsGrid(W),
     ground,
-    backdrop: paintBackdrop(W, H, tracks, spec.user ?? '', spec.skyline ?? null),
+    backdrop: paintBackdrop(W, H, tracks, spec.user ?? '', spec.skyline ?? null, spec.seed ?? spec.user ?? ''),
     trains: trains.map((tr, k) => {
       const shadow = new Grid(tr.train.width, TRAIN_H + 4);
       shadow.rect(0, TRAIN_H + 2, tr.train.width, 2, '@shadow');

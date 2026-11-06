@@ -28,6 +28,15 @@ jobs:
           output-dir: out
           cards: both
           calendar: true
+      # Repo mode: the same Action, drawing this repository instead of its owner. It writes
+      # train-repo*.svg and card-repo-*.svg next to the files above, and the README shows them.
+      - name: Draw this repository too
+        uses: ./
+        with:
+          repo: ${{ github.repository }}
+          output-dir: out
+          cards: stats, departures
+          calendar: true
       - name: Publish to the output branch
         working-directory: out
         run: |

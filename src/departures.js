@@ -33,6 +33,7 @@ export const LABELS = {
   en: {
     title: 'DEPARTURES',
     aria: (login) => `${login}'s departures board: the repositories pushed most recently`,
+    ariaRepo: (repo) => `Departures board of ${repo}: its latest releases and tags`,
     time: 'TIME',
     destination: 'DESTINATION',
     platform: 'PLATFORM',
@@ -42,10 +43,14 @@ export const LABELS = {
     delayed: 'DELAYED',
     departed: 'DEPARTED',
     none: 'NO DEPARTURES',
+    release: 'RELEASE',
+    prerelease: 'PRERELEASE',
+    tag: 'TAG',
   },
   es: {
     title: 'SALIDAS',
     aria: (login) => `Panel de salidas de ${login}: los repositorios con más actividad reciente`,
+    ariaRepo: (repo) => `Panel de salidas de ${repo}: sus últimas versiones y etiquetas`,
     time: 'HORA',
     destination: 'DESTINO',
     platform: 'ANDÉN',
@@ -55,6 +60,9 @@ export const LABELS = {
     delayed: 'RETRASADO',
     departed: 'SALIÓ',
     none: 'SIN SALIDAS',
+    release: 'VERSIÓN',
+    prerelease: 'PREVERSIÓN',
+    tag: 'ETIQUETA',
   },
 };
 
@@ -86,7 +94,9 @@ const fit = (text, cells) => {
   return t.length > cells ? `${t.slice(0, cells - 1)}…` : t;
 };
 
-// departures: [{ name, pushedAt, language }] newest first (see fetchDepartures).
+// departures: [{ name, pushedAt, language }] newest first (see fetchDepartures). A repository's board
+// (see fetchRepoReleases) lists releases and tags instead: [{ name, pushedAt, kind }], and the platform
+// column says whether each is a release, a prerelease or a plain tag.
 // Returns the rows of the board, text already in capitals and clipped to its column,
 // with the `tone` that colors the status.
 export function departureRows(departures, { language = 'en', now = new Date() } = {}) {
@@ -96,15 +106,16 @@ export function departureRows(departures, { language = 'en', now = new Date() } 
     return {
       time: fit(departureTime(d.pushedAt, now, language), COLUMNS.time),
       destination: fit(d.name, COLUMNS.destination),
-      platform: fit(d.language || '-', COLUMNS.platform),
+      platform: fit(d.kind ? L[d.kind] : d.language || '-', COLUMNS.platform),
       status: fit(L[tone], COLUMNS.status),
       tone,
     };
   });
 }
 
-// departures: [{ name, pushedAt, language }]. login: whose board it is.
-// o: { language, border, now, background, title, icon, text, ring }
+// departures: [{ name, pushedAt, language }]. login: whose board it is (the owner/name of the
+// repository when o.repo is true, which lists releases and tags).
+// o: { language, border, now, repo, background, title, icon, text, ring }
 export function renderDeparturesCard(departures, login, o = {}) {
   const L = LABELS[o.language] ?? LABELS.en;
   const columns = ['time', 'destination', 'platform', 'status'].map((key) => ({
@@ -115,7 +126,7 @@ export function renderDeparturesCard(departures, login, o = {}) {
   return renderBoard(
     {
       title: L.title,
-      aria: L.aria(login),
+      aria: o.repo ? L.ariaRepo(login) : L.aria(login),
       columns,
       rows: departureRows(departures, { language: o.language, now: o.now }),
       empty: L.none,

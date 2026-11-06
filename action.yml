@@ -12,6 +12,9 @@ inputs:
   user:
     description: GitHub user to draw. Defaults to the repository owner.
     default: ${{ github.repository_owner }}
+  repo:
+    description: "owner/name of a repository to draw instead of a user (the workflow's own is github.repository): the train grows with its commits of the last year, the languages are its own, the cards show its stars, forks, issues and contributors, and the departures board lists its latest releases. Files are named train-repo*.svg and card-repo-*.svg. When set, `user` is ignored."
+    default: ""
   train:
     description: "auto (evolves with your cars), a model (tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet) or the path to your own train in JSON (for example .github/train.json)."
     default: auto

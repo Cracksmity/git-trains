@@ -1,0 +1,43 @@
+# Copy this file to .github/workflows/train.yml in any repository to put a living train in its README:
+# the train describes the repository (its commits, its languages, its releases), not its owner.
+# The default GITHUB_TOKEN is enough for this repository and for any public one.
+name: Repository train
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # every day at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repository-train
+  cancel-in-progress: true
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: Cracksmity/git-trains@v1
+        with:
+          repo: ${{ github.repository }} # or any owner/name, for example facebook/react
+          output-dir: out
+          calendar: true # adds train-repo-calendar*.svg: the commit calendar with the train running through it
+          cards: stats, departures # card-repo-stats.svg (stars, forks...) and card-repo-departures.svg (latest releases)
+          # language: es # the LED sign reads RACHA, the cards speak Spanish
+          # exclude-languages: HTML, Jupyter Notebook
+
+      # Publish to a branch of its own, so the repository's history doesn't fill with image commits.
+      # The README then shows https://raw.githubusercontent.com/<owner>/<repo>/train/train-repo-light.svg
+      - name: Publish to the train branch
+        working-directory: out
+        run: |
+          git init -q -b train
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -q -m "Repository train"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" train
