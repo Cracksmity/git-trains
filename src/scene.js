@@ -58,7 +58,7 @@ export function planScene(spec) {
   const W = SCENE_W;
   const trains = tracks.map((t, k) => {
     const dir = t.dir === -1 ? -1 : 1;
-    const train = buildTrain(t.model, { cars: t.cars, stripe: t.stripe, streak: t.streak, label: t.label, dir });
+    const train = buildTrain(t.model, { cars: t.cars, stripe: t.stripe, streak: t.streak, label: t.label, dir, extra: t.extra });
     const st = STATES[t.state] ?? STATES.idle;
     const moving = st.dur > 0;
     const center = Math.round((W - train.width) / 2);

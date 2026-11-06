@@ -1,0 +1,12 @@
+{
+  "name": "departures-board",
+  "route": "design",
+  "promptFile": "departures-board.md",
+  "allow": ["src/board.js"],
+  "gates": [
+    "node --test test/departures.test.js test/cards.test.js",
+    "node -e \"const t=require('fs').readFileSync('src/board.js','utf8').replace(/\\/\\/.*$/gm,''); const bad=(t.match(/#[0-9a-fA-F]{3,8}\\b/g)||[]).filter(h=>!['#fff','#ffffff','#000','#000000'].includes(h.toLowerCase())); if(bad.length){console.log('fixed colors in src/board.js: '+bad.join(', ')+' (use the card colors)');process.exit(1)}\""
+  ],
+  "attempts": 2,
+  "timeoutMin": 40
+}

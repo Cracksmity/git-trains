@@ -43,8 +43,11 @@ inputs:
     description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."
     default: "false"
   cards:
-    description: "Profile cards to generate: none, stats, languages or both."
+    description: "Profile cards to generate: none, stats, languages, departures or both (stats and languages). Accepts a list: stats, departures."
     default: none
+  unlocks:
+    description: "true adds a special car to the main train when you earn it (dining: 100-day streak, observation: 100+ stars, mail: 500+ PRs). Needs your profile numbers, so it makes one extra API request; false skips it."
+    default: "true"
   rank:
     description: "Center of the stats card ring: letter (S, A+, B...) or github (the logo)."
     default: letter
