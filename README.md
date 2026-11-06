@@ -70,6 +70,30 @@ With the default `theme: both`, add this to your README:
 
 The Action also writes `train-calendar.svg`. With a single theme, it writes only that calendar file. See also the [steam example](docs/example-calendar-steam.svg).
 
+## Seasons and holidays
+
+The scene follows the calendar, so your profile feels alive all year. On the day the Action runs (UTC) it adds a few pixels of decoration on their own layers, behind the train, and still stops with reduced motion:
+
+| When | What the scene wears |
+| --- | --- |
+| Winter (Dec – Feb) | light snow falling, snow on the roofs and on the ground |
+| Spring (Mar – May) | a few pink petals drifting |
+| Summer (Jun – Aug) | nothing: the plain scene |
+| Autumn (Sep – Nov) | orange leaves |
+| Oct 1 – 30 · Hacktoberfest | a small pumpkin by the signal |
+| Oct 31 – Nov 2 · Día de Muertos | marigold papel picado strung along the line |
+| Dec 15 – Jan 6 · Christmas | blinking lights on the wire |
+| Dec 31 – Jan 1 · New Year | fireworks behind the city |
+
+| | |
+| --- | --- |
+| <img alt="The train scene with falling snow and snow on the roofs" src="docs/example-winter.svg"><br><sub>Winter (Jan 20)</sub> | <img alt="The train scene with pink petals drifting" src="docs/example-spring.svg"><br><sub>Spring (Apr 10)</sub> |
+| <img alt="The train scene with marigold papel picado along the wire" src="docs/example-muertos.svg"><br><sub>Día de Muertos (Nov 1)</sub> | <img alt="The train scene with blinking lights on the wire" src="docs/example-christmas.svg"><br><sub>Christmas (Dec 20)</sub> |
+
+A holiday wins over the season, and when two holidays overlap the shorter one wins (New Year over Christmas, Día de Muertos over Hacktoberfest). The seasons are the northern ones: set `hemisphere: south` to flip them (spring starts in September; holidays keep their dates), or `seasons: false` to keep the scene plain all year. A day with no decoration draws exactly the same SVG as before.
+
+To see any day, use the date picker in the **[playground](https://cracksmity.github.io/git-trains/preview/)**. In code, `buildSpec(stats, { date: '2026-12-24', hemisphere: 'north' })` dresses the scene for that day (`date` is a `Date` or a `YYYY-MM-DD` string).
+
 ## Quick start
 
 Create `.github/workflows/train.yml` in your profile repository (the one named after your username):
@@ -114,6 +138,8 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka` or the path to [your own skyline](#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
 | `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
+| `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](#seasons-and-holidays)) |
+| `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto` |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |

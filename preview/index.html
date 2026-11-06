@@ -58,9 +58,12 @@
   .panel { padding: 16px; }
   label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 4px; }
   label:first-child { margin-top: 0; }
-  select, input[type=range], input[type=color], input[type=text] { width: 100%; }
-  select, input[type=text], input[type=color], textarea { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
-  select, input[type=text] { padding: 7px 8px; font: 13px var(--mono); }
+  select, input[type=range], input[type=color], input[type=text], input[type=date] { width: 100%; }
+  select, input[type=text], input[type=color], input[type=date], textarea { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  select, input[type=text], input[type=date] { padding: 7px 8px; font: 13px var(--mono); }
+  .daybar { display: flex; gap: 6px; }
+  .daybar button { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 12px/1.4 var(--mono); }
+  .daybar button:hover { border-color: var(--green); }
   input[type=color] { height: 32px; padding: 2px; }
   input[type=range] { accent-color: var(--green); }
   .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -142,6 +145,21 @@
         <button data-v="en" aria-pressed="true">STREAK</button>
         <button data-v="es" aria-pressed="false">RACHA</button>
       </div>
+
+      <label for="day">Day (seasons and holidays; empty = plain scene)</label>
+      <div class="daybar">
+        <input type="date" id="day" min="2000-01-01" max="2099-12-31">
+        <button type="button" id="today" title="The day the Action would run today (UTC)">Today</button>
+      </div>
+
+      <label for="jump">Jump to</label>
+      <select id="jump"></select>
+
+      <label>Hemisphere</label>
+      <div class="seg" id="hemisphere">
+        <button data-v="north" aria-pressed="true">North</button>
+        <button data-v="south" aria-pressed="false">South</button>
+      </div>
     </aside>
 
     <section>
@@ -213,9 +231,10 @@ import { sampleDays, SAMPLE_LANGUAGES } from '../src/sample.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline, SKYLINES } from '../src/skyline.js';
 import { renderCalendar } from '../src/calendar.js';
+import { DECORATIONS, decorationFor } from '../src/seasons.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { mode: 'single', theme: 'light', language: 'en', doors: 'closed' };
+const state = { mode: 'single', theme: 'light', language: 'en', doors: 'closed', hemisphere: 'north' };
 const SIGN = { en: 'STREAK', es: 'RACHA' };
 
 // --- selects
@@ -236,6 +255,27 @@ function seg(id, key, cb) {
     for (const x of $(id).children) x.setAttribute('aria-pressed', String(x === b));
     cb();
   });
+}
+
+// --- seasons and holidays
+// It starts on the day the Action would run today (UTC), so the playground dresses like the Action.
+const todayUtc = () => new Date().toISOString().slice(0, 10);
+$('day').value = todayUtc();
+// The middle day of the year that wears `kind` in the picked hemisphere.
+function sampleDay(kind) {
+  const year = Number(($('day').value || todayUtc()).slice(0, 4));
+  const days = [];
+  for (let ms = Date.UTC(year, 0, 1); ms < Date.UTC(year + 1, 0, 1); ms += 864e5) {
+    const iso = new Date(ms).toISOString().slice(0, 10);
+    if (decorationFor(iso, state.hemisphere) === kind) days.push(iso);
+  }
+  return days[days.length >> 1];
+}
+function fillJump() {
+  const year = Number(($('day').value || todayUtc()).slice(0, 4));
+  $('jump').innerHTML = '<option value="">Choose a season or a holiday…</option>' +
+    Object.entries(DECORATIONS).map(([kind, name]) => `<option value="${sampleDay(kind)}">${name} · ${sampleDay(kind)}</option>`).join('') +
+    `<option value="${year}-${state.hemisphere === 'north' ? '07' : '01'}-15">Summer · plain scene</option>`;
 }
 
 function statsFromControls() {
@@ -354,18 +394,19 @@ function render() {
   $('o-streak').textContent = $('streak').value;
   $('o-yesterday').textContent = $('yesterday').value;
   const s = statsFromControls();
-  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme: state.theme, language: state.language, scale: 2, skyline: pickedSkyline() });
+  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme: state.theme, language: state.language, scale: 2, skyline: pickedSkyline(), date: $('day').value || undefined, hemisphere: state.hemisphere });
   const svg = renderScene(spec);
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   $('scene').src = url;
   $('scene').alt = spec.title;
   const t = spec.tracks[0];
+  const dressed = spec.date && decorationFor(spec.date, spec.hemisphere);
   const cal = renderCalendar(s, { model: t.model, stripe: t.stripe, label: t.label, language: state.language, theme: state.theme });
   if (calUrl) URL.revokeObjectURL(calUrl);
   calUrl = URL.createObjectURL(new Blob([cal], { type: 'image/svg+xml' }));
   $('calendar').src = calUrl;
-  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span>`;
+  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span>`;
   zoom(t);
   document.querySelectorAll('.card').forEach((c) => c.classList.toggle('pick', c.dataset.id === t.model));
 }
@@ -411,6 +452,11 @@ seg('mode', 'mode', render);
 seg('theme', 'theme', render);
 seg('language', 'language', () => { render(); gallery(); });
 seg('doors', 'doors', render);
+seg('hemisphere', 'hemisphere', () => { fillJump(); render(); });
+$('day').addEventListener('input', () => { fillJump(); render(); });
+$('today').addEventListener('click', () => { $('day').value = todayUtc(); fillJump(); render(); });
+$('jump').addEventListener('change', () => { if (!$('jump').value) return; $('day').value = $('jump').value; fillJump(); render(); });
+fillJump();
 gallery(); render();
 </script>
 </body>

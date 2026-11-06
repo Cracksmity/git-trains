@@ -36,6 +36,11 @@ const scenes = [
     { train: osaka, mode: 'single', theme: 'auto', skyline: parseSkyline('osaka') },
   ],
   ['example-steam', sampleStats({ total: 600, streak: 15, yesterday: 3 }), { train: steam, mode: 'single', theme: 'auto' }],
+  // Seasons and holidays: one day for each decoration worth showing.
+  ['example-winter', sampleStats({ total: 1400, yesterday: 6 }), { train: 'auto', theme: 'auto', date: '2026-01-20' }],
+  ['example-spring', sampleStats({ total: 1400, yesterday: 6 }), { train: 'auto', theme: 'auto', date: '2026-04-10' }],
+  ['example-muertos', sampleStats({ total: 1400, yesterday: 6 }), { train: 'auto', theme: 'auto', date: '2026-11-01' }],
+  ['example-christmas', sampleStats({ total: 1400, yesterday: 6 }), { train: 'auto', theme: 'auto', date: '2026-12-20' }],
 ];
 
 for (const [name, stats, opts] of scenes) {

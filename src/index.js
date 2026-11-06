@@ -14,6 +14,7 @@ import { unlockFor } from './unlocks.js';
 import { renderCalendar } from './calendar.js';
 import { parseCustomModel } from './custom.js';
 import { parseSkyline } from './skyline.js';
+import { HEMISPHERES } from './seasons.js';
 
 // Action inputs arrive as INPUT_<NAME> (hyphens kept).
 const raw = (name) => (process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] ?? '').trim();
@@ -75,6 +76,7 @@ const THEMES = ['light', 'dark', 'auto', 'both'];
 const CARDS = ['none', 'stats', 'languages', 'departures', 'both'];
 const CARD_ALIASES = { langs: 'languages' };
 const RANKS = ['letter', 'github'];
+const BOOLEANS = ['true', 'false'];
 
 function oneOf(name, value, options) {
   if (!options.includes(value)) throw new Error(`Unknown ${name}: "${value}". Options: ${options.join(', ')}`);
@@ -110,6 +112,10 @@ async function main() {
     label: input('label'),
     skyline: parseSkyline(isJsonPath(skylineIn) ? readJson(skylineIn, 'the skyline') : skylineIn),
     scale,
+    // Seasons and holidays: the scene wears the decoration of the day the Action runs (UTC).
+    seasons: oneOf('seasons', input('seasons', 'true'), BOOLEANS) === 'true',
+    hemisphere: oneOf('hemisphere', input('hemisphere', 'north'), HEMISPHERES),
+    date: new Date().toISOString().slice(0, 10),
   };
   const cardStyle = {
     language,

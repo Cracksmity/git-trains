@@ -39,6 +39,8 @@ const TEXT = {
 // opts.mode: 'single' (one train in your top language) or 'multi' (3 tracks, one train per language).
 // opts.skyline: a skyline already validated by parseSkyline, or null for the procedural city.
 // opts.language: 'en' or 'es' (LED sign word and title); opts.label overrides the sign word.
+// opts.date: a day (Date or YYYY-MM-DD) that dresses the scene for its season or holiday (see seasons.js);
+//   without it the scene stays plain. opts.hemisphere: 'north' (default) or 'south'. opts.seasons: false ignores the date.
 // opts.unlock: the special car the profile earned (see unlocks.js), or null. It joins the
 //   main train right behind the cab and adds a line to the title. Next to a full-length
 //   train it takes the place of the last regular car, so the train still fits the scene.
@@ -89,5 +91,6 @@ export function buildSpec(stats, opts = {}) {
     title: unlock ? `${text.title(stats)}\n${text.unlock[unlock](unlockThreshold(unlock))}` : text.title(stats),
     skyline,
     tracks,
+    ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),
   };
 }

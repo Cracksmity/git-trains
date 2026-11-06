@@ -1,0 +1,14 @@
+{
+  "name": "seasons-art",
+  "route": "design",
+  "promptFile": "seasons-art.md",
+  "allow": ["src/decor.js"],
+  "gates": [
+    "node --check src/decor.js",
+    "node tools/conductor/gates/theme-colors.js src/decor.js DECOR_THEMES",
+    "node --test test/seasons.test.js",
+    "npm test"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45
+}
