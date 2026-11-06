@@ -1,0 +1,12 @@
+{
+  "name": "regions-presets",
+  "route": "design",
+  "promptFile": "regions-presets.md",
+  "allow": ["src/regions.js"],
+  "gates": [
+    "node tools/conductor/gates/region-art.js osaka:mountains new-york:hills",
+    "node --test test/custom.test.js test/region.test.js test/skyline-editor.test.js test/studio.test.js test/share.test.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45
+}
