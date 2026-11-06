@@ -31,6 +31,22 @@ Your GitHub activity as a **pixel-art train**: it gets longer with your contribu
 
 Your streak doesn't break first thing in the morning: if there's no activity yet today, it counts from yesterday.
 
+## Unlockable cars
+
+Some milestones add a special car to your train, right behind the cab. Only one is shown, the rarest you've earned.
+
+![The dining car, the observation car and the mail car](docs/example-cars.svg)
+
+| You earn | Car | What it looks like |
+| --- | --- | --- |
+| 500+ pull requests | **Mail car** | No windows: a sliding cargo door, an envelope, and a stripe in your top language's color |
+| A 100-day streak | **Dining car** | Round windows that glow, and a little lamp on the roof |
+| 100+ stars on your repositories | **Observation car** | A raised glass roof and panoramic windows |
+
+The cars are drawn in the palette of whichever train they join, and the image title gets a line saying which one you earned. The streak is your current one, so the dining car leaves if the streak breaks. A special car counts as one more car: on a 6-car train it takes the place of the last regular car so the train still fits the scene.
+
+They need your profile numbers (stars and pull requests), which is one more API request per run. If it fails, the Action logs a `::notice::` and draws the train without it. Set `unlocks: false` to turn them off.
+
 ## Calendar mode
 
 Set `calendar: true` to write a contribution calendar alongside the train. A mini version of your train snakes through the weeks, eating contribution cells and growing to the same length as the scene train. It works with custom and steam trains too. Its stripe, windows and speed follow your activity; the caption shows your contributions and streak. `language` and `label` also apply. The calendar follows the selected theme and parks the train when reduced motion is requested.
@@ -128,11 +144,12 @@ Run the workflow once from the Actions tab and the train shows up. A fuller exam
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
 | `exclude-languages` | | Comma-separated languages to leave out, e.g. `HTML, Jupyter Notebook` |
+| `unlocks` | `true` | Add a special car when you earn it (see [Unlockable cars](#unlockable-cars)); `false` skips the extra API request |
 | `scale` | `2` | Size of each pixel (1 to 6) |
 | `user` | repo owner | User to draw |
 | `github-token` | `github.token` | Use a PAT to count private contributions |
 | `output-dir` | `dist` | Output folder |
-| `cards` | `none` | Profile cards: `stats`, `languages` or `both` (see below) |
+| `cards` | `none` | Profile cards: `stats`, `languages`, `departures` or `both` (stats and languages); a list works too, e.g. `stats, departures` (see below) |
 | `rank` | `letter` | Center of the stats card ring: `letter` (S, A+, B...) or `github` (the logo) |
 | `border` | `true` | Card border |
 | `max-languages` | `6` | Languages on the languages card (1 to 10) |
@@ -252,6 +269,21 @@ With `cards: both` the Action also writes `card-stats.svg` and `card-languages.s
 ![Stats](docs/card-stats.svg) ![Languages](docs/card-languages.svg)
 
 If the stats query fails (for example, an API limit), the Action logs a `::warning::` and keeps going: the train is still generated. The rank is an approximation (a weighted mix of commits, PRs, issues, reviews, stars and followers).
+
+### Departures board
+
+`cards: departures` writes `card-departures.svg`: a split-flap station board with your six most recently pushed public repositories. `cards` takes a list, so `cards: stats, departures` writes both and `cards: both, departures` writes all three (`both` still means stats and languages).
+
+![Departures board](docs/card-departures.svg)
+
+| Column | What it shows |
+| --- | --- |
+| TIME | When you last pushed: `HH:MM` (UTC) if it was today, otherwise the date |
+| DESTINATION | The repository name |
+| PLATFORM | Its main language |
+| STATUS | `BOARDING` (pushed today), `ON TIME` (last 7 days), `DELAYED` (last 30 days) or `DEPARTED` (older) |
+
+The characters flip into place when the card loads, with CSS only; it respects `prefers-reduced-motion`. With `language: es` it reads `SALIDAS`, `HORA`, `DESTINO`, `ANDÉN`, `ESTADO` and `ABORDANDO`, `A TIEMPO`, `RETRASADO`, `SALIÓ`. It takes the same `color-*` and `border` inputs as the other cards, but starts from a board of its own: `color-background` is the panel, `color-title` the title bar, headings and `BOARDING`, `color-text` the flap characters, `color-icon` the `ON TIME` status and the little train, and `color-ring` the `DELAYED` status. Forks aren't listed, and neither is your profile repository (the one named like you): the workflow that draws these images commits to it every day, so it would always be first.
 
 ## How it works
 

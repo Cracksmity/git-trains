@@ -3,12 +3,14 @@
 
 import { appendFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { fetchActivity, fetchProfile } from './github.js';
+import { fetchActivity, fetchProfile, fetchDepartures } from './github.js';
 import { summarize } from './stats.js';
-import { sampleStats, sampleProfile } from './sample.js';
+import { sampleStats, sampleProfile, sampleDepartures, SAMPLE_NOW } from './sample.js';
 import { buildSpec, LANGUAGES } from './compose.js';
 import { renderScene } from './scene.js';
 import { renderStatsCard, renderLangsCard } from './cards.js';
+import { renderDeparturesCard } from './departures.js';
+import { unlockFor } from './unlocks.js';
 import { renderCalendar } from './calendar.js';
 import { parseCustomModel } from './custom.js';
 import { parseSkyline } from './skyline.js';
@@ -71,7 +73,7 @@ const isJsonPath = (v) => /\.json$/i.test(v);
 const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
 
 const THEMES = ['light', 'dark', 'auto', 'both'];
-const CARDS = ['none', 'stats', 'languages', 'both'];
+const CARDS = ['none', 'stats', 'languages', 'departures', 'both'];
 const CARD_ALIASES = { langs: 'languages' };
 const RANKS = ['letter', 'github'];
 const BOOLEANS = ['true', 'false'];
@@ -81,6 +83,15 @@ function oneOf(name, value, options) {
   return value;
 }
 
+// `cards` takes one name or a list ("stats, departures"). Returns the set of cards to write:
+// stats, languages and departures; both means stats and languages.
+function parseCards(value) {
+  const names = list(value).map((n) => CARD_ALIASES[n] ?? n);
+  for (const n of names) oneOf('cards', n, CARDS);
+  if (names.includes('none') && names.length > 1) throw new Error(`The card "none" can't be combined with other cards`);
+  return new Set(names.flatMap((n) => (n === 'both' ? ['stats', 'languages'] : n === 'none' ? [] : [n])));
+}
+
 async function main() {
   const sample = process.argv.includes('--sample');
 
@@ -88,8 +99,7 @@ async function main() {
   const scale = Number(input('scale', '2'));
   if (!Number.isFinite(scale) || scale < 1 || scale > 6) throw new Error('"scale" must be between 1 and 6');
   const language = oneOf('language', input('language', 'en'), LANGUAGES);
-  const cardsIn = input('cards', 'none');
-  const cards = oneOf('cards', CARD_ALIASES[cardsIn] ?? cardsIn, CARDS);
+  const cards = parseCards(input('cards', 'none'));
   const rank = oneOf('rank', input('rank', 'letter'), RANKS);
   const outDir = input('output-dir', sample ? 'sample' : 'dist');
   // train and skyline take a catalog id or the path to a custom JSON file.
@@ -120,19 +130,38 @@ async function main() {
   };
   const exclude = list(input('exclude-languages'));
   const calendar = input('calendar', 'false') === 'true';
+  const unlocks = input('unlocks', 'true') !== 'false';
 
   let stats;
   let loadProfile;
+  let loadDepartures;
+  let now = new Date();
   if (sample) {
     stats = sampleStats({ exclude });
     loadProfile = async () => sampleProfile();
+    loadDepartures = async () => sampleDepartures();
+    now = SAMPLE_NOW;
   } else {
     const token = input('github-token') || process.env.GITHUB_TOKEN;
     const user = input('user') || process.env.GITHUB_REPOSITORY_OWNER;
     if (!token) throw new Error('Missing "github-token" (use ${{ github.token }} or a PAT)');
     if (!user) throw new Error('Missing "user" (or GITHUB_REPOSITORY_OWNER)');
     stats = summarize(await fetchActivity({ token, user }), { exclude });
-    loadProfile = () => fetchProfile({ token, user });
+    // The stats card and the unlockable cars both need the profile numbers: ask once.
+    let profile;
+    loadProfile = () => (profile ??= fetchProfile({ token, user }));
+    loadDepartures = () => fetchDepartures({ token, user });
+  }
+
+  // Special cars the profile earned (a 100-day streak, 100+ stars, 500+ PRs). They need
+  // the profile numbers; if those can't be read the scene still stands, without them.
+  if (unlocks) {
+    try {
+      const { stars, prs } = await loadProfile();
+      options.unlock = unlockFor({ streak: stats.streak, stars, prs });
+    } catch (err) {
+      console.log(`::notice::Could not check the unlockable cars: ${err.message}`);
+    }
   }
 
   mkdirSync(outDir, { recursive: true });
@@ -159,10 +188,13 @@ async function main() {
   }
 
   // Profile cards. If they fail the scene still stands: warn and carry on.
-  if (cards !== 'none') {
+  if (cards.size) {
     try {
-      if (cards === 'stats' || cards === 'both') write('card-stats.svg', renderStatsCard(await loadProfile(), cardStyle));
-      if (cards === 'languages' || cards === 'both') write('card-languages.svg', renderLangsCard(stats.languages, cardStyle));
+      if (cards.has('stats')) write('card-stats.svg', renderStatsCard(await loadProfile(), cardStyle));
+      if (cards.has('languages')) write('card-languages.svg', renderLangsCard(stats.languages, cardStyle));
+      if (cards.has('departures')) {
+        write('card-departures.svg', renderDeparturesCard(await loadDepartures(), stats.user, { ...cardStyle, now }));
+      }
     } catch (err) {
       console.log(`::warning::Could not generate the cards: ${err.message}`);
     }
@@ -172,7 +204,7 @@ async function main() {
   const modelId = typeof main.model === 'string' ? main.model : main.model.id;
   console.log(
     `${stats.user}: ${stats.total} contributions, streak ${stats.streak}, yesterday ${stats.yesterday} -> ` +
-      `${main.cars} car(s) ${modelId}, state ${stats.state}`,
+      `${main.cars} car(s) ${modelId}, state ${stats.state}${options.unlock ? `, ${options.unlock} car unlocked` : ''}`,
   );
 
   if (process.env.GITHUB_OUTPUT) {

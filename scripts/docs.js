@@ -4,8 +4,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { renderScene } from '../src/scene.js';
 import { buildSpec } from '../src/compose.js';
-import { sampleStats, sampleProfile } from '../src/sample.js';
+import { sampleStats, sampleProfile, sampleDepartures, SAMPLE_NOW } from '../src/sample.js';
 import { renderStatsCard, renderLangsCard } from '../src/cards.js';
+import { renderDeparturesCard } from '../src/departures.js';
+import { buildTrain, TRAIN_H } from '../src/train.js';
+import { MODELS } from '../src/models.js';
 import { parseCustomModel } from '../src/custom.js';
 import { parseSkyline } from '../src/skyline.js';
 import { renderCalendar } from '../src/calendar.js';
@@ -57,11 +60,35 @@ for (const [name, stats, opts] of calendars) {
   console.log(`docs/${name}.svg ${(svg.length / 1024).toFixed(1)} KB`);
 }
 
+// The three special cars, one on each of three models, with no scene behind them (so the
+// picture reads on a light or a dark page): dining, observation and mail.
+{
+  const rows = [
+    ['dining', 'metro-orange', '#3178c6'],
+    ['observation', 'bullet', '#f1e05a'],
+    ['mail', 'metro-white', '#dea584'],
+  ].map(([extra, model, stripe]) => buildTrain(MODELS[model], { cars: 2, extra, stripe, streak: 120, label: 'STREAK' }));
+  const gap = 4;
+  const width = Math.max(...rows.map((t) => t.width)) + 8;
+  const height = rows.length * (TRAIN_H + gap) + 4;
+  const layers = ['body', 'lit', 'wa', 'led'];
+  const trains = rows
+    .map((t, k) => `<g transform="translate(4 ${2 + k * (TRAIN_H + gap)})">${layers.map((l) => t.layers[l].paths()).join('')}</g>`)
+    .join('');
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width * 2}" height="${height * 2}" ` +
+    `shape-rendering="crispEdges" role="img" aria-label="The dining car, the observation car and the mail car, each on its own train">` +
+    `<title>The dining car, the observation car and the mail car</title>${trains}</svg>`;
+  writeFileSync('docs/example-cars.svg', svg);
+  console.log(`docs/example-cars.svg ${(svg.length / 1024).toFixed(1)} KB`);
+}
+
 // Example profile cards (default colors, GitHub's dark theme).
 const demo = sampleStats();
 const cards = [
   ['card-stats', renderStatsCard(sampleProfile(), { language: 'en' })],
   ['card-languages', renderLangsCard(demo.languages, { language: 'en', max: 6 })],
+  ['card-departures', renderDeparturesCard(sampleDepartures(), 'octocat', { language: 'en', now: SAMPLE_NOW })],
 ];
 for (const [name, svg] of cards) {
   writeFileSync(`docs/${name}.svg`, svg);

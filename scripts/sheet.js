@@ -2,6 +2,8 @@
 // node scripts/sheet.js out.png [scale] [cars] [open] [model,model...]
 // Each model can be a catalog id or the path to a custom train (.json):
 // node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json
+// A special car (dining, observation or mail) joins every train with a 7th argument:
+// node scripts/sheet.js cars.png 4 3 0 metro-orange,bullet a dining
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { buildTrain, TRAIN_H } from '../src/train.js';
@@ -9,7 +11,7 @@ import { MODEL_ORDER, getModel } from '../src/models.js';
 import { parseCustomModel } from '../src/custom.js';
 import { png } from './export.js';
 
-const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a'] = process.argv.slice(2);
+const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a', extraArg = ''] = process.argv.slice(2);
 const scale = Number(scaleArg);
 const cars = Number(carsArg);
 const open = openArg === '1';
@@ -27,7 +29,7 @@ function hex(c) {
 
 const load = (id) => (id.endsWith('.json') ? parseCustomModel(JSON.parse(readFileSync(id, 'utf8'))) : getModel(id));
 const trains = ids.map((id, i) =>
-  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'STREAK' }),
+  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: extraArg ? 120 : 12, label: 'STREAK', extra: extraArg || null }),
 );
 const gap = 6;
 const W = Math.max(...trains.map((t) => t.width)) * scale + 16;

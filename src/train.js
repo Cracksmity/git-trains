@@ -3,6 +3,7 @@
 
 import { Grid } from './pixel.js';
 import { drawText, textWidth } from './font.js';
+import { SPECIAL_CARS, paintSpecialCar } from './cars.js';
 
 export const TOP = 9; // free rows above the roof (pantograph and sparks)
 export const BODY_ROWS = 20; // roof .. skirt
@@ -85,10 +86,12 @@ export function cabWidth(model) {
 
 // Intermediate cars + lead car + tail nose (cab at both ends).
 // With a locomotive: the cars, coupler, and locomotive.
-export function trainWidth(model, cars) {
+// `extra`: a special car (see cars.js) adds one more intermediate car.
+export function trainWidth(model, cars, extra = false) {
   const n = clamp(cars, 1, MAX_CARS);
-  if (model.loco) return n * MID_W + COUPLER + model.loco.w;
-  return (n - 1) * MID_W + cabWidth(model) + model.nose.w;
+  const special = extra ? MID_W : 0;
+  if (model.loco) return n * MID_W + special + COUPLER + model.loco.w;
+  return (n - 1) * MID_W + special + cabWidth(model) + model.nose.w;
 }
 
 export function symbolColor(model, s, stripe) {
@@ -153,10 +156,14 @@ export function buildTrain(model, opts = {}) {
     streak = 0,
     label = 'RACHA',
     dir = 1,
+    extra = null,
   } = opts;
+  if (extra && !SPECIAL_CARS.includes(extra)) {
+    throw new Error(`Unknown special car: "${extra}". Options: ${SPECIAL_CARS.join(', ')}`);
+  }
   const n = clamp(Math.round(cars), 1, MAX_CARS);
   const cabW = model.loco ? 0 : cabWidth(model);
-  const width = trainWidth(model, n);
+  const width = trainWidth(model, n, !!extra);
 
   const layers = {
     body: new Grid(width, TRAIN_H),
@@ -170,7 +177,7 @@ export function buildTrain(model, opts = {}) {
     pb: new Grid(width, TRAIN_H), // locomotive smoke B
     led: new Grid(width, TRAIN_H),
   };
-  const ctx = { layers, model, stripe, panes: [], led: null, pantAnchor: null, shoeAnchor: null };
+  const ctx = { layers, model, stripe, streak, panes: [], led: null, pantAnchor: null, shoeAnchor: null };
 
   let x = 0;
   if (model.loco) {
@@ -179,19 +186,28 @@ export function buildTrain(model, opts = {}) {
       drawCar(ctx, { ox: x, w: MID_W, isCab: false, isTail: i === 0, isLed: i === n - 1, frontIndex: n - 1 - i });
       x += MID_W;
     }
+    // The special car, if any, right behind the locomotive.
+    if (extra) {
+      drawCar(ctx, { ox: x, w: MID_W, isCab: false, isTail: false, frontIndex: 0, special: extra });
+      x += MID_W;
+    }
     layers.body.rect(x, TOP + 15, COUPLER, 2, NOSE_DARK);
     drawLoco(ctx, x + COUPLER);
   } else {
-    for (let i = 0; i < n; i++) {
-      const isCab = i === n - 1;
+    // The special car, if any, sits right behind the cab. With a single car it
+    // becomes the tail, so the train is the special car followed by the cab.
+    const count = n + (extra ? 1 : 0);
+    for (let i = 0; i < count; i++) {
+      const isCab = i === count - 1;
       const isTail = i === 0;
       const w = (isCab ? cabW : MID_W) + (isTail ? model.nose.w : 0);
       // Articulated models: cars run in pairs (from the head) sharing
       // the bogie at the joint.
-      const f = n - 1 - i;
+      const f = count - 1 - i;
       const artFront = !!model.articulated && f % 2 === 1;
       const artRear = !!model.articulated && f % 2 === 0 && !isTail;
-      drawCar(ctx, { ox: x, w, isCab, isTail, artFront, artRear, frontIndex: f });
+      const special = extra && i === count - 2 ? extra : null;
+      drawCar(ctx, { ox: x, w, isCab, isTail, artFront, artRear, frontIndex: f, special });
       x += w;
     }
   }
@@ -223,7 +239,7 @@ function drawCar(ctx, car) {
   const { layers: L, model, stripe } = ctx;
   const P = model.pal;
   const B = L.body;
-  const { ox, w, isCab, isTail, isLed, artFront, artRear } = car;
+  const { ox, w, isCab, isTail, isLed, artFront, artRear, special } = car;
   const layout = layoutOf(model);
   // The noses come from a template: the front one on the lead car and the same one,
   // mirrored, on the tail car. The rest is a rectangle. Behind a locomotive
@@ -272,7 +288,7 @@ function drawCar(ctx, car) {
   if (isTail && model.loco) for (const y of [14, 15]) px(1, y, TAIL_LAMP);
 
   // 5. Roof details: recessed units.
-  if (model.roofBoxes) {
+  if (model.roofBoxes && !special) {
     const boxes = isCab ? [[8, 18]] : [[8, 18], [38, 18]];
     for (const [bx, bw] of boxes) {
       for (let x = lx + bx; x < lx + bx + bw && x <= right(1); x++) {
@@ -284,7 +300,7 @@ function drawCar(ctx, car) {
 
   // 6. Windows, doors, and sign. Some models have windows on a
   //    continuous dark band; it is painted first and the rest goes on top.
-  if (model.winBand) {
+  if (model.winBand && !special) {
     const { y0, y1 } = model.win;
     for (let y = y0; y <= y1; y++) for (let x = isTail ? lx : 2; x < nx0 - 1; x++) px(x, y, model.winBand);
   }
@@ -334,7 +350,12 @@ function drawCar(ctx, car) {
     return lx + LED_X + LED_W + 2;
   };
 
-  if (isCab) {
+  if (special) {
+    // Special cars (cars.js) draw their own roof, windows and details.
+    paintSpecialCar(special, {
+      layers: L, model, stripe, streak: ctx.streak, panes: ctx.panes, ox, top: TOP, w, left: lx + 3,
+    });
+  } else if (isCab) {
     let x = door(ledSign()) + 2;
     if (model.cabWindows) x = windows(x, model.cabWindows) + 2;
   } else if (isLed) {
@@ -576,7 +597,7 @@ function drawLoco(ctx, ox) {
 }
 
 function shouldHavePantograph(model, car) {
-  if (!model.pant) return false;
+  if (!model.pant || car.special) return false;
   if (model.pant === 'lead') return car.isCab;
   return car.frontIndex % 2 === 0; // 'alt'
 }
