@@ -63,6 +63,8 @@ Luego agrega esto a tu `README.md` para que siga el tema claro u oscuro de GitHu
 
 Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ejemplo completo, con todas las opciones comentadas, en [examples/workflow.yml](examples/workflow.yml).
 
+¿Prefieres que lo haga un agente de IA? Abre tu repositorio de perfil en Claude Code, Codex o Antigravity y pega [docs/ai/setup.md](docs/ai/setup.md): te pregunta tus preferencias, crea el workflow, edita tu README y revisa la primera ejecución. Las instrucciones están en inglés, pero puedes hablarle en español.
+
 El calendario de la demostración es opcional: agrega `calendar: true` a las opciones `with:` del Action y usa el [ejemplo para insertarlo](docs/es/usage.md#modo-calendario) en tu README.
 
 ## Documentación

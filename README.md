@@ -61,6 +61,8 @@ Then add this to your `README.md`, so it follows GitHub's light or dark theme:
 
 Run the workflow once from the Actions tab and the train shows up. A fuller example with every option commented is in [examples/workflow.yml](examples/workflow.yml).
 
+Prefer to let an AI agent do it? Open your profile repository in Claude Code, Codex or Antigravity and paste [docs/ai/setup.md](docs/ai/setup.md): it asks for your choices, creates the workflow, edits your README and checks the first run.
+
 The calendar shown above is optional: set `calendar: true` in the Action's `with:` options, then use the [calendar embed example](docs/usage.md#calendar-mode) to add it to your README.
 
 ## Documentation
