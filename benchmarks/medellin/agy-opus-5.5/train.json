@@ -1,0 +1,52 @@
+{
+  "id": "metro-medellin",
+  "name": "Metro de Medellín",
+  "description": "Inspirado en el CAF del Metro de Medellín: caja blanca, banda oscura de ventanas, franja verde que baja en curva por el frente, máscara negra y defensa gris.",
+  "pal": {
+    "body": "#e6e8e8",
+    "bodyHi": "#f6f7f7",
+    "bodyLo": "#c2c6c8",
+    "upper": "#e6e8e8",
+    "roof": "#c4c8cb",
+    "roofHi": "#eef0f0",
+    "trim": "#2f9a3e",
+    "dark": "#1b1d22",
+    "glass": "#262c35",
+    "glassHi": "#6f8194",
+    "door": "#dcdfe0",
+    "skirt": "#45484e"
+  },
+  "bands": "bbattbl",
+  "row3": "u",
+  "win": { "y0": 4, "y1": 10 },
+  "winBand": "#1e2127",
+  "doors": 3,
+  "nose": {
+    "color": "#eceeee",
+    "face": "#17191d",
+    "rows": [
+      "sssssssff....",
+      "ssssssnfff...",
+      "ssssssnffff..",
+      "ssssssnfiiiff",
+      "ssssssnfgGggf",
+      "ssssssnfgGggf",
+      "ssssssnfggGgf",
+      "ssssssnfggggf",
+      "ssssssnfggggf",
+      "ssssssnfggggf",
+      "ssssssnnfffff",
+      "ssssssnnnffff",
+      "ssssssnnfllff",
+      "ssssssnnfllff",
+      "sssssstnnffff",
+      "sssssstttnfff",
+      "ssssssnntttff",
+      "ssssssnnnttff",
+      "sssssskkkkkkk",
+      "ssssskkkkkkk."
+    ]
+  },
+  "pant": "alt",
+  "roofBoxes": true
+}

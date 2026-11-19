@@ -28,7 +28,7 @@ Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene
 
 ![Metro de Nueva York](../example-new-york.svg)
 
-Ejemplos en [examples/trains](../../examples/trains): los R160 del metro de Nueva York, la serie 400 del Metro de Osaka, el tren CAF del Metro de Medellín (salió de una [comparativa de diez corridas de IA](https://cracksmity.github.io/git-trains/benchmarks/medellin/) con las mismas guías y fotos) y una locomotora tanque de vapor. El formato usa las mismas claves que [src/trains/models.js](../../src/trains/models.js), así que un tren que guste puede entrar al catálogo tal cual. El archivo solo se lee como datos: nada en él se ejecuta, y cada color y medida se revisa antes de dibujar.
+Ejemplos en [examples/trains](../../examples/trains): los R160 del metro de Nueva York, la serie 400 del Metro de Osaka, el tren CAF del Metro de Medellín (salió de una [comparativa de quince corridas de IA](https://cracksmity.github.io/git-trains/benchmarks/medellin/) con las mismas guías y fotos) y una locomotora tanque de vapor. El formato usa las mismas claves que [src/trains/models.js](../../src/trains/models.js), así que un tren que guste puede entrar al catálogo tal cual. El archivo solo se lee como datos: nada en él se ejecuta, y cada color y medida se revisa antes de dibujar.
 
 **Trenes de vapor.** Con `loco` en vez de `nose`, el tren lleva una locomotora al frente: su propio dibujo de 30 filas, con la chimenea y el domo por encima de los vagones, ruedas motrices unidas por una biela que se mueve y humo que sale más seguido cuanto más rápido va. Los vagones van detrás y el último termina en una cola plana con farol rojo.
 
