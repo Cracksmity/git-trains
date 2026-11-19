@@ -1,0 +1,59 @@
+{
+  "id": "caf-medellin",
+  "name": "CAF del Metro de Medellín",
+  "description": "Caja blanca con banda negra de ventanas, acento verde y frente inclinado con faros bajos.",
+  "pal": {
+    "body": "#e1e5e4",
+    "bodyHi": "#f4f6f3",
+    "bodyLo": "#bfc8cb",
+    "upper": "#242a2f",
+    "roof": "#d4dddf",
+    "roofHi": "#f0f4f3",
+    "roofVent": "#aebbc0",
+    "trim": "#159447",
+    "dark": "#20262d",
+    "glass": "#3c484f",
+    "glassHi": "#81949b",
+    "door": "#e6ebea",
+    "doorHi": "#f5f7f4",
+    "skirt": "#353a41",
+    "outline": "#1a2027"
+  },
+  "bands": "bbatbbl",
+  "row3": "h",
+  "win": {
+    "y0": 4,
+    "y1": 10
+  },
+  "winBand": "#242a2f",
+  "doors": 3,
+  "nose": {
+    "color": "#edf1ef",
+    "face": "#171e26",
+    "rows": [
+      "sssssssssss.....",
+      "ssssshhhhhnn....",
+      "sssshhhnnffnn...",
+      "ssshhhnfffffn...",
+      "ssggssnfffffnn..",
+      "sGGggsnfGGggfn..",
+      "sggggsnfggGgfn..",
+      "sggggsnhfggggfn.",
+      "sggggsnhfggggfn.",
+      "sggggsnnhfgggfn.",
+      "ssssssnnhfgggffn",
+      "ssnnnnnnhffffffn",
+      "snnnnnnnnhfllffn",
+      "assnnnnnnhfqfffn",
+      "tttttnnnnnhffffn",
+      "snnntttnnnnhffnn",
+      "ssnnnntttnnnffn.",
+      "mmssnnnntttnnn..",
+      "sssskkkkkkkkkkk.",
+      "ssskkkkkkkkkkk.."
+    ]
+  },
+  "pant": "alt",
+  "cabWindows": 8,
+  "cabBogieOff": 21
+}

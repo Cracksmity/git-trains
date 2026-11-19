@@ -1,0 +1,59 @@
+{
+  "id": "caf-medellin",
+  "name": "Metro de Medellín · CAF",
+  "description": "Caja blanca y ventanales ahumados del CAF de Medellín. La cinta amarilla termina detrás del puesto de conducción y la verde baja por la mejilla blanca hasta la defensa.",
+  "pal": {
+    "body": "#e9e9e4",
+    "bodyHi": "#fafbf7",
+    "bodyLo": "#158445",
+    "upper": "#262c31",
+    "roof": "#d9dfde",
+    "roofHi": "#f6f7f2",
+    "trim": "#ecb325",
+    "glass": "#394850",
+    "glassHi": "#798d93",
+    "door": "#dedfda",
+    "doorHi": "#f8f8f3",
+    "skirt": "#414449",
+    "dark": "#1b2228",
+    "outline": "#21242a",
+    "wheel": "#292c31"
+  },
+  "bands": "bbtllba",
+  "row3": "h",
+  "win": {
+    "y0": 4,
+    "y1": 10
+  },
+  "winBand": "#262c31",
+  "doors": 3,
+  "pant": "alt",
+  "roofBoxes": false,
+  "cabBogieOff": 20,
+  "nose": {
+    "color": "#f5f6f2",
+    "face": "#181d24",
+    "rows": [
+      "sssssssshhff........",
+      "sssssshhhnffff......",
+      "ssssshhhnffffff.....",
+      "hhhhhhhnnffiiff.....",
+      "fffGGffnnfGGGggf....",
+      "ffGGggfnnfGGgggf....",
+      "fgggggfnnnfGggggf...",
+      "fggggggfnnfgggggf...",
+      "fggggggfnnfggggggf..",
+      "fggggggfnnnfgggggf..",
+      "ffffffffnnnfggggggf.",
+      "ssssssssnnnnfffffff.",
+      "ssssssssnnnnfllfqff.",
+      "tttnnnnnnnnnnffffff.",
+      "mmmmmmmnnnnnnnfffff.",
+      "mmmmmmmmmmnnnnnnfff.",
+      "ssssssmmmmmmmnnnnff.",
+      "aaassssssmmmmmmmmnf.",
+      "ssssssssssskkkkkkkkk",
+      "ssssssssssskkkkkkkk."
+    ]
+  }
+}
