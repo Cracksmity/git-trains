@@ -99,6 +99,8 @@ export const SKYLINE_ALIASES = { ciudad: 'city', 'nueva-york': 'new-york' };
 // Accepts a preset id ("new-york") or an object { name, fill, buildings }.
 // Returns null for the procedural city ("city" or empty).
 export function parseSkyline(raw) {
+  // Hand-painted panorama with three distinct landscapes, selected only by its preset id.
+  if (raw === 'jalisco') return { name: 'Jalisco', preset: 'jalisco', fill: false, buildings: [], region: undefined };
   if (typeof raw === 'string') raw = SKYLINE_ALIASES[raw] ?? raw;
   if (raw === undefined || raw === null || raw === '' || raw === 'city') return null;
   if (typeof raw === 'string') {

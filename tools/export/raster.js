@@ -4,7 +4,7 @@
 import { Grid } from '../../src/graphics/pixel.js';
 import { planScene, speedLines, TIMING } from '../../src/scene/render.js';
 import { TRAIN_H } from '../../src/trains/geometry.js';
-import { THEMES } from '../../src/scene/themes.js';
+import { scenePalette } from '../../src/scene/themes.js';
 import { paintSky, celestialGrid, starsGrids, cloudsGrid } from '../../src/scene/sky.js';
 import { paintBands } from '../../src/scene/terrain.js';
 import { paintRails } from '../../src/scene/rails.js';
@@ -82,7 +82,7 @@ const DOORS = [[0, 0], [0.08, 1], [0.78, 0]];
 export function rasterScene(spec, theme = spec.theme === 'dark' ? 'dark' : 'light') {
   const plan = planScene(spec);
   const { W, H, tracks, trains } = plan;
-  const vars = THEMES[theme];
+  const vars = scenePalette(theme, spec.skyline);
   const cache = new Map();
   const color = (c) => {
     let v = cache.get(c);
@@ -147,7 +147,7 @@ export function renderFrame(scene, t) {
     at(L.wa, tr.moving ? keyframe(t / tr.st.wheel, ON_OFF) : 1);
     at(L.wb, tr.moving ? keyframe(t / tr.st.wheel, OFF_ON) : 0);
     at(L.open, tr.moving ? 0 : keyframe((t + tr.k * TIMING.doorStagger) / TIMING.doors, DOORS));
-    at(L.led, keyframe(t / TIMING.led, LED));
+    at(L.led, tr.train.led?.color ? 1 : keyframe(t / TIMING.led, LED));
     at(L.pa, keyframe(t / tr.puff, ON_OFF));
     at(L.pb, keyframe(t / tr.puff, OFF_ON));
     if (tr.moving && tr.st.sparks) {

@@ -6,8 +6,8 @@
 
 | Input | Por defecto | Qué hace |
 | --- | --- | --- |
-| `train` | `auto` | `auto` evoluciona con tus vagones; o elige un [modelo](#modelos); o la ruta a [tu propio tren](customization.md#haz-tu-propio-tren-a-mano-o-con-ia) en JSON |
-| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
+| `train` | `auto` | `auto` evoluciona con tus vagones. Puedes elegir un [modelo](#modelos), los trenes de `jalisco` o la ruta al JSON de [tu propio tren](customization.md#haz-tu-propio-tren-a-mano-o-con-ia). |
+| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka`, `jalisco` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
 | `year-in-review` | `false` | `true` también escribe `year-in-review.svg`: un póster de un año natural, dibujado como un viaje en tren (ver [Resumen del año](usage.md#resumen-del-año)) |
@@ -48,6 +48,12 @@ Salidas: `files`, `cars`, `streak`, `state`, `model`.
 
 Con `train: auto` el modelo sube conforme ganas vagones: tranvía → metro naranja → metro gris → metro amarillo → metro blanco → tren bala.
 
-Cada tren tiene cabina en ambos extremos (faros blancos adelante, luces rojas atrás). La catenaria solo aparece sobre los trenes con pantógrafo; los demás van por tercer riel.
+Los seis modelos que evolucionan con tu actividad tienen cabinas en ambos extremos. Los trenes con pantógrafo circulan bajo la catenaria.
 
 ![Tres vías](../example-multi.svg)
+
+### Jalisco
+
+Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres primeros lenguajes corresponden al TEG-90 articulado de Guadalajara, al carguero de Los Altos y al José Cuervo Express entre los agaves. La racha aparece debajo de la primera vía. Si hay menos lenguajes, se dibuja el número de vías correspondiente.
+
+![Los tres trenes cruzando Jalisco](../../examples/jalisco/jalisco-sobre-rieles.svg)

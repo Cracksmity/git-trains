@@ -7,6 +7,7 @@ import { TOP, BODY_ROWS, TRAIN_H, MID_W, LED_W, MAX_CARS, COUPLER, layoutOf, cla
 import { LED_ON, NOSE_DARK, partColor, rowColor, underColors } from './palette.js';
 import { BOGIE_HALF, BOGIE_IN, drawBogie } from './running-gear.js';
 import { drawLoco } from './locomotive.js';
+import { drawJaliscoCar } from './jalisco-cars.js';
 
 // The tail nose is the same mirrored template; its lights are red.
 const TAIL_LIGHT = { l: 'r', y: 'r', q: 'r' };
@@ -69,9 +70,10 @@ export function buildTrain(model, opts = {}) {
   let x = 0;
   if (model.loco) {
     // Cars (the front one carries the sign), coupler, and locomotive.
+    const carWidth = model.carWidth ?? MID_W;
     for (let i = 0; i < n; i++) {
-      drawCar(ctx, { ox: x, w: MID_W, isCab: false, isTail: i === 0, isLed: i === n - 1, frontIndex: n - 1 - i });
-      x += MID_W;
+      drawCar(ctx, { ox: x, w: carWidth, isCab: false, isTail: i === 0, isLed: i === n - 1, frontIndex: n - 1 - i });
+      x += carWidth;
     }
     // The special car, if any, right behind the locomotive.
     if (extra) {
@@ -105,25 +107,29 @@ export function buildTrain(model, opts = {}) {
     streak > 0 ? clamp(Math.round(panes.length * Math.min(1, streak / 30)), 1, panes.length) : 0;
   for (const p of panes.slice(0, litCount)) layers.lit.rect(p.x, p.y, p.w, p.h, '#ffd86b');
 
-  drawSparks(ctx);
+  if (!model.loco?.diesel) drawSparks(ctx);
 
-  // LED sign: the text is drawn AFTER mirroring so it is not reversed.
-  const text = `${label} ${streak}`;
-  let ledBox = { ...ctx.led, w: LED_W, h: 7 };
   /** @type {Record<string, Grid>} */
   let out = layers;
   if (dir === -1) {
     out = {};
     for (const k of Object.keys(layers)) out[k] = layers[k].mirror();
-    ledBox = { ...ledBox, x: width - ledBox.x - LED_W };
   }
-  const tw = Math.min(textWidth(text), LED_W - 4);
-  drawText(out.led, text, ledBox.x + Math.floor((LED_W - tw) / 2), ledBox.y + 1, LED_ON);
+
+  // Some cabs carry no sign. Draw lettering after mirroring for the ones that do.
+  const ledBox = ctx.led ? { w: LED_W, h: 7, ...ctx.led } : null;
+  if (ledBox) {
+    if (dir === -1) ledBox.x = width - ledBox.x - ledBox.w;
+    const text = ledBox.text ?? `${label} ${streak}`;
+    const tw = Math.min(textWidth(text), ledBox.w - (ledBox.text ? 0 : 4));
+    drawText(out.led, text, ledBox.x + Math.floor((ledBox.w - tw) / 2), ledBox.y + 1, ledBox.color ?? LED_ON);
+  }
 
   return { width, height: TRAIN_H, cars: n, layers: out, hasPantograph: !!ctx.pantAnchor, dir, led: ledBox };
 }
 
 function drawCar(ctx, car) {
+  if (ctx.model.coach && !car.special) return drawJaliscoCar(ctx, car);
   const { layers: L, model, stripe } = ctx;
   const P = model.pal;
   const B = L.body;

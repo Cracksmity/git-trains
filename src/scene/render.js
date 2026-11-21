@@ -7,7 +7,7 @@ import { buildTrain } from '../trains/render.js';
 import { TRAIN_H, TOP } from '../trains/geometry.js';
 import { getModel } from '../trains/models.js';
 import { SCENE_W, GY0, PITCH, sceneHeight } from './layout.js';
-import { THEMES } from './themes.js';
+import { scenePalette } from './themes.js';
 import { rng } from '../graphics/pixel.js';
 import { skyLayer, celestialLayer, starsLayers, cloudsLayer } from './sky.js';
 import { bandsLayer } from './terrain.js';
@@ -59,18 +59,24 @@ export function planScene(spec) {
     const center = Math.round((W - train.width) / 2);
     const margin = Math.min(10, Math.floor((W - train.width) / 2));
     const parked = tracks.length === 1 ? center : dir === 1 ? W - train.width - margin : margin;
+    // Start the regional composition with all its trains and countryside in view.
+    const arrival = [0.86, 0.12, 0.66][k] ?? 0.5;
+    const rest = t.model.coach ? Math.round((W - train.width) * arrival) : center;
+    const phase = t.model.coach
+      ? (dir === 1 ? rest + train.width : W - rest) / (W + train.width)
+      : (0.12 + 0.37 * k) % 1;
     return {
       train,
       dir,
       st,
       moving,
       y0: GY0 + PITCH * k - TRAIN_H,
-      rest: moving ? center : t.parkAt ?? parked,
+      rest: moving ? rest : t.parkAt ?? (t.model.coach ? rest : parked),
       // Moving: `steps` jumps of 1 px from `from` to `to` every st.dur seconds, `delay` seconds in.
       from: dir === 1 ? -train.width : W,
       to: dir === 1 ? W : -train.width,
       steps: W + train.width,
-      delay: moving ? -(st.dur * ((0.12 + 0.37 * k) % 1)).toFixed(2) : 0,
+      delay: moving ? -(st.dur * phase).toFixed(2) : 0,
       // Locomotive smoke: puffs come more often the faster it goes; when stopped,
       // it releases steam slowly.
       puff: moving ? +(st.wheel * 4).toFixed(2) : TIMING.steam,
@@ -119,7 +125,7 @@ export function renderScene(spec) {
     inner += group('wa', `wa wa${k}`);
     inner += group('wb', `wb wb${k}`);
     inner += group('open', `do do${k}`);
-    inner += group('led', 'led');
+    inner += group('led', train.led?.color ? 'plate' : 'led');
     if (!L.pa.isEmpty()) {
       inner += group('pa', `sm pa${k}`) + group('pb', `sm pb pb${k}`);
       css.push(`.pa${k}{animation:sa ${puff}s step-end infinite}`, `.pb${k}{animation:sb ${puff}s step-end infinite}`);
@@ -146,7 +152,7 @@ export function renderScene(spec) {
   });
 
   const themeVars = (name) =>
-    Object.entries({ ...THEMES[name], ...decor?.vars[name] }).map(([key, v]) => `--${key}:${v}`).join(';');
+    Object.entries({ ...scenePalette(name, spec.skyline), ...decor?.vars[name] }).map(([key, v]) => `--${key}:${v}`).join(';');
   const rootCss =
     theme === 'auto'
       ? `:root{${themeVars('light')}}@media (prefers-color-scheme:dark){:root{${themeVars('dark')}}}`

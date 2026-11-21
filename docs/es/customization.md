@@ -35,12 +35,13 @@ Ejemplos en [examples/trains](../../examples/trains): los R160 del metro de Nuev
 ![Tren de vapor](../example-steam.svg)
 ## Skylines de ciudades
 
-Detrás del tren hay una ciudad. Por defecto se genera a partir de tu usuario: es solo tuya y es la misma todos los días. Con `skyline: .github/skyline.json` es la ciudad que quieras. Vienen dos incluidas:
+El fondo predeterminado se genera a partir de tu usuario y es el mismo todos los días. Puedes usar tu propio archivo con `skyline: .github/skyline.json` o elegir uno de los fondos incluidos.
 
 | `skyline` | Lo que se ve |
 | --- | --- |
 | `new-york` | One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad |
 | `osaka` | La pagoda de Shitennō-ji, la rueda de la fortuna, Tsutenkaku, Abeno Harukas, el Umeda Sky Building, un puente atirantado y el castillo |
+| `jalisco` | La Catedral y el Teatro Degollado en Guadalajara, ranchos alteños y surcos de agave al pie del volcán de Tequila |
 
 Un skyline es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para los monumentos con forma propia. No tiene colores propios: usa los del tema, así que cambia solo entre claro y oscuro y de noche se encienden las ventanas. Para hacer el tuyo, pega [docs/ai/skyline.md](../ai/skyline.md) en tu IA con la ciudad que quieres o una foto. Ejemplos en [examples/skylines](../../examples/skylines) (Ciudad de México, Medellín, Guadalajara, Malmö).
 

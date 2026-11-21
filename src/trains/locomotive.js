@@ -80,7 +80,8 @@ export function drawLoco(ctx, ox) {
     for (let x = 0; x < loco.w; x++) {
       const sym = at(x, y);
       if (sym === '.') continue;
-      const edge = !filled(x - 1, y) || !filled(x + 1, y) || !filled(x, y - 1) || !filled(x, y + 1);
+      // The built-in diesels have painted edges, including single-pixel handrails.
+      const edge = !loco.diesel && (!filled(x - 1, y) || !filled(x + 1, y) || !filled(x, y - 1) || !filled(x, y + 1));
       L.body.set(ox + x, y0 + y, edge ? P.outline : partColor(model, loco, sym, y - LOCO_UP, stripe));
     }
   }
