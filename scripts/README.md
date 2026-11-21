@@ -23,5 +23,6 @@ Run commands from the repository root with Node 24+. `npm ci` installs lint/type
 | `npm run leaderboard` | Merge safe, validated log fields into `docs/leaderboard.json` |
 | `node scripts/sheet.js sample/models.png 5 3 0` | Zoomed model contact sheet |
 | `node scripts/region-sheet.js examples/skylines/guadalajara.json sample/region.png` | Regional art contact sheet |
+| `npm run zoom -- 0 0 224 100 --no-trains` | Enlarged crop of a scene in both themes (`sample/zoom-light.png`, `sample/zoom-dark.png`); options `--scale`, `--time`, `--train`, `--skyline`, `--out` |
 
 `export.js` and `community.js` are thin command entrypoints. Reusable implementations live in [`tools/export/`](../tools/export) and [`tools/community/`](../tools/community). The conductor has a separate [execution guide](../tools/conductor/README.md); running checks never launches an external AI agent.

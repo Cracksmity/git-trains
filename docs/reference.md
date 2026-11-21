@@ -57,3 +57,5 @@ The six evolving models have cabs at both ends. Trains with a pantograph run und
 Set both `train` and `skyline` to `jalisco`. In `mode: multi`, the first three languages get Guadalajara's articulated TEG-90, a freight train in Los Altos, and the José Cuervo Express in the agave fields. The streak hangs on a plaque below your name sign. With fewer languages, the scene uses the corresponding number of tracks.
 
 ![The three trains crossing Jalisco](../examples/jalisco/jalisco-sobre-rieles.svg)
+
+[Design and publishing notes from the Jalisco scene](jalisco-notes.md)
