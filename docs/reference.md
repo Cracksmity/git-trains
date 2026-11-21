@@ -6,8 +6,8 @@
 
 | Input | Default | What it does |
 | --- | --- | --- |
-| `train` | `auto` | `auto` evolves with your cars; or pick a [model](#models); or the path to [your own train](customization.md#make-your-own-train-by-hand-or-with-ai) in JSON |
-| `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka` or the path to [your own skyline](customization.md#city-skylines) in JSON |
+| `train` | `auto` | `auto` evolves with your cars. Choose a [model](#models), the `jalisco` fleet, or a [custom train](customization.md#make-your-own-train-by-hand-or-with-ai) JSON path. |
+| `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka`, `jalisco` or the path to [your own skyline](customization.md#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
 | `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
 | `year-in-review` | `false` | `true` also writes `year-in-review.svg`: a poster of one calendar year, drawn as a train journey (see [Year in review](usage.md#year-in-review)) |
@@ -48,6 +48,12 @@ Outputs: `files`, `cars`, `streak`, `state`, `model`.
 
 With `train: auto` the model moves up as you gain cars: tram → orange metro → gray metro → yellow metro → white metro → bullet train.
 
-Every train has a cab at both ends (white headlights in front, red lights at the back). The overhead wire only shows up over trains with a pantograph; the rest run on a third rail.
+The six evolving models have cabs at both ends. Trains with a pantograph run under overhead wires.
 
 ![Three tracks](example-multi.svg)
+
+### Jalisco
+
+Set both `train` and `skyline` to `jalisco`. In `mode: multi`, the first three languages get Guadalajara's articulated TEG-90, a freight train in Los Altos, and the José Cuervo Express in the agave fields. The streak appears below the first track. With fewer languages, the scene uses the corresponding number of tracks.
+
+![The three trains crossing Jalisco](../examples/jalisco/jalisco-sobre-rieles.svg)

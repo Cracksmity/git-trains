@@ -1,4 +1,8 @@
-// scene/themes.js: focused themes operations.
+import { jaliscoPalette } from '../landscape/jalisco-palette.js';
+
+export function scenePalette(theme, skyline) {
+  return skyline?.preset === 'jalisco' ? { ...THEMES[theme], ...jaliscoPalette(theme) } : THEMES[theme];
+}
 
 
 

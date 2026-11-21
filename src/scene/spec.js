@@ -1,6 +1,7 @@
 // Turns the stats into the scene description that renderScene understands.
 
 import { MODEL_ORDER, getModel } from '../trains/models.js';
+import { JALISCO_TRAINS } from '../trains/jalisco.js';
 import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
@@ -57,7 +58,8 @@ export function buildSpec(stats, opts = {}) {
   const label = opts.label || text.label;
 
   const custom = typeof train === 'object' && train !== null ? train : null;
-  const baseId = custom || train === 'auto' ? MODEL_ORDER[stats.cars - 1] : getModel(train).id;
+  const jalisco = train === 'jalisco';
+  const baseId = custom || jalisco || train === 'auto' ? MODEL_ORDER[stats.cars - 1] : getModel(train).id;
   const baseIdx = MODEL_ORDER.indexOf(baseId);
 
   const langs = stats.languages.length
@@ -78,6 +80,16 @@ export function buildSpec(stats, opts = {}) {
         ? `${l.name} ${Math.round(l.share * 100)}%`
         : `${l.name} - ${stats.total}`,
   }));
+
+  if (jalisco) {
+    const places = ['Guadalajara', 'Los Altos', 'Tequila'];
+    tracks.forEach((track, i) => {
+      track.model = JALISCO_TRAINS[i];
+      // Keep the activity readout on the ballast beneath the regional trains.
+      const place = skyline?.preset === 'jalisco' ? `${places[i]} / ` : '';
+      track.caption = place + track.caption + (i === 0 ? ` / ${label} ${stats.streak}` : '');
+    });
+  }
 
   if (unlock) {
     const lead = tracks[0];

@@ -25,6 +25,7 @@ import { renderCalendar } from '../src/calendar/render.js';
 import { buildReview } from '../src/review/data.js';
 import { renderReview } from '../src/review/render.js';
 import { unlockFor } from '../src/activity/unlocks.js';
+import { writeJaliscoExamples } from './jalisco-examples.js';
 
 const example = (name) => parseCustomModel(JSON.parse(readFileSync(`examples/trains/${name}.json`, 'utf8')));
 const newYork = example('new-york');
@@ -33,6 +34,7 @@ const steam = example('steam');
 const skylineFile = (name) => parseSkyline(JSON.parse(readFileSync(`examples/skylines/${name}.json`, 'utf8')));
 
 mkdirSync('docs', { recursive: true });
+writeJaliscoExamples();
 
 const scenes = [
   ['example-light', sampleStats({ total: 2400, yesterday: 6 }), { train: 'auto', mode: 'single', theme: 'light' }],

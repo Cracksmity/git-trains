@@ -63,6 +63,6 @@ export function cabWidth(model) {
 export function trainWidth(model, cars, extra = false) {
   const n = clamp(cars, 1, MAX_CARS);
   const special = extra ? MID_W : 0;
-  if (model.loco) return n * MID_W + special + COUPLER + model.loco.w;
+  if (model.loco) return n * (model.carWidth ?? MID_W) + special + COUPLER + model.loco.w;
   return (n - 1) * MID_W + special + cabWidth(model) + model.nose.w;
 }

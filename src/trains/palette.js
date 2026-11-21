@@ -24,6 +24,7 @@ export const NOSE_DARK = '#26242b';
 // model.nose or model.loco: it supplies the paint (n), panel (f), and, for the
 // locomotive, the light and dark shades of its paint (h, m).
 export function partColor(model, part, sym, y, stripe) {
+  if (part.inks?.[sym]) return part.inks[sym];
   const p = model.pal;
   switch (sym) {
     case 's': return rowColor(model, y, stripe);

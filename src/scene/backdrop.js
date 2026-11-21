@@ -5,9 +5,11 @@ import { TRAIN_H } from '../trains/geometry.js';
 import { drawText, textWidth, clean } from '../graphics/font.js';
 import { paintSkyline, skylineColumns } from '../landscape/skyline-render.js';
 import { applyRegionTheme, regionParts, paintSprite, regionRng, pickOne } from '../landscape/region-render.js';
-import { GY0, PITCH } from './layout.js';
+import { BALLAST, GY0, PITCH } from './layout.js';
 import { THEMES } from './themes.js';
 import { bush, paintBandFront } from './terrain.js';
+import { paintGuadalajara } from '../landscape/jalisco-city.js';
+import { paintLosAltos, paintTequila } from '../landscape/jalisco-country.js';
 
 // Signal: red if there was no activity yesterday, amber if low, green if normal or high.
 function signal(g, x, gy, state) {
@@ -65,7 +67,9 @@ export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
   // (bushes, ballast, villages) does not change. With `fill` only its near layer
   // (low buildings with windows) is used as filler: in front of distant buildings,
   // behind nearby ones and without touching their columns.
-  if (!skyline) randomCity(g, g, W, rand);
+  const jalisco = skyline?.preset === 'jalisco';
+  if (jalisco) paintGuadalajara(g, GY0);
+  else if (!skyline) randomCity(g, g, W, rand);
   else {
     const scratch = new Grid(W, H);
     const filler = skyline.fill ? new Grid(W, H) : scratch;
@@ -84,8 +88,8 @@ export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
   }
 
   // Slope with bushes in front of the city.
-  g.rect(0, GY0 - 3, W, 3, '@hill');
-  for (let x = 2; x < W; x += 5 + Math.floor(rand() * 9)) {
+  if (!jalisco) g.rect(0, GY0 - 3, W, 3, '@hill');
+  for (let x = 2; !jalisco && x < W; x += 5 + Math.floor(rand() * 9)) {
     const w = 4 + Math.floor(rand() * 5);
     const h = 3 + Math.floor(rand() * 3);
     const color = rand() < 0.5 ? '@tree' : '@tree2';
@@ -98,7 +102,9 @@ export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
 
   tracks.forEach((t, k) => {
     const gy = GY0 + PITCH * k;
-    if (k > 0) paintBandFront(g, W, gy - 1, k, rand, region, pick);
+    if (jalisco && k === 1) paintLosAltos(g, gy, PITCH - BALLAST);
+    else if (jalisco && k === 2) paintTequila(g, gy, PITCH - BALLAST);
+    else if (k > 0) paintBandFront(g, W, gy - 1, k, rand, region, pick);
 
     // Ballast specks (ballast and sleepers are in railsLayer).
     for (let x = 0; x < W; x++) {

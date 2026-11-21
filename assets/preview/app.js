@@ -23,9 +23,11 @@ const SIGN = { en: 'STREAK', es: 'RACHA' };
 // --- selects
 $('train').innerHTML = '<option value="auto">Auto (evolves with the cars)</option>' +
   MODEL_ORDER.map((id) => `<option value="${id}">${MODELS[id].name}</option>`).join('') +
+  '<option value="jalisco">Jalisco · TEG-90, Los Altos freight, José Cuervo Express</option>' +
   '<option value="custom">Your train (JSON, below)</option>';
 $('skyline').innerHTML = '<option value="city">City (procedural, unique per user)</option>' +
   Object.entries(SKYLINES).map(([id, s]) => `<option value="${id}">${s.name}</option>`).join('') +
+  '<option value="jalisco">Jalisco · Guadalajara, Los Altos, Tequila</option>' +
   '<option value="custom">Your skyline (JSON, below)</option>';
 const langNames = Object.keys(LANGUAGE_COLORS);
 $('lang').innerHTML = langNames.map((n) => `<option>${n}</option>`).join('');

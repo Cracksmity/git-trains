@@ -16,10 +16,10 @@ inputs:
     description: "owner/name of a repository to draw instead of a user (the workflow's own is github.repository): the train grows with its commits of the last year, the languages are its own, the cards show its stars, forks, issues and contributors, and the departures board lists its latest releases. Files are named train-repo*.svg and card-repo-*.svg. When set, `user` is ignored."
     default: ""
   train:
-    description: "auto (evolves with your cars), a model (tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet) or the path to your own train in JSON (for example .github/train.json)."
+    description: "auto (evolves with your cars), a model (tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet), jalisco (TEG-90, Los Altos freight and José Cuervo Express in track order) or the path to your own train in JSON (for example .github/train.json)."
     default: auto
   skyline:
-    description: "City behind the train: city (procedural, unique to you), new-york, osaka or the path to your own skyline in JSON (for example .github/skyline.json)."
+    description: "City behind the train: city (procedural, unique to you), new-york, osaka, jalisco or the path to your own skyline in JSON (for example .github/skyline.json)."
     default: city
   mode:
     description: "single (one train in your top language) or multi (3 tracks, one train per language)."
