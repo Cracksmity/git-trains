@@ -15,11 +15,22 @@ test('Jalisco assigns the regional trains and captions to the available language
     const spec = buildSpec({ ...stats, languages: stats.languages.slice(0, count) }, opts);
     const { tracks, trains } = planScene(spec);
     assert.deepEqual(tracks.map((t) => t.model.id), ['teg-90', 'ferromex', 'jose-cuervo-express'].slice(0, count));
-    assert.match(tracks[0].caption, /Guadalajara.*RACHA/);
+    assert.match(tracks[0].caption, /^Guadalajara \/ [^/]+ \d+%$/);
+    assert.equal(tracks[0].plaque, `RACHA ${stats.streak} DÍAS`);
+    assert.ok(tracks.slice(1).every((t) => !t.plaque && !/RACHA/.test(t.caption)));
     assert.deepEqual(tracks.map((t) => t.overhead), [true, false, false].slice(0, count));
     for (const tr of trains) assert.ok(tr.rest >= 0 && tr.rest + tr.train.width <= SCENE_W);
     assert.doesNotMatch(renderScene(spec), /undefined|NaN/);
   }
+});
+
+test('the Jalisco streak plaque follows the language, the custom label and the singular', () => {
+  const opts = { train: 'jalisco', skyline: parseSkyline('jalisco'), mode: 'multi' };
+  const one = { ...sampleStats(), streak: 1 };
+  assert.equal(buildSpec(one, { ...opts, language: 'en' }).tracks[0].plaque, 'STREAK 1 DAY');
+  assert.equal(buildSpec(one, { ...opts, language: 'es' }).tracks[0].plaque, 'RACHA 1 DÍA');
+  assert.equal(buildSpec(one, { ...opts, label: 'COMMITS' }).tracks[0].plaque, 'COMMITS 1 DAY');
+  assert.equal(buildSpec(one, { mode: 'multi' }).tracks[0].plaque, undefined);
 });
 
 test('Jalisco trains fit at every length and leave their bodies free of signs in both directions', () => {

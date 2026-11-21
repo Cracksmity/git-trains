@@ -54,6 +54,6 @@ Los seis modelos que evolucionan con tu actividad tienen cabinas en ambos extrem
 
 ### Jalisco
 
-Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres primeros lenguajes corresponden al TEG-90 articulado de Guadalajara, al carguero de Los Altos y al José Cuervo Express entre los agaves. La racha aparece debajo de la primera vía. Si hay menos lenguajes, se dibuja el número de vías correspondiente.
+Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres primeros lenguajes corresponden al TEG-90 articulado de Guadalajara, al carguero de Los Altos y al José Cuervo Express entre los agaves. La racha cuelga en una placa bajo el letrero con tu nombre. Si hay menos lenguajes, se dibuja el número de vías correspondiente.
 
 ![Los tres trenes cruzando Jalisco](../../examples/jalisco/jalisco-sobre-rieles.svg)

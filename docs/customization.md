@@ -40,7 +40,7 @@ The default city is seeded with your username and stays the same every day. Set 
 | --- | --- |
 | `new-york` | One World Trade Center, Empire State, Chrysler, the Brooklyn Bridge and the Statue of Liberty |
 | `osaka` | Shitennō-ji pagoda, the Ferris wheel, Tsutenkaku, Abeno Harukas, the Umeda Sky Building, a cable-stayed bridge and the castle |
-| `jalisco` | Guadalajara Cathedral and Teatro Degollado, the ranches of Los Altos and rows of agave beneath Tequila volcano |
+| `jalisco` | Guadalajara's Estadio Jalisco, Cathedral and Sagrario, Teatro Degollado, Hospicio Cabañas, La Minerva and the towers of the west side; the ranches, red earth and parish church of Los Altos, and rows of agave beneath Tequila volcano |
 
 A skyline is a list of pixel-art buildings, **without too much detail**: each one is a block with a top (stepped, spire, antenna, dome, pyramid) or a row-by-row drawing for landmarks with their own shape. It has no colors of its own: it uses the theme's, so it switches between light and dark by itself and the windows light up at night. To make yours, paste [docs/ai/skyline.md](ai/skyline.md) into your AI with the city you want or a photo. Examples in [examples/skylines](../examples/skylines) (Mexico City, Medellín, Guadalajara, Malmö).
 

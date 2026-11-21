@@ -16,6 +16,37 @@ function bellows(g, x) {
   for (const dx of [-1, 1]) g.vline(x + dx, TOP + 2, 16, '#726968');
 }
 
+// Light-rail bogie: small dark steel wheels with a bright hub and a low frame
+// between them. It is painted before the body, so the skirt hides the top two
+// rows and only the lower five show, as on the real cars. Same rows and wheel
+// centres as the shared bogie (running-gear.js), symmetric for both directions.
+const LRV_BOGIE = [
+  '...ooo...........ooo...',
+  '..owwwo.........owwwo..',
+  '.owwwwwFFFFFFFFFwwwwwo.',
+  '.owwxwwfffffffffwwxwwo.',
+  '.owwwwwo.fffff.owwwwwo.',
+  '..owwwo.........owwwo..',
+  '...ooo...........ooo...',
+];
+const LRV_INKS = { o: '#262429', w: '#3f3c41', x: '#9a9699', F: '#625c60', f: '#48434a' };
+// Rotation marks alternate between the wa and wb layers, only on rows below the skirt.
+const LRV_MARKS = { wa: [[-2, -1], [2, 1]], wb: [[2, -1], [-2, 1]] };
+
+function lrvBogie(ctx, bx) {
+  const { layers: L } = ctx;
+  LRV_BOGIE.forEach((row, r) => {
+    for (let c = 0; c < row.length; c++) {
+      if (row[c] !== '.') L.body.set(bx - 11 + c, TOP + 18 + r, LRV_INKS[row[c]]);
+    }
+  });
+  for (const cx of [bx - 7, bx + 7]) {
+    for (const [layer, pts] of Object.entries(LRV_MARKS)) {
+      for (const [dx, dy] of pts) L[layer].set(cx + dx, TOP + 21 + dy, '#6a666b');
+    }
+  }
+}
+
 function teg(ctx, car) {
   const { layers: { body: g, open }, model } = ctx;
   const { ox, w, isTail, isCab, artRear, artFront } = car;
@@ -23,7 +54,13 @@ function teg(ctx, car) {
   const end = ox + w;
   const left = ox + (isTail ? model.nose.w : 1);
   const right = end - (isCab ? model.nose.w : 1);
-  g.rect(left, TOP, right - left, 20, p.outline);
+  const center = Math.floor((left + right) / 2);
+  if (isTail && isCab) lrvBogie(ctx, center);
+  if (!artRear) lrvBogie(ctx, ox + (isTail ? 17 : 13));
+  // Cars are painted from the tail, so the car ahead of a joint lays down the
+  // shared bogie: both halves' skirts then cover its wheels.
+  lrvBogie(ctx, artFront ? end : end - (isCab ? 17 : 14));
+  g.rect(left, TOP, right - left, 20, p.edge);
   g.rect(left, TOP + 1, right - left, 17, p.body);
   g.hline(left, TOP + 1, right - left, p.roofHi);
   g.rect(left, TOP + 3, right - left, 8, p.upper);
@@ -43,11 +80,10 @@ function teg(ctx, car) {
         const x = mirror ? left - 1 - i : right + i;
         const tail = mirror && (c === 'l' || c === 'y');
         const color = partColor(model, model.nose, tail ? 'r' : c, y, ctx.stripe);
-        g.set(x, TOP + y, y === 0 || i === tip ? p.outline : color);
+        g.set(x, TOP + y, y === 0 || i === tip ? p.edge : color);
       }
     });
   }
-  const center = Math.floor((left + right) / 2);
   const vent = isCab ? right - 16 : left + 6;
   g.rect(vent, TOP - 2, 13, 2, p.bodyLo);
   g.hline(vent + 1, TOP - 3, 11, p.bodyHi);
@@ -56,7 +92,7 @@ function teg(ctx, car) {
   g.hline(center - 5, TOP + 20, 11, '#716c72');
   // Each half has its own double door and a narrow cab-side window.
   for (const doorX of [left + 5, right - 13]) {
-    g.rect(doorX, TOP + 3, 8, 15, p.outline);
+    g.rect(doorX, TOP + 3, 8, 15, p.seal);
     for (const dx of [1, 4]) {
       g.rect(doorX + dx, TOP + 4, 2, 13, p.door);
       g.rect(doorX + dx, TOP + 4, 2, 7, p.glass);
@@ -71,14 +107,10 @@ function teg(ctx, car) {
     }
   }
   for (const dy of [14, 16]) g.hline(right - 21, TOP + dy, 6, '#737b7d');
-  if (isTail && isCab) {
-    bellows(g, center);
-    drawBogie(ctx, center);
-  } else if (!isTail) bellows(g, ox + 1);
-  if (!artRear) drawBogie(ctx, ox + (isTail ? 17 : 13));
-  else drawBogie(ctx, ox);
-  if (!artFront) drawBogie(ctx, end - (isCab ? 17 : 14));
-  g.hline(left + 2, TOP + 20, Math.min(9, right - left - 4), ctx.stripe);
+  if (isTail && isCab) bellows(g, center);
+  else if (!isTail) bellows(g, ox + 1);
+  // The language stripe runs along the bottom edge, like the other Jalisco cars.
+  g.hline(left + 2, TOP + 19, Math.min(9, right - left - 4), ctx.stripe);
   if (isCab) {
     const px = center - 5;
     line(g, px - 3, TOP - 1, px + 5, TOP - 4, '#8c8890');
