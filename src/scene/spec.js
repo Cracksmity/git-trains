@@ -16,6 +16,7 @@ export const LANGUAGES = ['en', 'es'];
 const TEXT = {
   en: {
     label: 'STREAK',
+    days: (n) => (n === 1 ? 'DAY' : 'DAYS'),
     title: (s) => `${s.user}'s train: ${s.cars} car${s.cars === 1 ? '' : 's'}, ${s.streak}-day streak`,
     repoTitle: (s) => `Train for ${s.fullName}: ${s.cars} car${s.cars === 1 ? '' : 's'}, ${s.streak}-day commit streak`,
     unlock: {
@@ -26,6 +27,7 @@ const TEXT = {
   },
   es: {
     label: 'RACHA',
+    days: (n) => (n === 1 ? 'DÍA' : 'DÍAS'),
     title: (s) => `Tren de ${s.user}: ${s.cars} ${s.cars === 1 ? 'vagón' : 'vagones'}, racha de ${s.streak} día${s.streak === 1 ? '' : 's'}`,
     repoTitle: (s) => `Tren de ${s.fullName}: ${s.cars} ${s.cars === 1 ? 'vagón' : 'vagones'}, racha de commits de ${s.streak} día${s.streak === 1 ? '' : 's'}`,
     unlock: {
@@ -85,10 +87,12 @@ export function buildSpec(stats, opts = {}) {
     const places = ['Guadalajara', 'Los Altos', 'Tequila'];
     tracks.forEach((track, i) => {
       track.model = JALISCO_TRAINS[i];
-      // Keep the activity readout on the ballast beneath the regional trains.
+      // Every caption reads "place / language %"; the regional trains carry no
+      // LED sign, so the streak hangs on a plaque beneath the station sign.
       const place = skyline?.preset === 'jalisco' ? `${places[i]} / ` : '';
-      track.caption = place + track.caption + (i === 0 ? ` / ${label} ${stats.streak}` : '');
+      track.caption = place + track.caption;
     });
+    tracks[0].plaque = `${label} ${stats.streak} ${text.days(stats.streak)}`;
   }
 
   if (unlock) {

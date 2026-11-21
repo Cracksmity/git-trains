@@ -34,15 +34,16 @@ export function ferromexFreight() {
   g.rect(61, 5, 15, 5, 'C');
   g.hline(60, 5, 17, 'n');
   g.hline(61, 4, 14, 'C');
-  // Broad diagonal gray bands wrap around the dark hood. The narrower silver
-  // chevrons continue across the red equipment doors ahead of it.
+  // Two broad diagonal gray bands wrap around the dark hood, spaced so they still
+  // read at README size. The narrower silver chevrons continue across the red
+  // equipment doors ahead of it.
   for (let y = 7; y < 21; y++) {
     const offset = Math.floor((y - 7) * 0.55);
-    for (const x of [13, 29, 45]) g.hline(x - offset, y, 5, 'm');
+    for (const x of [18, 40]) g.hline(x - offset, y, 6, 'm');
     const elbow = 3 - Math.floor(Math.abs(y - 14) / 2);
     for (const x of [52, 58]) g.hline(x + elbow, y, 2, 't');
   }
-  for (const x of [6, 20, 35, 48, 57]) {
+  for (const x of [6, 27, 46]) {
     g.hline(x, 8, 5, 'o');
     g.hline(x, 10, 5, 'k');
     g.vline(x + 1, 17, 4, 'd');
@@ -63,7 +64,7 @@ export function ferromexFreight() {
     g.rect(x, 24, 19, 4, 'o');
     g.hline(x + 2, 25, 15, 'm');
   }
-  for (const x of [3, 12, 22, 32, 42, 52, 61]) g.vline(x, 16, 5, 'k');
+  for (const x of [3, 22, 42, 61]) g.vline(x, 16, 5, 'k');
   g.hline(3, 16, 59, 'k');
   g.hline(3, 15, 3, 'm');
   g.vline(81, 16, 6, 't');

@@ -7,22 +7,26 @@ const base = {
 };
 
 // Driver's side window, broad windscreen and inset rectangular headlights.
-// Only the roof corner and the skirt recede, by a single pixel.
+// Only the roof corner and the skirt recede, by a single pixel. The windscreen
+// keeps the black surround (o); the silhouette uses the softer edge (e).
+const tegEdge = '#4b4449';
 const tegNose = [
   'sssssssssssss.', 'ssssssssssssss', 'nnnnnnnnnnnnnn', 'oooooonnnooooo',
   'oggggonnoGGggo', 'ogGggonnoGgggo', 'oggggonnoGgggo', 'oggggonnoggggo',
   'oggggonnogggGo', 'oggggonnoggggo', 'oooooonnooooog', 'tttttttttttttt',
   'tttttttttttttt', 'nnnnnnnnnnnnnn', 'nnnnnnnnnoooon', 'nnnnnnnnnollon',
-  'nnnnnnnnnoooon', 'mmmmmmmmmmmmmm', 'nnnnnnnnnnnnnn', 'ooooooooooooo.',
+  'nnnnnnnnnoooon', 'mmmmmmmmmmmmmm', 'nnnnnnnnnnnnnn', 'eeeeeeeeeeeee.',
 ];
 
 export const JALISCO_TRAINS = [
   {
     id: 'teg-90', name: 'SITEUR TEG-90', coach: 'teg',
     pal: { ...base, body: '#c95d60', bodyHi: '#db7977', bodyLo: '#9e4c53', upper: '#332f34',
-      trim: '#ece5db', door: '#a6a9a9', glass: '#384747', glassHi: '#748b8b', roofHi: '#bcb5ad' },
+      trim: '#ece5db', door: '#a6a9a9', glass: '#384747', glassHi: '#748b8b', roofHi: '#bcb5ad',
+      // A light car outlined in near-black looked inked next to the diesels.
+      edge: tegEdge, seal: '#5c5e64' },
     bands: [...'ttbbblb'], row3: 'u', win: { y0: 3, y1: 10 },
-    nose: { w: 14, rows: tegNose, color: '#cc6366', lo: '#a0a6a6' },
+    nose: { w: 14, rows: tegNose, color: '#cc6366', lo: '#a0a6a6', inks: { e: tegEdge } },
     pant: 'lead', articulated: true, doors: 2, roofBoxes: false,
   },
   {

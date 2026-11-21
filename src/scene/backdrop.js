@@ -137,6 +137,16 @@ export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
     drawText(g, name, 14 + 4, 14, '#ffffff');
   }
 
+  // Supplementary plaque (the streak, for trains without an LED sign), in reversed colors.
+  const plaque = clean(tracks[0]?.plaque ?? '').slice(0, 20);
+  const pw = textWidth(plaque) + 6;
+  if (pw > 6) {
+    const top = name ? 25 : 10;
+    g.rect(14, top, pw, 9, '#1f7a56');
+    g.rect(15, top + 1, pw - 2, 7, '#e9f3ee');
+    drawText(g, plaque, 17, top + 2, '#1f7a56');
+  }
+
   // Legend on the ballast.
   tracks.forEach((t, k) => {
     if (!t.caption) return;
