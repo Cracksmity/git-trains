@@ -1,3 +1,4 @@
+import { mix } from '../graphics/colors.js';
 import { line, polygon } from '../graphics/pixel-shapes.js';
 import { TOP } from './geometry.js';
 import { partColor } from './palette.js';
@@ -173,11 +174,41 @@ function saloon(ctx, { ox, w, isTail }) {
   g.hline(ox + 6, TOP + 19, 5, ctx.stripe);
 }
 
+// Freight truck under the hoppers, in the style of the diesel hauling them: a
+// dark side frame with two small wheels, kept inside the car's outline instead
+// of the large passenger bogie wheels.
+const TRUCK_DISC = '#394348';
+const TRUCK_INKS = {
+  r: '#1c2028', h: mix(TRUCK_DISC, '#ffffff', 0.1), l: TRUCK_DISC, x: mix(TRUCK_DISC, '#ffffff', 0.45),
+};
+const SMALL_WHEEL = ['.rrr.', 'rhhhr', 'rlxlr', 'rlllr', '.rrr.'];
+// Rotation marks around the hub alternate between the wa and wb layers.
+const TRUCK_MARKS = { wa: [[0, -1], [1, 1], [-1, 1]], wb: [[1, -1], [0, 1], [-1, -1]] };
+
+function freightTruck(ctx, bx) {
+  const { layers: L } = ctx;
+  L.body.rect(bx - 9, TOP + 20, 19, 3, '#19242b');
+  L.body.hline(bx - 7, TOP + 21, 15, '#56666b');
+  for (const cx of [bx - 6, bx + 6]) {
+    SMALL_WHEEL.forEach((row, r) => {
+      for (let c = 0; c < row.length; c++) if (row[c] !== '.') L.body.set(cx - 2 + c, TOP + 20 + r, TRUCK_INKS[row[c]]);
+    });
+    for (const [layer, pts] of Object.entries(TRUCK_MARKS)) {
+      for (const [dx, dy] of pts) L[layer].set(cx + dx, TOP + 22 + dy, mix(TRUCK_DISC, '#ffffff', 0.3));
+    }
+  }
+}
+
 /** Paint a regular Jalisco car in the normal train layers, including its running gear. */
 export function drawJaliscoCar(ctx, car) {
   if (ctx.model.coach === 'teg') return teg(ctx, car);
-  if (ctx.model.coach === 'hopper') hopper(ctx, car);
-  else saloon(ctx, car);
+  if (ctx.model.coach === 'hopper') {
+    hopper(ctx, car);
+    freightTruck(ctx, car.ox + 12);
+    freightTruck(ctx, car.ox + car.w - 13);
+    return;
+  }
+  saloon(ctx, car);
   drawBogie(ctx, car.ox + 13);
   drawBogie(ctx, car.ox + car.w - 14);
 }
