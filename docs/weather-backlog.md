@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws five states: `clear`, `cloudy`, `drizzle`, `rain` and `storm` (see [Weather](reference.md#weather)). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws six states (`clear`, `partly`, `cloudy`, `drizzle`, `rain` and `storm`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -31,10 +31,9 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | --- | --- | --- | --- |
 | [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
 | [Hail](#hail) | WMO 96, 99 | `storm` | A Guadalajara hailstorm: white pellets bounce and pile up on the plaza and roofs |
-| [Frost](#frost) | `clear` and 2 °C or less | `clear` | White frost on the pasture and roofs of Los Altos |
-| [Heat](#heat) | `clear` and 32 °C or more | `clear` | Heat shimmer over the Tequila agave field |
+| [Frost](#frost) | WMO 0–2 and 2 °C or less | `clear` or `partly` | White frost on the pasture and roofs of Los Altos |
+| [Heat](#heat) | WMO 0–2 and 32 °C or more | `clear` or `partly` | Heat shimmer over the Tequila agave field |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
-| [Partly cloudy](#partly-cloudy) | WMO 1, 2 | `clear` | The sun or moon between more clouds |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
 | [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
 | [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
@@ -76,7 +75,7 @@ Done when: hail is clearly different from rain at README size in both themes, an
 ```text
 In git-trains, add a "frost" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
 
-Trigger: a clear code (0–2) with temperature_2m at 2 °C or less. The request already asks for temperature_2m. Decide the state in src/weather/conditions.js from the code and the temperature together, and test the threshold.
+Trigger: WMO code 0, 1 or 2 with temperature_2m at 2 °C or less. The request already asks for temperature_2m. Decide the state in src/weather/conditions.js from the code and the temperature together, and test the threshold.
 
 Art, mostly in Los Altos (frost is common on its winter mornings):
 - A pale blue-white tint on the tops of the pasture and grassland ridges and on the ranch roofs. Paint it on the top pixel of each surface by reading the backdrop grid; do not cover the whole surface.
@@ -93,7 +92,7 @@ Done when: frost is visible but subtle in both themes, the threshold has tests, 
 ```text
 In git-trains, add a "heat" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
 
-Trigger: a clear code (0–2) with temperature_2m at 32 °C or more.
+Trigger: WMO code 0, 1 or 2 with temperature_2m at 32 °C or more.
 
 Art, mostly in Tequila:
 - Heat shimmer: a 2-row band just above the agave field horizon. A few horizon pixels shift one pixel left and right in a slow step-end loop (two alternating grids, as the stars twinkle in src/scene/sky.js). It stops with prefers-reduced-motion.
@@ -114,18 +113,6 @@ Trigger: WMO codes 71, 73, 75, 77, 85 and 86, which map to "rain" today. Snow is
 Art: reuse the winter decoration of src/scene/decor.js as much as possible: the falling flakes and the snow resting on roofs found from the backdrop grid. Clip the flakes to each place's strip with the fall layers of src/scene/weather.js. Use the "cloudy" sky. Add snow on the Cathedral spires, the stadium roof, the Los Altos roofs and the volcano's upper slopes. Do not duplicate decor.js; move a shared helper into a small module if both need it.
 
 Done when: snow reads at README size in both themes and the winter decoration still passes its tests, and `npm run check` passes.
-```
-
-### Partly cloudy
-
-```text
-In git-trains, add a "partly" (partly cloudy) weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 1 and 2, which map to "clear" today. Keep 0 as clear.
-
-Art: the usual sky, sun and moon, plus a second layer of three or four larger, flatter cloud banks drifting with the existing cloud loop. Use the bank() helper in src/scene/weather.js with the scene's own cloud inks. One bank may pass partly in front of the sun. The country strips get one or two small banks each. No veil, no rain.
-
-Done when: partly cloudy is clearly between clear and cloudy in both themes, and `npm run check` passes.
 ```
 
 ### Wind

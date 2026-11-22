@@ -1,7 +1,5 @@
-// The inks of the weather layers in each theme. Every state has its own sky
-// (four bands from the top down) and cloud inks, so two places can wear
-// different weather side by side. The dark theme keeps the night: overcast
-// skies glow faintly warm near the ground, as clouds do over a lit city.
+// Overcast skies use four bands from the top down and three cloud inks.
+// At night the sky glows faintly warm near the ground, as clouds do over a lit city.
 const sky = (light, dark) => ({ light, dark });
 
 const SKIES = {
@@ -22,6 +20,10 @@ const SKIES = {
 const SKY_NAMES = ['0', '1', '2', '3', 'Cloud', 'CloudShade', 'CloudLit'];
 
 const SHARED = {
+  // Scattered banks pick up the usual clouds' ivory by day and slate blue at night.
+  wPartlyCloud: ['#dce6e0', '#35435f'],
+  wPartlyCloudShade: ['#c5d4d2', '#2b3852'],
+  wPartlyCloudLit: ['#f0f2e9', '#4a5874'],
   // Rain streaks are translucent so they read over the sky and the buildings alike.
   wDrop: ['rgba(74,104,134,0.6)', 'rgba(176,196,240,0.55)'],
   wDropFar: ['rgba(74,104,134,0.35)', 'rgba(176,196,240,0.3)'],
@@ -50,7 +52,7 @@ export const WEATHER_THEMES = { light: theme(0), dark: theme(1) };
 
 /**
  * The ink of a state's sky band (0-3) or cloud part: '@wRain2', '@wStormCloudShade'...
- * @param {string} state cloudy, rain or storm
+ * @param {string} state partly (cloud parts only), cloudy, rain or storm
  * @param {string | number} part
  */
 export const skyInk = (state, part) => `@w${state[0].toUpperCase()}${state.slice(1)}${part}`;

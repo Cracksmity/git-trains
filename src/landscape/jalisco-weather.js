@@ -105,11 +105,25 @@ function tequila(g, state, band, backdrop) {
 }
 
 /**
- * Per place: its painter, and where its lightning strikes, in rows from the top of its strip.
- * @type {Record<string, { paint: Function, bolt: { x: number, from: number, to: number } }>}
+ * Each scattered bank has a left edge, base row, width and crown radii.
+ * Banks and bolts use rows from the top of the place's strip.
+ * @type {Record<string, { paint: Function, bolt: { x: number, from: number, to: number }, partly: Array<[number, number, number, number[]]> }>}
  */
 export const JALISCO_WEATHER = {
-  guadalajara: { paint: guadalajara, bolt: { x: 118, from: 0, to: 46 } },
-  altos: { paint: altos, bolt: { x: 398, from: 2, to: 26 } },
-  tequila: { paint: tequila, bolt: { x: 62, from: 3, to: 24 } },
+  guadalajara: {
+    paint: guadalajara, bolt: { x: 118, from: 0, to: 46 },
+    partly: [
+      [53, 24, 54, [2, 3, 5, 4, 3, 3, 2, 2]],
+      [237, 15, 61, [2, 3, 3, 4, 5, 3, 3, 2]],
+      [404, 7, 50, [2, 4, 3, 3, 2, 2, 2]],
+    ],
+  },
+  altos: {
+    paint: altos, bolt: { x: 398, from: 2, to: 26 },
+    partly: [[61, 11, 29, [1, 2, 3, 3, 2, 1]], [257, 6, 33, [2, 3, 2, 3, 2, 2]]],
+  },
+  tequila: {
+    paint: tequila, bolt: { x: 62, from: 3, to: 24 },
+    partly: [[84, 9, 34, [2, 3, 3, 2, 3, 2]], [326, 7, 26, [1, 2, 3, 2, 1]]],
+  },
 };

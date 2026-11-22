@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja cinco estados: `clear`, `cloudy`, `drizzle`, `rain` y `storm` (ver [Clima](reference.md#clima)). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja seis estados (`clear`, `partly`, `cloudy`, `drizzle`, `rain` y `storm`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -31,10 +31,9 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | --- | --- | --- | --- |
 | [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
 | [Granizo](#granizo) | WMO 96, 99 | `storm` | Una granizada tapatía: bolitas blancas que rebotan y se juntan en la plaza y los techos |
-| [Helada](#helada) | `clear` con 2 °C o menos | `clear` | Escarcha blanca en el pasto y los techos de Los Altos |
-| [Calor](#calor) | `clear` con 32 °C o más | `clear` | El aire que vibra sobre el agave de Tequila |
+| [Helada](#helada) | WMO 0–2 con 2 °C o menos | `clear` o `partly` | Escarcha blanca en el pasto y los techos de Los Altos |
+| [Calor](#calor) | WMO 0–2 con 32 °C o más | `clear` o `partly` | El aire que vibra sobre el agave de Tequila |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
-| [Medio nublado](#medio-nublado) | WMO 1, 2 | `clear` | El sol o la luna entre más nubes |
 | [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
 | [Calima](#calima) | Mala calidad del aire (PM2.5) | Nada | Una capa café sobre Guadalajara en días de contingencia |
 | [Temperatura en las leyendas](#temperatura-en-las-leyendas) | Cualquier lectura en vivo | Nada | "Tequila 20° / Rust 15%" |
@@ -76,7 +75,7 @@ Listo cuando: el granizo se distingue claramente de la lluvia a tamaño README e
 ```text
 En git-trains, agrega el estado de clima "frost" (helada) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
 
-Cuándo: un código despejado (0–2) con temperature_2m de 2 °C o menos. La consulta ya pide temperature_2m. Decide el estado en src/weather/conditions.js con el código y la temperatura juntos, y prueba el umbral.
+Cuándo: código WMO 0, 1 o 2 con temperature_2m de 2 °C o menos. La consulta ya pide temperature_2m. Decide el estado en src/weather/conditions.js con el código y la temperatura juntos, y prueba el umbral.
 
 Arte, sobre todo en Los Altos (donde la helada es común en las mañanas de invierno):
 - Un tono blanco azulado y pálido en la parte alta de las lomas de pasto y en los techos de los ranchos. Píntalo sobre el píxel de arriba de cada superficie leyendo la cuadrícula del fondo; no cubras toda la superficie.
@@ -93,7 +92,7 @@ Listo cuando: la helada se ve, pero discreta, en los dos temas, el umbral tiene 
 ```text
 En git-trains, agrega el estado de clima "heat" (calor) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
 
-Cuándo: un código despejado (0–2) con temperature_2m de 32 °C o más.
+Cuándo: código WMO 0, 1 o 2 con temperature_2m de 32 °C o más.
 
 Arte, sobre todo en Tequila:
 - El aire que vibra: una franja de 2 filas justo encima del horizonte del campo de agave. Algunos píxeles del horizonte se mueven un píxel a la izquierda y a la derecha en un ciclo lento step-end (dos cuadrículas que se alternan, como el parpadeo de las estrellas en src/scene/sky.js). Se detiene con prefers-reduced-motion.
@@ -114,18 +113,6 @@ Cuándo: códigos WMO 71, 73, 75, 77, 85 y 86, que hoy cuentan como "rain". La n
 Arte: reutiliza lo más posible la decoración de invierno de src/scene/decor.js: los copos que caen y la nieve sobre los techos encontrados en la cuadrícula del fondo. Recorta los copos a la franja de cada lugar con las capas de caída de src/scene/weather.js. Usa el cielo de "cloudy". Agrega nieve en las torres de la Catedral, el techo del estadio, los techos de Los Altos y las laderas altas del volcán. No dupliques decor.js; si los dos necesitan una función, muévela a un módulo pequeño compartido.
 
 Listo cuando: la nieve se lee a tamaño README en los dos temas, la decoración de invierno sigue pasando sus pruebas y `npm run check` pasa.
-```
-
-### Medio nublado
-
-```text
-En git-trains, agrega el estado de clima "partly" (medio nublado) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: códigos WMO 1 y 2, que hoy cuentan como "clear". El 0 sigue siendo despejado.
-
-Arte: el cielo, el sol y la luna de siempre, más una segunda capa de tres o cuatro bancos de nubes más grandes y planos que se deslizan con el ciclo de nubes que ya existe. Usa la función bank() de src/scene/weather.js con las tintas de nube de la propia escena. Un banco puede tapar en parte al sol. Las franjas del campo reciben uno o dos bancos pequeños cada una. Sin velo ni lluvia.
-
-Listo cuando: medio nublado queda claramente entre despejado y nublado en los dos temas y `npm run check` pasa.
 ```
 
 ### Viento

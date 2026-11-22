@@ -4,6 +4,7 @@ import { buildSpec } from '../../src/scene/spec.js';
 import { renderScene } from '../../src/scene/render.js';
 import { weatherArt, weatherBands, FLASH } from '../../src/scene/weather.js';
 import { paintBackdrop } from '../../src/scene/backdrop.js';
+import { celestialGrid } from '../../src/scene/sky.js';
 import { parseSkyline } from '../../src/landscape/skyline-parse.js';
 import { sampleStats } from '../../src/demo/sample.js';
 import { WEATHER_THEMES } from '../../src/weather/inks.js';
@@ -98,10 +99,52 @@ test('in Jalisco the weather replaces the seasonal particles but never a holiday
 test('the title names each place with its weather in the scene language', () => {
   assert.match(spec({ weather: ['rain', 'clear', 'storm'] }).title, /\nWeather: Guadalajara rain, Los Altos clear, Tequila storm$/);
   assert.match(spec({ weather: ['cloudy', 'drizzle', 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Los Altos llovizna, Tequila lluvia$/);
-  assert.match(spec({ weather: ['cloudy', null, 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Tequila lluvia$/);
+  assert.match(spec({ weather: ['partly', null, 'rain'], language: 'es' }).title, /\nClima: Guadalajara medio nublado, Tequila lluvia$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);
+});
+
+test('partly adds separate banks to the city cloud loop and leaves the sun and moon visible in frame 0', () => {
+  const weather = ['partly', 'clear', 'clear'];
+  const layers = weatherArt(weather, sceneContext(spec({ weather })));
+  assert.equal(layers.length, 1);
+  const [{ grid, z, drift, y: top }] = layers;
+  assert.deepEqual([z, drift, top, grid.w], ['sky', true, 0, 2 * SCENE_W]);
+  const celestial = celestialGrid(SCENE_W);
+  const covered = Array(SCENE_W).fill(false);
+  for (let x = 0; x < SCENE_W; x++) {
+    for (let y = 0; y < grid.h; y++) {
+      const ink = grid.get(x, y);
+      assert.equal(ink, grid.get(x + SCENE_W, y), 'both periods match');
+      if (ink) covered[x] = true;
+      if (celestial.get(x, y)) assert.equal(ink, null, 'frame 0 leaves the whole disc and rays visible');
+    }
+  }
+  // Count starts on a circle so a bank crossing the scene edge counts once.
+  const starts = covered.filter((cloud, x) => cloud && !covered[(x + SCENE_W - 1) % SCENE_W]);
+  assert.ok(starts.length === 3 || starts.length === 4);
+  const out = svg({ weather });
+  assert.equal((out.match(/<g class="cl">/g) ?? []).length, 2, 'usual clouds and extra banks drift together');
+  assert.match(out, /prefers-reduced-motion:reduce\)\{[^}]*\.cl\b[^}]*animation:none/);
+});
+
+test('partly paints the country banks only on exposed sky pixels', () => {
+  const weather = ['clear', 'partly', 'partly'];
+  const context = sceneContext(spec({ weather }));
+  const layers = weatherArt(weather, context);
+  const sky = new Set(['@dusk', '@haze', '@afterglow', '@starlight']);
+  assert.equal(layers.length, 2);
+  layers.forEach((layer, i) => {
+    assert.equal(layer.z, 'ground');
+    assert.equal(layer.y, weatherBands(3)[i + 1].top);
+    assert.ok(!layer.drift && !layer.fall && !layer.grid.isEmpty());
+    for (let y = 0; y < layer.grid.h; y++) {
+      for (let x = 0; x < layer.grid.w; x++) {
+        if (layer.grid.get(x, y)) assert.ok(sky.has(context.backdrop.get(x, y + layer.y)), 'terrain stays in front');
+      }
+    }
+  });
 });
 
 test('drizzle uses the cloudy sky without a veil, sparse slow 1-pixel drops and dry Tequila furrows', () => {

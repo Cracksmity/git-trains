@@ -34,13 +34,13 @@ test('weather is off unless asked for, and live weather in the sample comes from
 });
 
 test('fixed weather draws without a reading, and a bad value stops the run with the options', () => {
-  const fixed = runAction({ ...JALISCO, INPUT_WEATHER: 'storm' });
+  const fixed = runAction({ ...JALISCO, INPUT_WEATHER: 'partly' });
   assert.equal(fixed.r.status, 0, fixed.r.stdout + fixed.r.stderr);
-  assert.match(fixed.svg, /Weather: Guadalajara storm, Los Altos storm, Tequila storm/);
+  assert.match(fixed.svg, /Weather: Guadalajara partly cloudy, Los Altos partly cloudy, Tequila partly cloudy/);
 
   const bad = runAction({ ...JALISCO, INPUT_WEATHER: 'hail' });
   assert.notEqual(bad.r.status, 0);
-  assert.match(bad.r.stdout, /::error::Unknown weather: "hail"\. Options: off, live, clear, cloudy, drizzle, rain, storm/);
+  assert.match(bad.r.stdout, /::error::Unknown weather: "hail"\. Options: off, live, clear, partly, cloudy, drizzle, rain, storm/);
 });
 
 test('a skyline without places keeps its scene and says why', () => {

@@ -109,14 +109,7 @@ function cityDeck(state, W) {
     const lumps = Array.from({ length: Math.max(2, Math.round(w / 10)) }, () => 2 + Math.floor(rand() * 3));
     const art = bank(w, lumps, state);
     // A bank that crosses either end is drawn a scene width away too, so the loop has no seam.
-    for (const o of [-W, 0, W]) {
-      for (let by = 0; by < art.h; by++) {
-        for (let bx = 0; bx < art.w; bx++) {
-          const ink = art.get(bx, by);
-          if (ink) g.set(x + o + bx - 6, y - art.h + 2 + by, ink);
-        }
-      }
-    }
+    for (const o of [-W, 0, W]) placeBank(g, art, x + o, y);
   }
   return g;
 }
@@ -146,6 +139,33 @@ function bank(w, lumps, state) {
 
 const isCountrySky = (backdrop, x, y) => COUNTRY_SKY.has(backdrop.get(x, y));
 
+/** Place a bank by its left edge and flat base.
+ * @param {(x: number, y: number) => boolean} [visible] restricts the bank to exposed sky
+ */
+function placeBank(g, art, left, base, visible) {
+  for (let by = 0; by < art.h; by++) {
+    for (let bx = 0; bx < art.w; bx++) {
+      const ink = art.get(bx, by);
+      const x = left + bx - 6;
+      const y = base - art.h + 2 + by;
+      if (ink && (!visible || visible(x, y))) g.set(x, y, ink);
+    }
+  }
+}
+
+/** @returns {WeatherLayer} */
+function partlyClouds(banks, band, backdrop, W) {
+  const city = band.k === 0;
+  const grid = new Grid(city ? 2 * W : W, band.base - band.top);
+  const offsets = city ? [-W, 0, W] : [0];
+  const visible = city ? undefined : (x, y) => isCountrySky(backdrop, x, band.top + y);
+  for (const [left, base, width, lumps] of banks) {
+    const art = bank(width, lumps, 'partly');
+    for (const offset of offsets) placeBank(grid, art, left + offset, base, visible);
+  }
+  return { grid, z: city ? 'sky' : 'ground', y: band.top, drift: city };
+}
+
 // Rain and storms dim the light: one translucent veil over the place, behind its rain.
 function veil(state, band, W) {
   const g = new Grid(W, (band.k === 0 ? GY0 : band.base) - band.top);
@@ -172,9 +192,7 @@ function countrySky(state, band, backdrop, W) {
     const lumps = Array.from({ length: Math.max(2, Math.round(w / 9)) }, () => 1 + Math.floor(rand() * 3));
     const art = bank(w, lumps, state);
     const y = depth + 6 + Math.floor(rand() * 5);
-    for (let by = 0; by < art.h; by++) {
-      for (let bx = 0; bx < art.w; bx++) if (art.get(bx, by)) clouds.set(x + bx - 6, y - art.h + 2 + by, art.get(bx, by));
-    }
+    placeBank(clouds, art, x, y);
   }
   const g = new Grid(W, band.base - band.top);
   for (let y = 0; y < g.h; y++) {
@@ -255,6 +273,10 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
     const state = weather[band.k];
     const art = PLACE_ART[places[band.k]?.id];
     if (!state || state === 'clear' || !art) return;
+    if (state === 'partly') {
+      layers.push(partlyClouds(art.partly, band, backdrop, W));
+      return;
+    }
     const sky = state === 'drizzle' ? 'cloudy' : state;
     if (band.k === 0) {
       layers.push({ ...citySky(sky, W), z: 'sky', y: 0 });

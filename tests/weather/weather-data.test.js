@@ -15,7 +15,7 @@ test('every WMO code Open-Meteo documents maps to a state the scenes draw', () =
   const documented = [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99];
   for (const code of documented) assert.ok(WEATHER_STATES.includes(stateOfCode(code)), `code ${code}`);
   assert.equal(stateOfCode(0), 'clear');
-  assert.equal(stateOfCode(2), 'clear');
+  for (const code of [1, 2]) assert.equal(stateOfCode(code), 'partly', `code ${code}`);
   assert.equal(stateOfCode(3), 'cloudy');
   assert.equal(stateOfCode(45), 'cloudy');
   for (const code of [51, 53, 55, 56, 57]) assert.equal(stateOfCode(code), 'drizzle', `code ${code}`);
@@ -28,10 +28,11 @@ test('the weather input accepts off, live, one state or one per place', () => {
   assert.deepEqual(parseWeatherInput(''), { mode: 'off' });
   assert.deepEqual(parseWeatherInput('off'), { mode: 'off' });
   assert.deepEqual(parseWeatherInput(' Live '), { mode: 'live' });
+  assert.deepEqual(parseWeatherInput('partly'), { mode: 'fixed', states: ['partly', 'partly', 'partly'] });
   assert.deepEqual(parseWeatherInput('drizzle'), { mode: 'fixed', states: ['drizzle', 'drizzle', 'drizzle'] });
   assert.deepEqual(parseWeatherInput('rain'), { mode: 'fixed', states: ['rain', 'rain', 'rain'] });
   assert.deepEqual(parseWeatherInput('storm, cloudy ,clear'), { mode: 'fixed', states: ['storm', 'cloudy', 'clear'] });
-  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, cloudy, drizzle, rain, storm/);
+  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, partly, cloudy, drizzle, rain, storm/);
   assert.throws(() => parseWeatherInput('rain,clear'), /one state per place/);
 });
 
@@ -78,7 +79,7 @@ test('network and server errors are retried once; other failures say what went w
     return answer([reading(1)]);
   };
   const one = [JALISCO_PLACES[0]];
-  assert.equal((await fetchWeather({ places: one, fetchImpl: flaky, retryDelay: 0 })).places[0].state, 'clear');
+  assert.equal((await fetchWeather({ places: one, fetchImpl: flaky, retryDelay: 0 })).places[0].state, 'partly');
   assert.equal(calls, 2);
 
   const down = async () => answer('busy', 503);
