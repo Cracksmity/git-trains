@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws eight states (`clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws nine states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -30,7 +30,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
 | [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
-| [Heat](#heat) | WMO 0–2 and 32 °C or more | `clear` or `partly` | Heat shimmer over the Tequila agave field |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
 | [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
@@ -50,22 +49,6 @@ Art:
 Use dithered edges (the 25/50/75% pattern of src/scene/sky.js) rather than translucency, so the pixel art stays crisp. Fog does not move, or drifts with the existing cloud loop.
 
 Done when: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` looks right in both themes, and `npm run check` passes.
-```
-
-### Heat
-
-```text
-In git-trains, add a "heat" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO code 0, 1 or 2 with temperature_2m at 32 °C or more.
-
-Art, mostly in Tequila:
-- Heat shimmer: a 2-row band just above the agave field horizon. A few horizon pixels shift one pixel left and right in a slow step-end loop (two alternating grids, as the stars twinkle in src/scene/sky.js). It stops with prefers-reduced-motion.
-- Washed-out sky: the upper sky bands of the three places blend toward a pale warm tone in the light theme. In the dark theme, a warmer night haze.
-- Guadalajara: the sun's rays grow one pixel.
-Keep the effect subtle: the agave must stay recognisable.
-
-Done when: the shimmer loops seamlessly and the scene still reads at README size, and `npm run check` passes.
 ```
 
 ### Snow

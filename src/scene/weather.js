@@ -6,6 +6,7 @@ import { Grid, rng } from '../graphics/pixel.js';
 import { BALLAST, GY0, PITCH } from './layout.js';
 import { WEATHER_THEMES, skyInk, skyState } from '../weather/inks.js';
 import { hailLayers } from './weather-hail.js';
+import { heatSky } from './weather-heat.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
 import { placesFor } from '../weather/places.js';
 
@@ -274,6 +275,11 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
     const state = weather[band.k];
     const art = PLACE_ART[places[band.k]?.id];
     if (!state || state === 'clear' || !art) return;
+    if (state === 'heat') {
+      layers.push(...heatSky(band, backdrop));
+      if (art.heat) layers.push(...art.heat(band, backdrop));
+      return;
+    }
     if (state === 'partly') {
       layers.push(partlyClouds(art.partly, band, backdrop, W));
       return;

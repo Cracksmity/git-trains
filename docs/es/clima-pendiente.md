@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja ocho estados (`clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja nueve estados (`clear`, `frost`, `heat`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -30,7 +30,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
 | [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
-| [Calor](#calor) | WMO 0–2 con 32 °C o más | `clear` o `partly` | El aire que vibra sobre el agave de Tequila |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
 | [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
 | [Calima](#calima) | Mala calidad del aire (PM2.5) | Nada | Una capa café sobre Guadalajara en días de contingencia |
@@ -50,22 +49,6 @@ Arte:
 Usa bordes tramados (el patrón 25/50/75 % de src/scene/sky.js) en vez de transparencias, para que el pixel art siga nítido. La neblina no se mueve, o se desliza con el ciclo de nubes que ya existe.
 
 Listo cuando: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` se ve bien en los dos temas y `npm run check` pasa.
-```
-
-### Calor
-
-```text
-En git-trains, agrega el estado de clima "heat" (calor) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: código WMO 0, 1 o 2 con temperature_2m de 32 °C o más.
-
-Arte, sobre todo en Tequila:
-- El aire que vibra: una franja de 2 filas justo encima del horizonte del campo de agave. Algunos píxeles del horizonte se mueven un píxel a la izquierda y a la derecha en un ciclo lento step-end (dos cuadrículas que se alternan, como el parpadeo de las estrellas en src/scene/sky.js). Se detiene con prefers-reduced-motion.
-- Cielo deslavado: las bandas altas del cielo de los tres lugares se acercan a un tono cálido pálido en el tema claro. En el oscuro, una bruma nocturna más cálida.
-- Guadalajara: los rayos del sol crecen un píxel.
-Mantén el efecto discreto: el agave debe seguir reconociéndose.
-
-Listo cuando: la vibración hace un ciclo sin costura, la escena se lee a tamaño README y `npm run check` pasa.
 ```
 
 ### Nieve

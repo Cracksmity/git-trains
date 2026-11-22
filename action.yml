@@ -49,7 +49,7 @@ inputs:
     description: "north or south: which hemisphere the seasons follow (spring in the south is September to November). Holidays keep their dates."
     default: north
   weather:
-    description: "Weather for skylines with real places behind their tracks (jalisco: Guadalajara, Los Altos and Tequila). off keeps the scene as it is. live reads the current weather from Open-Meteo when the Action runs; run it every few hours to keep it current. clear, frost, partly, cloudy, drizzle, rain, storm or hail fixes it for every place, or give one per place separated by commas. In Jalisco the weather replaces the seasonal snow, blossom and leaves; holidays stay."
+    description: "Weather for skylines with real places behind their tracks (jalisco: Guadalajara, Los Altos and Tequila). off keeps the scene as it is. live reads the current weather from Open-Meteo when the Action runs; run it every few hours to keep it current. clear, frost, heat, partly, cloudy, drizzle, rain, storm or hail fixes it for every place, or give one per place separated by commas. In Jalisco the weather replaces the seasonal snow, blossom and leaves; holidays stay."
     default: "off"
   calendar:
     description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."

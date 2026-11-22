@@ -322,3 +322,64 @@ function sceneContext(scene) {
   const H = 204;
   return { W: SCENE_W, H, tracks, skyline: scene.skyline, backdrop: paintBackdrop(SCENE_W, H, tracks, scene.user, scene.skyline) };
 }
+
+test('heat warms the sky behind the landmarks and extends all eight daytime rays by one pixel', () => {
+  const weather = ['heat', 'heat', 'heat'];
+  const context = sceneContext(spec({ weather }));
+  const layers = weatherArt(weather, context);
+  const washes = layers.filter(({ grid }) => grid.cells.includes('@wHeatHaze'));
+  assert.deepEqual(washes.map(({ z, y }) => [z, y]), [['sky', 0], ['ground', 100], ['ground', 152]]);
+  for (const { grid, y: top } of washes.slice(1)) {
+    for (let y = 0; y < grid.h; y++) {
+      for (let x = 0; x < grid.w; x++) {
+        if (grid.get(x, y)) assert.ok(['@dusk', '@haze', '@starlight'].includes(context.backdrop.get(x, top + y)));
+      }
+    }
+  }
+
+  for (const theme of ['light', 'dark']) {
+    const scene = rasterScene(spec({ weather }), theme);
+    scene.trains = [];
+    const hot = renderFrame(scene, 0);
+    const clear = renderFrame({ ...scene, weather: [] }, 0);
+    const withoutRays = renderFrame({ ...scene, weather: scene.weather.filter(({ grid }) => !grid.cells.includes('@rays')) }, 0);
+    const pixel = (frame, x, y) => frame.px.slice((y * frame.w + x) * 3, (y * frame.w + x) * 3 + 3);
+    for (const [x, y] of [[0, 0], [0, 100], [0, 152]]) assert.notDeepEqual(pixel(hot, x, y), pixel(clear, x, y));
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (!dx && !dy) continue;
+        const r = dx && dy ? 8 : 11;
+        const x = SCENE_W - 56 + dx * r;
+        const y = 20 + dy * r;
+        const expected = theme === 'light' ? Uint8Array.from(scene.color('@rays').slice(0, 3)) : pixel(withoutRays, x, y);
+        assert.deepEqual(pixel(hot, x, y), expected);
+        assert.deepEqual(pixel(hot, x + dx, y + dy), pixel(withoutRays, x + dx, y + dy));
+      }
+    }
+  }
+});
+
+test('the heat shimmer shifts only two Tequila horizon rows, then returns to its first pose', () => {
+  const weather = ['clear', 'clear', 'heat'];
+  const scene = rasterScene(spec({ weather }), 'light');
+  scene.trains = [];
+  const band = weatherBands(3)[2];
+  const { W } = scene.plan;
+  const top = band.base - 24;
+  const strip = (t) => renderFrame(scene, t).px.subarray(3 * W * band.top);
+  const start = strip(0);
+  assert.deepEqual(strip(1.19), start);
+  assert.deepEqual(strip(2.4), start);
+  const next = strip(1.2);
+  const changedRows = new Set();
+  let count = 0;
+  for (let i = 0; i < start.length; i += 3) {
+    if (start[i] === next[i] && start[i + 1] === next[i + 1] && start[i + 2] === next[i + 2]) continue;
+    changedRows.add(band.top + Math.floor(i / (3 * W)));
+    assert.deepEqual(next.subarray(i, i + 3), start.subarray(i + 3, i + 6), 'the edge moves left by one pixel');
+    count++;
+  }
+  assert.deepEqual([...changedRows], [top, top + 1]);
+  assert.ok(count < W / 10, 'only scattered edges shimmer');
+  assert.match(svg({ weather }), /prefers-reduced-motion:reduce\)\{\.w-fall\d+,\.w-fall\d+\{animation:none!important\}/);
+});

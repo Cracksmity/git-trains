@@ -5,6 +5,7 @@
 import { skyInk, skyState } from '../weather/inks.js';
 import { altosFrost, cityFrost, tequilaFrost } from './jalisco-weather-frost.js';
 import { cityHail, fieldHail } from './jalisco-weather-hail.js';
+import { tequilaShimmer } from './jalisco-weather-heat.js';
 
 const wet = (state) => state === 'drizzle' || state === 'rain' || state === 'storm';
 const heavy = (state) => state === 'rain' || state === 'storm';
@@ -115,7 +116,7 @@ function tequila(g, state, band, backdrop) {
 /**
  * Each scattered bank has a left edge, base row, width and crown radii.
  * Banks and bolts use rows from the top of the place's strip.
- * @type {Record<string, { paint: Function, bolt: { x: number, from: number, to: number }, partly: Array<[number, number, number, number[]]> }>}
+ * @type {Record<string, { paint: Function, heat?: typeof tequilaShimmer, bolt: { x: number, from: number, to: number }, partly: Array<[number, number, number, number[]]> }>}
  */
 export const JALISCO_WEATHER = {
   guadalajara: {
@@ -131,7 +132,7 @@ export const JALISCO_WEATHER = {
     partly: [[61, 11, 29, [1, 2, 3, 3, 2, 1]], [257, 6, 33, [2, 3, 2, 3, 2, 2]]],
   },
   tequila: {
-    paint: tequila, bolt: { x: 62, from: 3, to: 24 },
+    paint: tequila, heat: tequilaShimmer, bolt: { x: 62, from: 3, to: 24 },
     partly: [[84, 9, 34, [2, 3, 3, 2, 3, 2]], [326, 7, 26, [1, 2, 3, 2, 1]]],
   },
 };

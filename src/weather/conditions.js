@@ -2,16 +2,16 @@
 // Only the classification and the input format live here; src/scene/weather.js draws it.
 
 /** The weather states the scenes know how to draw, from calm to wild. */
-export const WEATHER_STATES = ['clear', 'frost', 'partly', 'cloudy', 'drizzle', 'rain', 'storm', 'hail'];
+export const WEATHER_STATES = ['clear', 'frost', 'heat', 'partly', 'cloudy', 'drizzle', 'rain', 'storm', 'hail'];
 
 /** The name of each state in the scene's accessible title. */
 export const WEATHER_NAMES = {
-  en: { clear: 'clear', frost: 'frost', partly: 'partly cloudy', cloudy: 'cloudy', drizzle: 'drizzle', rain: 'rain', storm: 'storm', hail: 'hail' },
-  es: { clear: 'despejado', frost: 'helada', partly: 'medio nublado', cloudy: 'nublado', drizzle: 'llovizna', rain: 'lluvia', storm: 'tormenta', hail: 'granizo' },
+  en: { clear: 'clear', frost: 'frost', heat: 'heat', partly: 'partly cloudy', cloudy: 'cloudy', drizzle: 'drizzle', rain: 'rain', storm: 'storm', hail: 'hail' },
+  es: { clear: 'despejado', frost: 'helada', heat: 'calor', partly: 'medio nublado', cloudy: 'nublado', drizzle: 'llovizna', rain: 'lluvia', storm: 'tormenta', hail: 'granizo' },
 };
 
 // WMO weather interpretation codes, as Open-Meteo reports them. Clear/partly codes
-// at 2 °C or less become frost in readCurrentWeather; fog and snow still borrow
+// can become frost or heat in readCurrentWeather. Fog and snow still borrow
 // the closest state (see docs/weather-backlog.md for the designs still to draw).
 const CODES = {
   clear: [0],
@@ -22,8 +22,8 @@ const CODES = {
   storm: [95],
   hail: [96, 99],
 };
-const FROST_CODES = new Set([0, 1, 2]);
 const FROST_MAX_C = 2;
+const HEAT_MIN_C = 32;
 const STATE_OF_CODE = new Map(Object.entries(CODES).flatMap(([state, codes]) => codes.map((code) => [code, state])));
 
 /**
@@ -67,9 +67,11 @@ export function readCurrentWeather(data, count) {
     const t = current.temperature_2m;
     const temperature = typeof t === 'number' && t >= -60 && t <= 60 ? t : null;
     if (temperature === null && t !== undefined) problems.push(`${where}: temperature_2m out of range`);
-    const state = baseState && temperature !== null && FROST_CODES.has(code) && temperature <= FROST_MAX_C
-      ? 'frost'
-      : baseState;
+    let state = baseState;
+    if (temperature !== null && (baseState === 'clear' || baseState === 'partly')) {
+      if (temperature <= FROST_MAX_C) state = 'frost';
+      else if (temperature >= HEAT_MIN_C) state = 'heat';
+    }
     return { state, code: state ? code : null, temperature };
   });
   return { places, problems };

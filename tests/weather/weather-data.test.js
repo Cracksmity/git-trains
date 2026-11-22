@@ -30,12 +30,13 @@ test('the weather input accepts off, live, one state or one per place', () => {
   assert.deepEqual(parseWeatherInput('off'), { mode: 'off' });
   assert.deepEqual(parseWeatherInput(' Live '), { mode: 'live' });
   assert.deepEqual(parseWeatherInput('frost'), { mode: 'fixed', states: ['frost', 'frost', 'frost'] });
+  assert.deepEqual(parseWeatherInput('heat'), { mode: 'fixed', states: ['heat', 'heat', 'heat'] });
   assert.deepEqual(parseWeatherInput('partly'), { mode: 'fixed', states: ['partly', 'partly', 'partly'] });
   assert.deepEqual(parseWeatherInput('drizzle'), { mode: 'fixed', states: ['drizzle', 'drizzle', 'drizzle'] });
   assert.deepEqual(parseWeatherInput('rain'), { mode: 'fixed', states: ['rain', 'rain', 'rain'] });
   assert.deepEqual(parseWeatherInput('hail'), { mode: 'fixed', states: ['hail', 'hail', 'hail'] });
   assert.deepEqual(parseWeatherInput('storm, cloudy ,clear'), { mode: 'fixed', states: ['storm', 'cloudy', 'clear'] });
-  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, frost, partly, cloudy, drizzle, rain, storm, hail/);
+  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, frost, heat, partly, cloudy, drizzle, rain, storm, hail/);
   assert.throws(() => parseWeatherInput('rain,clear'), /one state per place/);
 });
 
@@ -56,6 +57,19 @@ test('clear and partly codes become frost at 2 °C or less, while other codes ke
   // Overcast, precipitation and storm codes never turn into frost.
   for (const [code, temp, expected] of [[3, 0, 'cloudy'], [45, -1, 'cloudy'], [51, 1, 'drizzle'], [61, 1, 'rain'], [95, 0, 'storm'], [96, -2, 'hail']]) {
     assert.equal(read(code, temp), expected, `code ${code} at ${temp}°C`);
+  }
+});
+
+test('only clear and partly codes become heat, starting at 32 °C', () => {
+  const read = (code, temp) => readCurrentWeather(reading(code, temp), 1).places[0].state;
+  for (const code of [0, 1, 2]) {
+    assert.equal(read(code, 31.9), stateOfCode(code));
+    assert.equal(read(code, 32), 'heat');
+    assert.equal(read(code, 38), 'heat');
+    assert.equal(read(code, 61), stateOfCode(code));
+  }
+  for (const code of [3, 45, 51, 61, 71, 95, 96, 99, 100]) {
+    assert.equal(read(code, 35), stateOfCode(code));
   }
 });
 

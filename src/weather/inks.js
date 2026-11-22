@@ -18,8 +18,12 @@ const SKIES = {
 };
 // Per state: the four sky bands, then the cloud body, its shaded underside and its lit top.
 const SKY_NAMES = ['0', '1', '2', '3', 'Cloud', 'CloudShade', 'CloudLit'];
+const HEAT_DAY = 'rgba(255,232,193,0.44)';
 
 const SHARED = {
+  // Transparent warmth preserves the dither of the sky beneath it.
+  wHeatHaze: [HEAT_DAY, 'rgba(158,98,107,0.28)'],
+  wHeatDayHaze: [HEAT_DAY, 'rgba(0,0,0,0)'],
   // Scattered banks pick up the usual clouds' ivory by day and slate blue at night.
   wPartlyCloud: ['#dce6e0', '#35435f'],
   wPartlyCloudShade: ['#c5d4d2', '#2b3852'],
