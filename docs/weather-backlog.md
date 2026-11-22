@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws nine states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws ten states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -29,27 +29,10 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
-| [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
 | [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
 | [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
-
-### Fog
-
-```text
-In git-trains, add a "fog" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 45 and 48, which map to "cloudy" today in src/weather/conditions.js.
-
-Art:
-- Guadalajara: a pale fog band covering the lower city to about row 70. The tops of the Cathedral spires, the west-side towers and La Minerva come out of it. The distant ridge disappears.
-- Los Altos: fog lies in the low ground between the hills; the parish church tower and the mesquite crowns rise out of it. Keep the ranch roofs half visible.
-- Tequila: a fog bank over the far agave rows. The nearer rows stay clear, and only the volcano's summit shows above it.
-Use dithered edges (the 25/50/75% pattern of src/scene/sky.js) rather than translucency, so the pixel art stays crisp. Fog does not move, or drifts with the existing cloud loop.
-
-Done when: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` looks right in both themes, and `npm run check` passes.
-```
 
 ### Snow
 

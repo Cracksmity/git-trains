@@ -28,6 +28,9 @@ const SHARED = {
   wPartlyCloud: ['#dce6e0', '#35435f'],
   wPartlyCloudShade: ['#c5d4d2', '#2b3852'],
   wPartlyCloudLit: ['#f0f2e9', '#4a5874'],
+  // Fog: cool pale mist by day and dim slate-blue mist at night, layered with dithering.
+  wFog: ['#dfe6e4', '#515a72'],
+  wFogLight: ['#eef2ef', '#626b85'],
   // Rain streaks are translucent so they read over the sky and the buildings alike.
   wDrop: ['rgba(74,104,134,0.6)', 'rgba(176,196,240,0.55)'],
   wDropFar: ['rgba(74,104,134,0.35)', 'rgba(176,196,240,0.3)'],
@@ -61,7 +64,7 @@ function theme(index) {
 export const WEATHER_THEMES = { light: theme(0), dark: theme(1) };
 
 /** The cloud and sky palette shared by states with the same cloud cover. */
-export const skyState = (state) => ({ drizzle: 'cloudy', hail: 'storm' })[state] ?? state;
+export const skyState = (state) => ({ drizzle: 'cloudy', fog: 'cloudy', hail: 'storm' })[state] ?? state;
 
 /**
  * The ink of a state's sky band (0-3) or cloud part: '@wRain2', '@wStormCloudShade'...

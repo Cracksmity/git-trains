@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja nueve estados (`clear`, `frost`, `heat`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja diez estados (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -29,27 +29,10 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
-| [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
 | [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
 | [Calima](#calima) | Mala calidad del aire (PM2.5) | Nada | Una capa café sobre Guadalajara en días de contingencia |
 | [Temperatura en las leyendas](#temperatura-en-las-leyendas) | Cualquier lectura en vivo | Nada | "Tequila 20° / Rust 15%" |
-
-### Neblina
-
-```text
-En git-trains, agrega el estado de clima "fog" (neblina) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: códigos WMO 45 y 48, que hoy cuentan como "cloudy" en src/weather/conditions.js.
-
-Arte:
-- Guadalajara: una franja pálida de neblina cubre la parte baja de la ciudad hasta la fila 70, más o menos. Las puntas de las torres de la Catedral, las torres del poniente y La Minerva sobresalen. La loma del fondo desaparece.
-- Los Altos: la neblina se queda en lo bajo entre las lomas; la torre de la parroquia y las copas de los mezquites sobresalen. Los techos de los ranchos quedan medio visibles.
-- Tequila: un banco de neblina sobre las hileras lejanas de agave. Las hileras cercanas quedan despejadas, y sobre la neblina solo asoma la cumbre del volcán.
-Usa bordes tramados (el patrón 25/50/75 % de src/scene/sky.js) en vez de transparencias, para que el pixel art siga nítido. La neblina no se mueve, o se desliza con el ciclo de nubes que ya existe.
-
-Listo cuando: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` se ve bien en los dos temas y `npm run check` pasa.
-```
 
 ### Nieve
 
