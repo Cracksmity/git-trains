@@ -56,21 +56,26 @@ export function cityHail(g, band, backdrop) {
   }
 }
 
+// Share of furrow pixels and ballast stones that hold a grain. Kept low so a
+// field reads as hail lying in the furrows, not as snow over the whole field.
+const FIELD_GRAINS = 0.12;
+const BALLAST_GRAINS = 0.45;
+
 /** Grains settle in exposed furrows and lodge against stones in the ballast. */
 export function fieldHail(g, band, backdrop, furrow) {
   const rand = rng(6371 + band.k);
   for (let y = band.top; y < band.base; y++) {
     for (let x = 0; x < g.w; x++) {
-      if (backdrop.get(x, y) === furrow && rand() < 0.42) {
+      if (backdrop.get(x, y) === furrow && rand() < FIELD_GRAINS) {
         g.set(x, y, rand() < 0.65 ? '@wHail' : '@wHailShade');
       }
     }
   }
   for (let y = band.base + 6; y < band.bottom; y++) {
     for (let x = 0; x < g.w; x++) {
-      if (backdrop.get(x, y) !== '@ballast2') continue;
+      if (backdrop.get(x, y) !== '@ballast2' || rand() >= BALLAST_GRAINS) continue;
       g.set(x, y, '@wHail');
-      if (!backdrop.get(x + 1, y) && rand() < 0.7) g.set(x + 1, y, '@wHailShade');
+      if (!backdrop.get(x + 1, y) && rand() < 0.5) g.set(x + 1, y, '@wHailShade');
     }
   }
 }

@@ -287,7 +287,7 @@ test('heat warms the sky behind the landmarks and extends all eight daytime rays
   for (const { grid, y: top } of washes.slice(1)) {
     for (let y = 0; y < grid.h; y++) {
       for (let x = 0; x < grid.w; x++) {
-        if (grid.get(x, y)) assert.ok(['@dusk', '@haze', '@starlight'].includes(context.backdrop.get(x, top + y)));
+        if (grid.get(x, y)) assert.ok(['@dusk', '@haze', '@afterglow', '@starlight'].includes(context.backdrop.get(x, top + y)));
       }
     }
   }
