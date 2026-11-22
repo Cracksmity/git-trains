@@ -101,6 +101,8 @@ test('the title names each place with its weather in the scene language', () => 
   assert.match(spec({ weather: ['cloudy', 'drizzle', 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Los Altos llovizna, Tequila lluvia$/);
   assert.match(spec({ weather: ['partly', null, 'rain'], language: 'es' }).title, /\nClima: Guadalajara medio nublado, Tequila lluvia$/);
   assert.match(spec({ weather: ['hail', null, 'storm'], language: 'es' }).title, /\nClima: Guadalajara granizo, Tequila tormenta$/);
+  assert.match(spec({ weather: ['frost', 'frost', 'frost'] }).title, /\nWeather: Guadalajara frost, Los Altos frost, Tequila frost$/);
+  assert.match(spec({ weather: ['frost', 'frost', 'frost'], language: 'es' }).title, /\nClima: Guadalajara helada, Los Altos helada, Tequila helada$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);
@@ -269,6 +271,50 @@ test('hail banks rest on Guadalajara landmarks, rural furrows and ballast', () =
     assert.ok(field.every(([x, y]) => context.backdrop.get(x, y) === (k === 1 ? '@earthLit' : '@furrow')));
     assert.ok(grains[k].some(([x, y]) => context.backdrop.get(x, y) === '@ballast2'));
   }
+});
+
+test('frost keeps the sky clear and still, and only rims the plaza trees, Los Altos tops and wall, and agave tips', () => {
+  const weather = ['frost', 'frost', 'frost'];
+  const context = sceneContext(spec({ weather }));
+  const layers = weatherArt(weather, context);
+  assert.equal(layers.length, 3);
+  for (const layer of layers) {
+    assert.equal(layer.z, 'ground');
+    assert.equal(layer.y, 0);
+    assert.ok(!layer.fall && !layer.drift && !layer.blink, 'nothing moves in frost');
+  }
+  const out = svg({ weather });
+  assert.ok(!out.includes('w-fall') && !out.includes('w-flash'), 'no weather animations');
+  assert.ok(!out.includes('--wCloudy0:') && !out.includes('--wRain0:') && !out.includes('--wStorm0:'), 'clear sky stays untouched');
+
+  const pixelsOf = (grid) => grid.cells.flatMap((ink, i) => (ink ? [[i % grid.w, Math.floor(i / grid.w), ink]] : []));
+  const bands = weatherBands(3);
+  const { backdrop } = context;
+
+  // Guadalajara: frost only on the plaza trees' lit top row.
+  const gdl = pixelsOf(layers[0].grid);
+  assert.ok(gdl.length > 50);
+  assert.ok(gdl.every(([x, y, ink]) => y >= bands[0].top && y < bands[0].base && ink === '@wFrost' && backdrop.get(x, y) === '@foliageLit'));
+
+  // Los Altos: top pixels of grassland, pasture and tile roofs, plus thin white line on the stone wall.
+  const altos = pixelsOf(layers[1].grid);
+  const byBackdrop = (target) => altos.filter(([x, y]) => backdrop.get(x, y) === target);
+  assert.ok(byBackdrop('@grassland').length > 20, 'grassland ridge top');
+  assert.ok(byBackdrop('@pasture').length > 40, 'pasture ridge top');
+  const roofFrost = altos.filter(([x, y]) => backdrop.get(x, y) === '@tile' || backdrop.get(x, y) === '@tileLit');
+  let totalRoof = 0;
+  for (let y = bands[1].top; y < bands[1].base; y++) {
+    for (let x = 0; x < context.W; x++) if (backdrop.get(x, y) === '@tile' || backdrop.get(x, y) === '@tileLit') totalRoof++;
+  }
+  assert.ok(roofFrost.length > 40 && roofFrost.length < totalRoof / 3, 'frosts only the top pixel of roofs, not the whole surface');
+  const wallLine = altos.filter(([, , ink]) => ink === '@wFrostLine');
+  assert.ok(wallLine.length > context.W / 2, 'thin white line across the dry-stone wall');
+  assert.ok(wallLine.every(([x, y]) => backdrop.get(x, y) === '@stone' && backdrop.get(x, y + 1) === '@stoneShade'));
+
+  // Tequila: frosted agave tips only.
+  const teq = pixelsOf(layers[2].grid);
+  assert.ok(teq.length > 50);
+  assert.ok(teq.every(([x, y, ink]) => y >= bands[2].top && y < bands[2].base && ink === '@wFrost' && backdrop.get(x, y) === '@agaveLit'));
 });
 
 function sceneContext(scene) {

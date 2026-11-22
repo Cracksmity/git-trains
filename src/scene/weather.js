@@ -278,6 +278,12 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
       layers.push(partlyClouds(art.partly, band, backdrop, W));
       return;
     }
+    if (state === 'frost') {
+      const ground = new Grid(W, H);
+      art.paint(ground, state, band, backdrop);
+      if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
+      return;
+    }
     const sky = skyState(state);
     if (band.k === 0) {
       layers.push({ ...citySky(sky, W), z: 'sky', y: 0 });

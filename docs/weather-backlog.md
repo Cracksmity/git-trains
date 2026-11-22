@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws seven states (`clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws eight states (`clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -30,7 +30,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
 | [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
-| [Frost](#frost) | WMO 0–2 and 2 °C or less | `clear` or `partly` | White frost on the pasture and roofs of Los Altos |
 | [Heat](#heat) | WMO 0–2 and 32 °C or more | `clear` or `partly` | Heat shimmer over the Tequila agave field |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
@@ -51,23 +50,6 @@ Art:
 Use dithered edges (the 25/50/75% pattern of src/scene/sky.js) rather than translucency, so the pixel art stays crisp. Fog does not move, or drifts with the existing cloud loop.
 
 Done when: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` looks right in both themes, and `npm run check` passes.
-```
-
-### Frost
-
-```text
-In git-trains, add a "frost" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO code 0, 1 or 2 with temperature_2m at 2 °C or less. The request already asks for temperature_2m. Decide the state in src/weather/conditions.js from the code and the temperature together, and test the threshold.
-
-Art, mostly in Los Altos (frost is common on its winter mornings):
-- A pale blue-white tint on the tops of the pasture and grassland ridges and on the ranch roofs. Paint it on the top pixel of each surface by reading the backdrop grid; do not cover the whole surface.
-- A thin white line along the dry-stone wall.
-- Guadalajara: frost only on the plaza trees.
-- Tequila: frosted agave tips.
-The sky stays clear. Nothing moves.
-
-Done when: frost is visible but subtle in both themes, the threshold has tests, and `npm run check` passes.
 ```
 
 ### Heat

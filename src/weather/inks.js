@@ -39,6 +39,9 @@ const SHARED = {
   // Wet ground: water standing in furrows and plazas, shining tile roofs.
   wPuddle: ['#d3dfe5', '#7584bb'],
   wTileWet: ['#c27a5c', '#9a5f62'],
+  // Morning frost: pale blue-white rime on ridges, roofs and leaves, crisper on the stone wall.
+  wFrost: ['#cfe2ee', '#94b1ca'],
+  wFrostLine: ['#eef5f8', '#c2d4e6'],
 };
 
 function theme(index) {

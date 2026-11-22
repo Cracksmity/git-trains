@@ -14,7 +14,7 @@
 | `review-year` | año en curso | El año que muestra el póster (de 2008 al actual). Vacío: el año en curso hasta hoy, o el año que acaba de terminar en enero |
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](usage.md#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
-| `weather` | `off` | Para el skyline `jalisco`: `live` (el clima actual según Open-Meteo), `clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
+| `weather` | `off` | Para el skyline `jalisco`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
@@ -66,12 +66,13 @@ Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres pri
 La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather` al bloque `with`:
 
 - `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action. No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
-- `clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- `clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
 - `off`, el valor por defecto, deja la escena como está.
 
 | Estado | Guadalajara | Los Altos | Tequila |
 | --- | --- | --- | --- |
 | `clear` (despejado) | La escena de siempre | La escena de siempre | La escena de siempre |
+| `frost` (helada) | Cielo despejado con escarcha en los árboles de la plaza | Cielo despejado, escarcha blanco azulada en lo alto de las lomas de pasto y los techos de los ranchos, y una línea blanca delgada sobre la cerca de piedra | Cielo despejado con las puntas del agave escarchadas |
 | `partly` (medio nublado) | Tres bancos de nubes anchos y planos cruzan el cielo de siempre, con el sol o la luna a la vista en el primer cuadro | Dos bancos pequeños detrás de las lomas y la parroquia | Dos bancos pequeños, uno en parte oculto por el volcán |
 | `cloudy` (nublado) | Un techo de nubes con bancos que pasan sobre la ciudad | Un techo y bancos bajos detrás de las lomas | Una bufanda de nubes alrededor del volcán, con la cumbre asomando |
 | `drizzle` (llovizna) | El cielo nublado con gotas finas y escasas, una plaza mojada que refleja los faroles y algunos charcos en el balasto | Gotas finas, tejas que brillan y algunos charcos en el balasto | Gotas finas, la bufanda nublada alrededor del volcán y algunos charcos en el balasto |
@@ -83,6 +84,6 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 
 La imagen se dibuja cuando corre la Action, no cuando alguien abre el README. Para que el clima esté al día, programa el workflow cada pocas horas, por ejemplo `cron: "0 */3 * * *"`. GitHub puede retrasar unos minutos las ejecuciones programadas.
 
-Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear`, el 1 y el 2 a `partly` y el 3 a `cloudy`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La neblina cuenta como `cloudy` y la nieve como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
+Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear`, el 1 y el 2 a `partly` y el 3 a `cloudy`; los códigos 0 a 2 con 2 °C o menos corresponden a `frost`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La neblina cuenta como `cloudy` y la nieve como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
 
 En Jalisco el clima reemplaza la nieve, los pétalos y las hojas de cada estación; las fiestas se quedan. Los demás skylines conservan sus estaciones. Para cambiar esa regla, edita la lista `WEATHER_OVER_SEASONS` en [src/scene/weather.js](../../src/scene/weather.js).

@@ -29,13 +29,34 @@ test('the weather input accepts off, live, one state or one per place', () => {
   assert.deepEqual(parseWeatherInput(''), { mode: 'off' });
   assert.deepEqual(parseWeatherInput('off'), { mode: 'off' });
   assert.deepEqual(parseWeatherInput(' Live '), { mode: 'live' });
+  assert.deepEqual(parseWeatherInput('frost'), { mode: 'fixed', states: ['frost', 'frost', 'frost'] });
   assert.deepEqual(parseWeatherInput('partly'), { mode: 'fixed', states: ['partly', 'partly', 'partly'] });
   assert.deepEqual(parseWeatherInput('drizzle'), { mode: 'fixed', states: ['drizzle', 'drizzle', 'drizzle'] });
   assert.deepEqual(parseWeatherInput('rain'), { mode: 'fixed', states: ['rain', 'rain', 'rain'] });
   assert.deepEqual(parseWeatherInput('hail'), { mode: 'fixed', states: ['hail', 'hail', 'hail'] });
   assert.deepEqual(parseWeatherInput('storm, cloudy ,clear'), { mode: 'fixed', states: ['storm', 'cloudy', 'clear'] });
-  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, partly, cloudy, drizzle, rain, storm, hail/);
+  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, frost, partly, cloudy, drizzle, rain, storm, hail/);
   assert.throws(() => parseWeatherInput('rain,clear'), /one state per place/);
+});
+
+test('clear and partly codes become frost at 2 °C or less, while other codes keep their state', () => {
+  const read = (code, temp) => readCurrentWeather(reading(code, temp), 1).places[0].state;
+  for (const code of [0, 1, 2]) {
+    for (const temp of [2, 1, 0, -2, -4]) assert.equal(read(code, temp), 'frost', `code ${code} at ${temp}°C`);
+  }
+  for (const temp of [2.1, 3, 20]) {
+    assert.equal(read(0, temp), 'clear', `code 0 at ${temp}°C`);
+    assert.equal(read(1, temp), 'partly', `code 1 at ${temp}°C`);
+    assert.equal(read(2, temp), 'partly', `code 2 at ${temp}°C`);
+  }
+  // Missing or out-of-range temperature falls back to the code's own state.
+  assert.equal(readCurrentWeather({ current: { weather_code: 0 } }, 1).places[0].state, 'clear');
+  assert.equal(readCurrentWeather({ current: { weather_code: 1 } }, 1).places[0].state, 'partly');
+  assert.equal(read(0, -99), 'clear');
+  // Overcast, precipitation and storm codes never turn into frost.
+  for (const [code, temp, expected] of [[3, 0, 'cloudy'], [45, -1, 'cloudy'], [51, 1, 'drizzle'], [61, 1, 'rain'], [95, 0, 'storm'], [96, -2, 'hail']]) {
+    assert.equal(read(code, temp), expected, `code ${code} at ${temp}°C`);
+  }
 });
 
 test('a reading is checked field by field and a bad place does not spoil the others', () => {

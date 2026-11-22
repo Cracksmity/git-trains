@@ -3,6 +3,7 @@
 // where each place's lightning strikes. src/scene/weather.js adds the sky,
 // the rain and the flashes; these painters only touch the ground they own.
 import { skyInk, skyState } from '../weather/inks.js';
+import { altosFrost, cityFrost, tequilaFrost } from './jalisco-weather-frost.js';
 import { cityHail, fieldHail } from './jalisco-weather-hail.js';
 
 const wet = (state) => state === 'drizzle' || state === 'rain' || state === 'storm';
@@ -49,6 +50,7 @@ function lens(g, cx, top, rows, state) {
  * red sign; the plaza in front of the Cathedral shines with rain and the lamps reflect in it.
  */
 function guadalajara(g, state, band, backdrop) {
+  if (state === 'frost') return cityFrost(g, band, backdrop);
   const sky = skyState(state);
   if (heavy(sky)) lens(g, 340, band.base - 61, sky === 'storm' ? [9, 15, 13] : [7, 12, 9], sky);
   if (state === 'hail') return cityHail(g, band, backdrop);
@@ -61,6 +63,7 @@ function guadalajara(g, state, band, backdrop) {
 
 /** Los Altos: the tile roofs shine and, in rain, the furrows of red earth hold water. */
 function altos(g, state, band, backdrop) {
+  if (state === 'frost') return altosFrost(g, band, backdrop);
   if (state === 'hail') return fieldHail(g, band, backdrop, '@earthLit');
   if (!wet(state)) return;
   recolor(g, backdrop, band, { '@tileLit': '@wTileWet' });
@@ -93,6 +96,7 @@ function scarf(g, backdrop, top, trails, state) {
  * thicker and lower in heavier weather. In rain water lines the nearer furrows.
  */
 function tequila(g, state, band, backdrop) {
+  if (state === 'frost') return tequilaFrost(g, band, backdrop);
   const peak = band.base - 38;
   const sky = skyState(state);
   const trails = {

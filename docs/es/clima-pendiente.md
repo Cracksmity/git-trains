@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja siete estados (`clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja ocho estados (`clear`, `frost`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -30,7 +30,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
 | [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
-| [Helada](#helada) | WMO 0–2 con 2 °C o menos | `clear` o `partly` | Escarcha blanca en el pasto y los techos de Los Altos |
 | [Calor](#calor) | WMO 0–2 con 32 °C o más | `clear` o `partly` | El aire que vibra sobre el agave de Tequila |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
 | [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
@@ -51,23 +50,6 @@ Arte:
 Usa bordes tramados (el patrón 25/50/75 % de src/scene/sky.js) en vez de transparencias, para que el pixel art siga nítido. La neblina no se mueve, o se desliza con el ciclo de nubes que ya existe.
 
 Listo cuando: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` se ve bien en los dos temas y `npm run check` pasa.
-```
-
-### Helada
-
-```text
-En git-trains, agrega el estado de clima "frost" (helada) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: código WMO 0, 1 o 2 con temperature_2m de 2 °C o menos. La consulta ya pide temperature_2m. Decide el estado en src/weather/conditions.js con el código y la temperatura juntos, y prueba el umbral.
-
-Arte, sobre todo en Los Altos (donde la helada es común en las mañanas de invierno):
-- Un tono blanco azulado y pálido en la parte alta de las lomas de pasto y en los techos de los ranchos. Píntalo sobre el píxel de arriba de cada superficie leyendo la cuadrícula del fondo; no cubras toda la superficie.
-- Una línea blanca delgada sobre la cerca de piedra.
-- Guadalajara: escarcha solo en los árboles de la plaza.
-- Tequila: las puntas del agave escarchadas.
-El cielo sigue despejado. Nada se mueve.
-
-Listo cuando: la helada se ve, pero discreta, en los dos temas, el umbral tiene pruebas y `npm run check` pasa.
 ```
 
 ### Calor
