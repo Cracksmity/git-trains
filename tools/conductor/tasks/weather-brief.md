@@ -1,10 +1,13 @@
-# Brief: a new weather state for the Jalisco scene
+# Brief: a new weather design for the Jalisco scene
 
-git-trains draws a GitHub profile as an animated pixel-art SVG of trains. Its `jalisco` scene has three strips, one per track: **Guadalajara** (the city: Cathedral, Teatro Degollado, Hospicio Cabañas, Estadio Jalisco, La Minerva, three west-side towers), **Los Altos** (red-earth parcels, ranches, a parish church, a dry-stone wall) and **Tequila** (blue agave in furrows below the Volcán de Tequila). The `weather` input draws each place's weather. Four states are done and approved: `clear`, `cloudy`, `rain` and `storm`. You add one more.
+git-trains draws a GitHub profile as an animated pixel-art SVG of trains. Its `jalisco` scene has three strips, one per track: **Guadalajara** (the city: Cathedral, Teatro Degollado, Hospicio Cabañas, Estadio Jalisco, La Minerva, three west-side towers), **Los Altos** (red-earth parcels, ranches, a parish church, a dry-stone wall) and **Tequila** (blue agave in furrows below the Volcán de Tequila). The `weather` input draws each place's weather. Ten states are done and approved: `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` and `hail`. You add one more design: a state, a modifier that combines with the states, or a detail of the captions. Your task says which.
 
 ## Read first
 
-- `src/weather/conditions.js`: `WEATHER_STATES`, `WEATHER_NAMES` (English and Spanish), the WMO `CODES` table, `readCurrentWeather` (reads Open-Meteo `current.weather_code` and `current.temperature_2m`) and `parseWeatherInput`.
+- `src/weather/conditions.js`: `WEATHER_STATES`, `WEATHER_NAMES` (English and Spanish), the WMO `CODES` table, `readCurrentWeather` (reads Open-Meteo `current.weather_code` and `current.temperature_2m`), `parseWeatherInput`, and the `PlaceSky` entries (`placeSky`, `skyOfReading`).
+  - A scene's weather has one entry per place: a state name (`'rain'`) from a fixed input, or a `PlaceSky` object such as `{ state: 'rain', temperature: 18.2 }` from a live reading.
+  - `buildSpec` keeps the states in `spec.weather` and the whole entries in `spec.sky`. `weatherArt` receives them as `scene.sky`, so a design that needs more than the state reads `scene.sky[band.k]`.
+  - A design that adds a field to the entries (wind, haze) documents it in the `PlaceSky` typedef.
 - `src/weather/inks.js`: every weather ink, with a light and a dark value. `skyInk(state, part)` builds a state's sky and cloud ink names; the `SKIES` table holds them.
 - `src/scene/weather.js`: the layers.
   - `weatherArt` returns a list of layers.
@@ -19,7 +22,9 @@ git-trains draws a GitHub profile as an animated pixel-art SVG of trains. Its `j
 - `tests/weather/`: the existing tests.
 - `docs/reference.md`, section "Weather", and `docs/es/reference.md`, section "Clima".
 
-## What a new state needs
+## What a new design needs
+
+A state follows every step below. A modifier or a caption detail follows the steps that apply to it; its task says what changes.
 
 1. **Data.** In `src/weather/conditions.js`:
    - Add the state to `WEATHER_STATES`, in calm-to-wild order, and to both languages of `WEATHER_NAMES`.
@@ -38,7 +43,7 @@ git-trains draws a GitHub profile as an animated pixel-art SVG of trains. Its `j
 
 ## Rules
 
-- **Leave the four approved states exactly as they are.** A gate compares their scenes byte for byte. Add to the shared code; do not restyle it.
+- **Leave the approved designs exactly as they are.** A gate (`tools/conductor/gates/weather-unchanged.js`) renders every existing scene with the code you started from and with yours, and compares them byte for byte. Add to the shared code; do not restyle it.
 - **Deterministic output.** Use `rng(seed)` from `src/graphics/pixel.js` with a fixed seed, never `Math.random` or the clock.
 - **Pixel art.** Use crisp pixels on the scene grid and dithering rather than blur. Translucent inks are allowed sparingly, as the rain veil shows.
 - **Everything rests on something.** Nothing floats, and the landmarks must stay recognisable to someone from Guadalajara.

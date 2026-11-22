@@ -22,6 +22,12 @@ const HEAT_DAY = 'rgba(255,226,180,0.5)';
 const HEAT_DAY_LOW = 'rgba(255,206,146,0.58)';
 
 const SHARED = {
+  // Guadalajara's suspended dust looks tawny by day and catches amber streetlight at night.
+  wHazeThin: ['rgba(185,149,115,0.28)', 'rgba(174,109,76,0.25)'],
+  wHaze: ['rgba(185,149,115,0.50)', 'rgba(174,109,76,0.42)'],
+  wHazeLow: ['rgba(185,149,115,0.70)', 'rgba(174,109,76,0.58)'],
+  // Loose red earth above the plowed parcels of Los Altos.
+  wDust: ['rgba(193,112,78,0.85)', 'rgba(153,89,81,0.8)'],
   // Transparent warmth preserves the dither of the sky beneath it.
   // The haze thickens toward the horizon, where hot air bleaches the sky most.
   wHeatHaze: [HEAT_DAY, 'rgba(158,98,107,0.28)'],
@@ -55,6 +61,10 @@ const SHARED = {
   // Morning frost: pale blue-white rime on ridges, roofs and leaves, crisper on the stone wall.
   wFrost: ['#cfe2ee', '#94b1ca'],
   wFrostLine: ['#eef5f8', '#c2d4e6'],
+  // Rare snowfall: crisp white snow, soft cool shadow and icy far flakes that read over bright clouds.
+  wSnow: ['#f8fcff', '#dce9f8'],
+  wSnowShade: ['#c8dce8', '#92aecb'],
+  wSnowIce: ['#7fa6c2', '#8fb4d8'],
 };
 
 function theme(index) {
@@ -70,7 +80,7 @@ function theme(index) {
 export const WEATHER_THEMES = { light: theme(0), dark: theme(1) };
 
 /** The cloud and sky palette shared by states with the same cloud cover. */
-export const skyState = (state) => ({ drizzle: 'cloudy', fog: 'cloudy', hail: 'storm' })[state] ?? state;
+export const skyState = (state) => ({ drizzle: 'cloudy', fog: 'cloudy', snow: 'cloudy', hail: 'storm' })[state] ?? state;
 
 /**
  * The ink of a state's sky band (0-3) or cloud part: '@wRain2', '@wStormCloudShade'...

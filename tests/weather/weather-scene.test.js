@@ -102,9 +102,51 @@ test('the title names each place with its weather in the scene language', () => 
   assert.match(spec({ weather: ['hail', null, 'storm'], language: 'es' }).title, /\nClima: Guadalajara granizo, Tequila tormenta$/);
   assert.match(spec({ weather: ['frost', 'frost', 'frost'] }).title, /\nWeather: Guadalajara frost, Los Altos frost, Tequila frost$/);
   assert.match(spec({ weather: ['frost', 'frost', 'frost'], language: 'es' }).title, /\nClima: Guadalajara helada, Los Altos helada, Tequila helada$/);
+  assert.match(spec({ weather: ['snow', 'snow', 'snow'] }).title, /\nWeather: Guadalajara snow, Los Altos snow, Tequila snow$/);
+  assert.match(spec({ weather: ['snow', 'snow', 'snow'], language: 'es' }).title, /\nClima: Guadalajara nieve, Los Altos nieve, Tequila nieve$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);
+});
+
+test('a place takes a state name or a reading with extras, keeping its own copy in sky', () => {
+  const live = [{ state: 'cloudy', temperature: 19.8 }, null, { state: 'storm', temperature: 22.4, gust: 1 }];
+  const scene = spec({ weather: live });
+  assert.deepEqual(scene.weather, ['cloudy', null, 'storm']);
+  assert.deepEqual(scene.sky, [{ state: 'cloudy', temperature: 19.8 }, null, { state: 'storm', temperature: 22.4, gust: 1 }]);
+  assert.notEqual(scene.sky[0], live[0], 'the spec keeps its own copy');
+  assert.equal(svg({ weather: [{ state: 'cloudy', gust: 1 }, null, { state: 'storm', temperature: null }] }), svg({ weather: ['cloudy', null, 'storm'] }));
+  assert.notEqual(svg({ weather: live }), svg({ weather: ['cloudy', null, 'storm'] }), 'live temperatures appear in the captions');
+  assert.deepEqual(spec({ weather: ['rain', { state: 'sleet' }, 7] }).weather, ['rain', null, null]);
+  assert.deepEqual(spec({ weather: ['rain', 'rain', 'rain'] }).sky, [{ state: 'rain' }, { state: 'rain' }, { state: 'rain' }]);
+});
+
+test('live weather shows each place temperature in Jalisco captions, rounded with no -0°', () => {
+  const live = [
+    { state: 'cloudy', temperature: 19.8 },
+    { state: 'rain', temperature: -2.6 },
+    { state: 'storm', temperature: -0.4 },
+  ];
+  const plain = spec({ weather: ['cloudy', 'rain', 'storm'] }).tracks.map((t) => t.caption);
+  const shown = spec({ weather: live }).tracks.map((t) => t.caption);
+  assert.deepEqual(shown, [
+    plain[0].replace('Guadalajara / ', 'Guadalajara 20° / '),
+    plain[1].replace('Los Altos / ', 'Los Altos -3° / '),
+    plain[2].replace('Tequila / ', 'Tequila 0° / '),
+  ]);
+  assert.deepEqual(spec({ weather: live, language: 'es' }).tracks.map((t) => t.caption), shown);
+  assert.equal(spec({ weather: [{ state: 'frost', temperature: 0 }, { state: 'frost', temperature: -0.5 }, { state: 'frost', temperature: -0.6 }] }).tracks.map((t) => t.caption.split(' / ')[0]).join(', '), 'Guadalajara 0°, Los Altos 0°, Tequila -1°');
+  const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: live });
+  assert.match(single.tracks[0].caption, /^Guadalajara 20° \/ TypeScript - \d+$/);
+
+  const missing = spec({ weather: [{ state: 'cloudy', temperature: null }, { state: 'rain' }, { state: 'storm', temperature: Number.NaN }] }).tracks.map((t) => t.caption);
+  assert.deepEqual(missing, plain);
+  assert.deepEqual(plain, spec({ weather: null }).tracks.map((t) => t.caption));
+
+  const longStats = { ...sampleStats(), languages: [{ name: 'Jupyter Notebook', color: '#DA5B0B', bytes: 100, share: 1 }] };
+  const longScene = buildSpec(longStats, { train: 'jalisco', skyline: jalisco, mode: 'single', weather: [{ state: 'frost', temperature: -12.4 }] });
+  assert.match(longScene.tracks[0].caption, /^Guadalajara -12° \/ Jupyter Notebook - \d+$/);
+  assert.doesNotThrow(() => renderScene(longScene));
 });
 
 function sceneContext(scene) {

@@ -6,10 +6,20 @@ import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
 import { UNLOCK_IDS, unlockThreshold } from '../activity/unlocks.js';
-import { WEATHER_NAMES, WEATHER_STATES } from '../weather/conditions.js';
+import { WEATHER_MODIFIERS, WEATHER_NAMES, placeSky, showsHaze } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+/**
+ * Rounded Celsius reading for a caption (never "-0°"), or empty when missing.
+ * @param {number | null | undefined} temperature
+ * @returns {string}
+ */
+function formatTemperature(temperature) {
+  if (typeof temperature !== 'number' || !Number.isFinite(temperature)) return '';
+  return `${Math.round(temperature) || 0}°`;
+}
 
 export const MODES = ['single', 'multi'];
 export const LANGUAGES = ['en', 'es'];
@@ -27,6 +37,8 @@ const TEXT = {
       mail: (n) => `Mail car unlocked: ${n}+ pull requests`,
     },
     weather: 'Weather',
+    modifiers: { wind: 'wind', haze: 'haze' },
+    withModifiers: (words) => ` with ${words.join(' and ')}`,
   },
   es: {
     label: 'RACHA',
@@ -39,6 +51,8 @@ const TEXT = {
       mail: (n) => `Vagón postal desbloqueado: más de ${n} pull requests`,
     },
     weather: 'Clima',
+    modifiers: { wind: 'viento', haze: 'calima' },
+    withModifiers: (words) => ` con ${words.join(' y ')}`,
   },
 };
 
@@ -53,8 +67,9 @@ const TEXT = {
 // opts.unlock: the special car the profile earned (see unlocks.js), or null. It joins the
 //   main train right behind the cab and adds a line to the title. Next to a full-length
 //   train it takes the place of the last regular car, so the train still fits the scene.
-// opts.weather: one weather state per track (see src/weather/conditions.js), or null. Only
-//   skylines with real places behind their tracks (the jalisco preset) wear it; the title names it.
+// opts.weather: one weather entry per track, a state name or a PlaceSky with a live reading's
+//   extras (see src/weather/conditions.js), or null. Only skylines with real places behind
+//   their tracks (the jalisco preset) wear it; the title names it.
 export function buildSpec(stats, opts = {}) {
   const { train = 'auto', mode = 'single', theme = 'auto', language = 'en', scale = 2, skyline = null } = opts;
   const unlock = opts.unlock ?? null;
@@ -90,12 +105,15 @@ export function buildSpec(stats, opts = {}) {
   }));
 
   const places = placesFor(skyline);
+  // The art reads the states; the designs that need a reading's extras read `sky`.
+  const sky = places && Array.isArray(opts.weather) ? tracks.map((_, i) => placeSky(opts.weather[i])) : null;
   if (jalisco) {
     tracks.forEach((track, i) => {
       track.model = JALISCO_TRAINS[i];
-      // Every caption reads "place / language %"; the regional trains carry no
-      // LED sign, so the streak hangs on a plaque beneath the station sign.
-      const place = skyline?.preset === 'jalisco' ? `${places[i].name} / ` : '';
+      // Every caption reads "place / language %" (with the rounded temperature for live readings);
+      // the regional trains carry no LED sign, so the streak hangs on a plaque beneath the station sign.
+      const temp = formatTemperature(sky?.[i]?.temperature);
+      const place = skyline?.preset === 'jalisco' ? `${places[i].name}${temp ? ` ${temp}` : ''} / ` : '';
       track.caption = place + track.caption;
     });
     tracks[0].plaque = `${label} ${stats.streak} ${text.days(stats.streak)}`;
@@ -108,13 +126,16 @@ export function buildSpec(stats, opts = {}) {
     while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
   }
 
-  const weather = places && Array.isArray(opts.weather)
-    ? tracks.map((_, i) => (WEATHER_STATES.includes(opts.weather[i]) ? opts.weather[i] : null))
-    : null;
+  const weather = sky ? sky.map((place) => place?.state ?? null) : null;
   const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
-  const forecast = weather?.some(Boolean)
-    ? `${text.weather}: ${weather.flatMap((state, i) => (state ? [`${places[i].name} ${names[state]}`] : [])).join(', ')}`
-    : '';
+  const descriptions = sky?.flatMap((place, i) => {
+    if (!place) return [];
+    const modifiers = WEATHER_MODIFIERS
+      .filter((mod) => mod === 'haze' ? showsHaze(places[i].id, place) : place[mod] === true)
+      .map((mod) => text.modifiers[mod]);
+    return [`${places[i].name} ${names[place.state]}${modifiers.length ? text.withModifiers(modifiers) : ''}`];
+  });
+  const forecast = descriptions?.length ? `${text.weather}: ${descriptions.join(', ')}` : '';
 
   // Repo mode (see repo.js): the title names the repository, and the city is seeded with its full name.
   const title = stats.kind === 'repo' ? text.repoTitle(stats) : text.title(stats);
@@ -128,6 +149,6 @@ export function buildSpec(stats, opts = {}) {
     skyline,
     tracks,
     ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),
-    ...(forecast ? { weather } : {}),
+    ...(forecast ? { weather, sky } : {}),
   };
 }

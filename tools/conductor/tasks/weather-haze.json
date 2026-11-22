@@ -1,0 +1,40 @@
+{
+  "name": "weather-haze",
+  "route": "design",
+  "promptFile": "weather-haze.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/weather*.js",
+    "src/landscape/jalisco-weather*.js",
+    "tests/weather/**",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml",
+    "src/scene/spec.js",
+    "src/action/weather.js",
+    "tools/export/raster.js",
+    "assets/preview/app.js",
+    "tests/tooling/export.test.js",
+    "eslint.config.js"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-haze.js",
+    "node tools/conductor/gates/weather-wind.js",
+    "node tools/conductor/gates/weather-unchanged.js",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.2-astra",
+      "effort": "xhigh",
+      "why": "Weather lanes: GPT-6.2-Astra adds wind, then haze on top of it"
+    }
+  ]
+}

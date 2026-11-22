@@ -21,8 +21,10 @@ import { runAgent } from './agent.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
-const STATE = join(ROOT, '.conductor');
-const ROUTES = JSON.parse(readFileSync(join(HERE, 'routes.json'), 'utf8'));
+// Logs, patches and runs.jsonl. lanes.js points every lane here, so all runs land in
+// one place; CONDUCTOR_ROUTES swaps the backends, for a test with a stand-in agent.
+const STATE = process.env.CONDUCTOR_STATE ? resolve(process.env.CONDUCTOR_STATE) : join(ROOT, '.conductor');
+const ROUTES = JSON.parse(readFileSync(process.env.CONDUCTOR_ROUTES ? resolve(process.env.CONDUCTOR_ROUTES) : join(HERE, 'routes.json'), 'utf8'));
 
 const git = (args, opts = {}) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28, ...opts });
 

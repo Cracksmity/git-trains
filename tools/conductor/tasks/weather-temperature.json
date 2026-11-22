@@ -1,0 +1,35 @@
+{
+  "name": "weather-temperature",
+  "route": "design",
+  "promptFile": "weather-temperature.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/spec.js",
+    "src/scene/backdrop.js",
+    "src/graphics/font.js",
+    "tests/weather/**",
+    "tests/scene/**",
+    "tests/graphics/**",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-temperature.js",
+    "node tools/conductor/gates/weather-unchanged.js",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "gemini",
+      "model": "gemini-4-neon-xhigh",
+      "why": "Weather lanes: Gemini 4 Neon draws snow, then the caption temperatures"
+    }
+  ]
+}
