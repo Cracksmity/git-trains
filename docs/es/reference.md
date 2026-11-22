@@ -67,6 +67,9 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 
 - `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action. No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
 - `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- Agrega `+wind` a cualquier estado. Con `rain+wind` sopla el viento en los tres lugares. Con `storm+wind, clear, hail+wind`, Los Altos queda en calma. El clima en vivo agrega viento donde la velocidad alcanza los 40 km/h. Los árboles se mecen, el viento levanta polvo rojo de las parcelas aradas de Los Altos y la lluvia y el granizo caen en diagonal.
+- Agrega `+haze` para dibujar una capa café sobre la loma del fondo y las torres del poniente de Guadalajara. Aparece con `clear`, `partly`, `cloudy`, `heat` y `fog`. Puedes combinarla con viento en cualquier orden, por ejemplo `cloudy+wind+haze`. La Catedral y los monumentos del primer plano se mantienen nítidos.
+- En modo `live`, una segunda consulta opcional lee la concentración de PM2.5 en la API de calidad del aire de Open-Meteo solo para Guadalajara. La calima aparece en esos estados cuando la concentración supera los 55 µg/m³. Si falla esta lectura, la Action registra un aviso y dibuja el clima que recibió.
 - `off`, el valor por defecto, deja la escena como está.
 
 | Estado | Guadalajara | Los Altos | Tequila |
@@ -92,6 +95,6 @@ Con `theme: local`, la escena también sigue el día y la noche de Guadalajara:
 - Para que cambie cerca del amanecer y el atardecer, programa el workflow cada hora (`cron: "0 * * * *"`).
 - Los skylines sin lugares reales usan `auto`, que sigue el modo claro u oscuro de quien ve el README.
 
-Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La nieve cuenta como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
+Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La nieve cuenta como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima y de la calidad del aire de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
 
 En Jalisco el clima reemplaza la nieve, los pétalos y las hojas de cada estación; las fiestas se quedan. Los demás skylines conservan sus estaciones. Para cambiar esa regla, edita la lista `WEATHER_OVER_SEASONS` en [src/scene/weather.js](../../src/scene/weather.js).

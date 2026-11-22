@@ -30,8 +30,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
-| [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
-| [Calima](#calima) | Mala calidad del aire (PM2.5) | Nada | Una capa café sobre Guadalajara en días de contingencia |
 | [Temperatura en las leyendas](#temperatura-en-las-leyendas) | Cualquier lectura en vivo | Nada | "Tequila 20° / Rust 15%" |
 
 ### Nieve
@@ -44,33 +42,6 @@ Cuándo: códigos WMO 71, 73, 75, 77, 85 y 86, que hoy cuentan como "rain". La n
 Arte: reutiliza lo más posible la decoración de invierno de src/scene/decor.js: los copos que caen y la nieve sobre los techos encontrados en la cuadrícula del fondo. Recorta los copos a la franja de cada lugar con las capas de caída de src/scene/weather.js. Usa el cielo de "cloudy". Agrega nieve en las torres de la Catedral, el techo del estadio, los techos de Los Altos y las laderas altas del volcán. No dupliques decor.js; si los dos necesitan una función, muévela a un módulo pequeño compartido.
 
 Listo cuando: la nieve se lee a tamaño README en los dos temas, la decoración de invierno sigue pasando sus pruebas y `npm run check` pasa.
-```
-
-### Viento
-
-```text
-En git-trains, agrega viento al clima de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-El viento es un modificador, no un estado: se combina con cualquier estado. Agrega wind_speed_10m a la consulta de Open-Meteo, valídalo en readCurrentWeather (0–200 km/h) y pasa a buildSpec una marca "windy" por lugar (40 km/h o más) junto al estado.
-
-Arte:
-- La lluvia y el granizo caen inclinados. Dibuja las gotas en diagonal y muévelas en diagonal en los keyframes de caída, para que el ciclo siga sin costura.
-- Los Altos: unas rayas de polvo rojo se levantan de las parcelas aradas.
-- Los árboles de la plaza y los mezquites se mecen un píxel con una animación step-end lenta que se detiene con movimiento reducido.
-
-Listo cuando: las pruebas combinan el viento con cada estado, los ciclos no tienen costura y `npm run check` pasa.
-```
-
-### Calima
-
-```text
-En git-trains, agrega calima por mala calidad del aire sobre Guadalajara. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Datos: una segunda consulta a la API de calidad del aire de Open-Meteo (https://air-quality-api.open-meteo.com/v1/air-quality, current=pm2_5), solo para Guadalajara. Ponla en su propia función de adaptador con fetch inyectado, y que sea opcional: si falla, no hay calima. Usa calima cuando el PM2.5 pase de 55 µg/m³.
-
-Arte: una capa café tramada sobre la mitad baja del cielo de Guadalajara. La loma del fondo y las torres del poniente se desvanecen hacia el color del cielo. La Catedral y los monumentos del frente siguen nítidos. La calima se combina con despejado y nublado. La lluvia la limpia, así que no la dibujes con lluvia ni tormenta.
-
-Listo cuando: la segunda consulta tiene pruebas con un fetch falso, su falla no afecta nada y `npm run check` pasa.
 ```
 
 ### Temperatura en las leyendas

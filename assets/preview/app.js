@@ -15,7 +15,7 @@ import { renderReview } from '../../src/review/render.js';
 import { sampleYear } from '../../src/demo/sample.js';
 import { DECORATIONS, decorationFor } from '../../src/activity/seasons.js';
 import { WEATHER_STATES, parseWeatherInput, skyOfReading } from '../../src/weather/conditions.js';
-import { fetchWeather } from '../../src/weather/open-meteo.js';
+import { fetchLiveWeather } from '../../src/weather/live.js';
 import { JALISCO_PLACES } from '../../src/weather/places.js';
 import { localTheme } from '../../src/weather/sun.js';
 
@@ -71,18 +71,21 @@ function fillJump() {
 $('weather').innerHTML = '<option value="off">Off · seasons as usual</option>' +
   '<option value="live">Live · current weather from Open-Meteo</option>' +
   WEATHER_STATES.map((s) => `<option value="${s}">${s[0].toUpperCase() + s.slice(1)} in every place</option>`).join('') +
+  '<option value="rain+wind">Rain with wind</option><option value="clear+wind">Clear with wind</option>' +
+  '<option value="clear+haze">Clear with haze</option>' +
   '<option value="cloudy,rain,storm">Mixed · cloudy, rain, storm</option>';
 let liveWeather = null;
 async function readLiveWeather() {
   $('st-weather').className = 'status';
   $('st-weather').textContent = 'Asking Open-Meteo…';
   try {
-    const { places } = await fetchWeather({ places: JALISCO_PLACES, fetchImpl: (url, init) => fetch(url, init) });
+    const { places, airQuality } = await fetchLiveWeather({ places: JALISCO_PLACES, fetchImpl: fetch });
     liveWeather = places.map(skyOfReading);
     $('st-weather').className = 'status ok';
+    const quality = airQuality.pm25 === null ? 'air quality unavailable' : `PM2.5 ${airQuality.pm25} µg/m³`;
     $('st-weather').textContent = JALISCO_PLACES.map((place, i) => {
       const { state, temperature } = places[i];
-      return `${place.name}: ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}`;
+      return `${place.name}: ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}${i === 0 ? ', ' + quality : ''}`;
     }).join(' · ');
   } catch (err) {
     liveWeather = null;

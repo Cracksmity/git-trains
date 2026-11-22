@@ -3,6 +3,8 @@
 
 /** The weather states the scenes know how to draw, from calm to wild. */
 export const WEATHER_STATES = ['clear', 'frost', 'heat', 'partly', 'cloudy', 'fog', 'drizzle', 'rain', 'storm', 'hail'];
+export const WEATHER_MODIFIERS = ['wind', 'haze'];
+const HAZY_STATES = new Set(['clear', 'partly', 'cloudy', 'heat', 'fog']);
 
 /** The name of each state in the scene's accessible title. */
 export const WEATHER_NAMES = {
@@ -25,6 +27,7 @@ const CODES = {
 };
 const FROST_MAX_C = 2;
 const HEAT_MIN_C = 32;
+const WIND_MIN_KMH = 40;
 const STATE_OF_CODE = new Map(Object.entries(CODES).flatMap(([state, codes]) => codes.map((code) => [code, state])));
 
 /**
@@ -41,6 +44,8 @@ export function stateOfCode(code) {
  * @property {string | null} state a key of WEATHER_STATES, or null when the reading was unusable
  * @property {number | null} code the WMO code as reported
  * @property {number | null} temperature degrees Celsius at 2 m
+ * @property {number | null} windSpeed km/h at 10 m
+ * @property {number | null} [pm25] fine particles in µg/m³, measured separately for Guadalajara
  */
 
 /**
@@ -60,7 +65,7 @@ export function readCurrentWeather(data, count) {
     const where = `place ${i + 1}`;
     if (!current || typeof current !== 'object') {
       problems.push(`${where}: no "current" block`);
-      return { state: null, code: null, temperature: null };
+      return { state: null, code: null, temperature: null, windSpeed: null };
     }
     const code = current.weather_code;
     const baseState = stateOfCode(code);
@@ -68,24 +73,32 @@ export function readCurrentWeather(data, count) {
     const t = current.temperature_2m;
     const temperature = typeof t === 'number' && t >= -60 && t <= 60 ? t : null;
     if (temperature === null && t !== undefined) problems.push(`${where}: temperature_2m out of range`);
+    const speed = current.wind_speed_10m;
+    const windSpeed = typeof speed === 'number' && speed >= 0 && speed <= 200 ? speed : null;
+    if (windSpeed === null && Object.hasOwn(current, 'wind_speed_10m')) problems.push(`${where}: wind_speed_10m out of range`);
     let state = baseState;
     if (temperature !== null && (baseState === 'clear' || baseState === 'partly')) {
       if (temperature <= FROST_MAX_C) state = 'frost';
       else if (temperature >= HEAT_MIN_C) state = 'heat';
     }
-    return { state, code: state ? code : null, temperature };
+    return { state, code: state ? code : null, temperature, windSpeed };
   });
   return { places, problems };
 }
 
 /**
- * What a scene draws over one place: a state, plus what a live reading adds to it.
- * A fixed state from the workflow carries only the state. New designs that need more
- * from a reading (wind, haze) add their own fields here.
+ * What a scene draws over one place, from a fixed input or a live reading.
  * @typedef {object} PlaceSky
  * @property {string} state a key of WEATHER_STATES
  * @property {number | null} [temperature] degrees Celsius at 2 m, from a live reading only
+ * @property {boolean} [wind] set by +wind or a live wind speed of at least 40 km/h
+ * @property {boolean} [haze] set by +haze or a live Guadalajara PM2.5 reading above 55 µg/m³
  */
+
+/** @param {string} placeId @param {PlaceSky | null | undefined} sky */
+export function showsHaze(placeId, sky) {
+  return placeId === 'guadalajara' && sky?.haze === true && HAZY_STATES.has(sky.state);
+}
 
 /**
  * One entry of a scene's weather, a state name or a PlaceSky, as a PlaceSky. Null when it
@@ -102,15 +115,19 @@ export function placeSky(entry) {
 
 /**
  * What a live reading draws, or null when its state could not be read.
- * @param {PlaceWeather} reading
+ * @param {{ state: string | null, temperature: number | null, windSpeed?: number | null, pm25?: number | null }} reading
  * @returns {PlaceSky | null}
  */
 export function skyOfReading(reading) {
-  return reading.state ? { state: reading.state, temperature: reading.temperature } : null;
+  if (!reading.state) return null;
+  const sky = { state: reading.state, temperature: reading.temperature };
+  if (reading.windSpeed >= WIND_MIN_KMH) sky.wind = true;
+  if (reading.pm25 > 55) sky.haze = true;
+  return sky;
 }
 
 /**
- * @typedef {{ mode: 'off' } | { mode: 'live' } | { mode: 'fixed', states: string[] }} WeatherInput
+ * @typedef {{ mode: 'off' } | { mode: 'live' } | { mode: 'fixed', states: Array<string | PlaceSky> }} WeatherInput
  */
 
 /**
@@ -124,13 +141,18 @@ export function parseWeatherInput(value, places = 3) {
   const text = String(value ?? '').trim().toLowerCase();
   if (!text || text === 'off') return { mode: 'off' };
   if (text === 'live') return { mode: 'live' };
-  const states = text.split(',').map((s) => s.trim());
-  const bad = states.filter((s) => !WEATHER_STATES.includes(s));
-  if (bad.length || (states.length !== 1 && states.length !== places)) {
+  const entries = text.split(',').map((s) => s.split('+').map((part) => part.trim()));
+  const invalid = entries.some(([state, ...modifiers]) =>
+    !WEATHER_STATES.includes(state) || modifiers.some((mod) => !WEATHER_MODIFIERS.includes(mod)));
+  if (invalid || (entries.length !== 1 && entries.length !== places)) {
     throw new Error(
       `Unknown weather: "${value}". Options: off, live, ${WEATHER_STATES.join(', ')}, ` +
-        `or one state per place separated by commas (${places} places)`,
+        `or one state per place separated by commas (${places} places). Modifiers: ${WEATHER_MODIFIERS.map((m) => '+' + m).join(', ')}`,
     );
   }
-  return { mode: 'fixed', states: states.length === 1 ? Array(places).fill(states[0]) : states };
+  const states = Array.from({ length: places }, (_, i) => {
+    const [state, ...modifiers] = entries[i] ?? entries[0];
+    return modifiers.length ? { state, ...Object.fromEntries(modifiers.map((mod) => [mod, true])) } : state;
+  });
+  return { mode: 'fixed', states };
 }

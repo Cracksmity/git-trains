@@ -30,8 +30,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
-| [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
-| [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
 | [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
 
 ### Snow
@@ -44,33 +42,6 @@ Trigger: WMO codes 71, 73, 75, 77, 85 and 86, which map to "rain" today. Snow is
 Art: reuse the winter decoration of src/scene/decor.js as much as possible: the falling flakes and the snow resting on roofs found from the backdrop grid. Clip the flakes to each place's strip with the fall layers of src/scene/weather.js. Use the "cloudy" sky. Add snow on the Cathedral spires, the stadium roof, the Los Altos roofs and the volcano's upper slopes. Do not duplicate decor.js; move a shared helper into a small module if both need it.
 
 Done when: snow reads at README size in both themes and the winter decoration still passes its tests, and `npm run check` passes.
-```
-
-### Wind
-
-```text
-In git-trains, add wind to the Jalisco weather. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Wind is a modifier, not a state: it combines with any state. Add wind_speed_10m to the Open-Meteo request, validate it in readCurrentWeather (0–200 km/h), and pass a per-place "windy" flag (40 km/h or more) through buildSpec next to the state.
-
-Art:
-- Rain and hail fall slanted. Draw the drops on a diagonal and move them diagonally in the fall keyframes, so the loop stays seamless.
-- Los Altos: a few red dust streaks blow off the plowed parcels.
-- The plaza trees and mesquites sway one pixel with a slow step-end animation that stops with reduced motion.
-
-Done when: wind combines with every state in tests, the loops are seamless, and `npm run check` passes.
-```
-
-### Haze
-
-```text
-In git-trains, add haze for poor air quality over Guadalajara. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Data: a second Open-Meteo request to the air-quality API (https://air-quality-api.open-meteo.com/v1/air-quality, current=pm2_5) for Guadalajara only. Put it in its own adapter function with an injected fetch, and keep it optional: if it fails, there is no haze. Use haze when PM2.5 is above 55 µg/m³.
-
-Art: a brownish dithered layer over the lower half of Guadalajara's sky. The distant ridge and the west-side towers fade toward the sky color. The Cathedral and the landmarks in front stay crisp. Haze combines with clear and cloudy. Rain washes it away, so do not draw it in rain or storm.
-
-Done when: the second request is tested with a fake fetch, its failure is harmless, and `npm run check` passes.
 ```
 
 ### Temperature in captions

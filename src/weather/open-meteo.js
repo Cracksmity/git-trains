@@ -16,7 +16,7 @@ export function weatherUrl(places) {
   const query = new URLSearchParams({
     latitude: coordinate('latitude'),
     longitude: coordinate('longitude'),
-    current: 'weather_code,temperature_2m',
+    current: 'weather_code,temperature_2m,wind_speed_10m',
   });
   return `${OPEN_METEO_URL}?${query}`;
 }
@@ -32,8 +32,17 @@ export function weatherUrl(places) {
  * @param {number} [options.retryDelay]
  * @returns {Promise<ReturnType<typeof readCurrentWeather>>}
  */
-export async function fetchWeather({ places, fetchImpl, timeoutMs = 10000, retryDelay = 1500 }) {
-  const url = weatherUrl(places);
+export async function fetchWeather({ places, fetchImpl, timeoutMs, retryDelay }) {
+  const data = await fetchOpenMeteoJson(weatherUrl(places), { fetchImpl, timeoutMs, retryDelay });
+  return readCurrentWeather(data, places.length);
+}
+
+/**
+ * Read a bounded JSON response from either Open-Meteo endpoint.
+ * @param {string} url
+ * @param {{ fetchImpl: typeof fetch, timeoutMs?: number, retryDelay?: number, retryUnreadable?: boolean }} options
+ */
+export async function fetchOpenMeteoJson(url, { fetchImpl, timeoutMs = 10000, retryDelay = 1500, retryUnreadable = false }) {
   let failure = '';
   for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
     if (attempt) await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -49,15 +58,21 @@ export async function fetchWeather({ places, fetchImpl, timeoutMs = 10000, retry
       continue;
     }
     if (!response.ok) throw new Error(`Open-Meteo answered ${response.status}: ${(await response.text()).slice(0, 200)}`);
-    const text = await response.text();
-    if (text.length > 64 * 1024) throw new Error('Open-Meteo answered more than 64 KB');
-    let data;
+    let text;
     try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error('Open-Meteo answered something that is not JSON');
+      text = await response.text();
+    } catch (error) {
+      if (!retryUnreadable) throw error;
+      failure = `could not read Open-Meteo: ${error.message}`;
+      continue;
     }
-    return readCurrentWeather(data, places.length);
+    if (text.length > 64 * 1024) throw new Error('Open-Meteo answered more than 64 KB');
+    try {
+      return JSON.parse(text);
+    } catch {
+      failure = 'Open-Meteo answered something that is not JSON';
+      if (!retryUnreadable) throw new Error(failure);
+    }
   }
   throw new Error(failure);
 }

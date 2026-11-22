@@ -51,9 +51,9 @@ function lens(g, cx, top, rows, state) {
  * Guadalajara: under a low ceiling a wisp drifts across the tallest tower, below its
  * red sign; the plaza in front of the Cathedral shines with rain and the lamps reflect in it.
  */
-function guadalajara(g, state, band, backdrop) {
+function guadalajara(g, state, band, backdrop, haze) {
   if (state === 'frost') return cityFrost(g, band, backdrop);
-  if (state === 'fog') return paintGuadalajaraFog(g, band, backdrop);
+  if (state === 'fog') return paintGuadalajaraFog(g, band, backdrop, haze);
   const sky = skyState(state);
   if (heavy(sky)) lens(g, 340, band.base - 61, sky === 'storm' ? [9, 15, 13] : [7, 12, 9], sky);
   if (state === 'hail') return cityHail(g, band, backdrop);
