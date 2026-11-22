@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws ten states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws eleven states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` and `hail`). See [Weather](reference.md#weather). This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -29,22 +29,9 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
-| [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
 | [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
 | [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
-
-### Snow
-
-```text
-In git-trains, add a "snow" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 71, 73, 75, 77, 85 and 86, which map to "rain" today. Snow is rare in Jalisco; Guadalajara saw it in December 1997.
-
-Art: reuse the winter decoration of src/scene/decor.js as much as possible: the falling flakes and the snow resting on roofs found from the backdrop grid. Clip the flakes to each place's strip with the fall layers of src/scene/weather.js. Use the "cloudy" sky. Add snow on the Cathedral spires, the stadium roof, the Los Altos roofs and the volcano's upper slopes. Do not duplicate decor.js; move a shared helper into a small module if both need it.
-
-Done when: snow reads at README size in both themes and the winter decoration still passes its tests, and `npm run check` passes.
-```
 
 ### Wind
 

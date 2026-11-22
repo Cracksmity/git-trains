@@ -102,6 +102,8 @@ test('the title names each place with its weather in the scene language', () => 
   assert.match(spec({ weather: ['hail', null, 'storm'], language: 'es' }).title, /\nClima: Guadalajara granizo, Tequila tormenta$/);
   assert.match(spec({ weather: ['frost', 'frost', 'frost'] }).title, /\nWeather: Guadalajara frost, Los Altos frost, Tequila frost$/);
   assert.match(spec({ weather: ['frost', 'frost', 'frost'], language: 'es' }).title, /\nClima: Guadalajara helada, Los Altos helada, Tequila helada$/);
+  assert.match(spec({ weather: ['snow', 'snow', 'snow'] }).title, /\nWeather: Guadalajara snow, Los Altos snow, Tequila snow$/);
+  assert.match(spec({ weather: ['snow', 'snow', 'snow'], language: 'es' }).title, /\nClima: Guadalajara nieve, Los Altos nieve, Tequila nieve$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);

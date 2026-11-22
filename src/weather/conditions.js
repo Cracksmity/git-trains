@@ -2,24 +2,24 @@
 // Only the classification and the input format live here; src/scene/weather.js draws it.
 
 /** The weather states the scenes know how to draw, from calm to wild. */
-export const WEATHER_STATES = ['clear', 'frost', 'heat', 'partly', 'cloudy', 'fog', 'drizzle', 'rain', 'storm', 'hail'];
+export const WEATHER_STATES = ['clear', 'frost', 'heat', 'partly', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'storm', 'hail'];
 
 /** The name of each state in the scene's accessible title. */
 export const WEATHER_NAMES = {
-  en: { clear: 'clear', frost: 'frost', heat: 'heat', partly: 'partly cloudy', cloudy: 'cloudy', fog: 'fog', drizzle: 'drizzle', rain: 'rain', storm: 'storm', hail: 'hail' },
-  es: { clear: 'despejado', frost: 'helada', heat: 'calor', partly: 'medio nublado', cloudy: 'nublado', fog: 'neblina', drizzle: 'llovizna', rain: 'lluvia', storm: 'tormenta', hail: 'granizo' },
+  en: { clear: 'clear', frost: 'frost', heat: 'heat', partly: 'partly cloudy', cloudy: 'cloudy', fog: 'fog', drizzle: 'drizzle', rain: 'rain', snow: 'snow', storm: 'storm', hail: 'hail' },
+  es: { clear: 'despejado', frost: 'helada', heat: 'calor', partly: 'medio nublado', cloudy: 'nublado', fog: 'neblina', drizzle: 'llovizna', rain: 'lluvia', snow: 'nieve', storm: 'tormenta', hail: 'granizo' },
 };
 
 // WMO weather interpretation codes, as Open-Meteo reports them. Clear/partly codes
-// can become frost or heat in readCurrentWeather. Snow still borrows the closest
-// state (see docs/weather-backlog.md for the designs still to draw).
+// can become frost or heat in readCurrentWeather.
 const CODES = {
   clear: [0],
   partly: [1, 2],
   cloudy: [3],
   fog: [45, 48],
   drizzle: [51, 53, 55, 56, 57],
-  rain: [61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86],
+  rain: [61, 63, 65, 66, 67, 80, 81, 82],
+  snow: [71, 73, 75, 77, 85, 86],
   storm: [95],
   hail: [96, 99],
 };

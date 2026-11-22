@@ -7,6 +7,8 @@ import { BALLAST, GY0, PITCH } from './layout.js';
 import { WEATHER_THEMES, skyInk, skyState } from '../weather/inks.js';
 import { hailLayers } from './weather-hail.js';
 import { heatSky } from './weather-heat.js';
+import { snowLayers } from './weather-snow.js';
+import { swayKeyframe } from './snow.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
 import { placesFor } from '../weather/places.js';
 
@@ -43,7 +45,7 @@ const COUNTRY_SKY = new Set(['@dusk', '@haze', '@afterglow', '@starlight']);
  * @property {'sky' | 'ground'} z sky: behind the city and countryside; ground: over them, behind the trains
  * @property {number} y scene row of the grid's first row
  * @property {[number, number]} [clip] scene rows the layer may paint, end exclusive
- * @property {{ h: number, dur: number }} [fall] drops h rows in steps of a pixel every dur seconds, looping
+ * @property {{ h: number, dur: number, sway?: number }} [fall] drops h rows in steps of a pixel every dur seconds, looping; optional horizontal sway period in seconds
  * @property {boolean} [drift] shares the clouds' loop: a 2W-wide grid sliding W pixels
  * @property {{ offset: number }} [blink] lightning, `offset` seconds into its cycle at frame 0
  */
@@ -304,6 +306,7 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
     art.paint(ground, state, band, backdrop);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
     if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W));
+    if (state === 'snow') layers.push(...snowLayers(band, W));
     if (state === 'hail') layers.push(...hailLayers(band, W));
   });
   return layers;
@@ -319,13 +322,23 @@ export function weatherLayers(weather, scene, used) {
   const out = { sky: '', ground: '', css: '', vars: { light: {}, dark: {} } };
   const rules = [];
   const animated = [];
+  const sways = new Set();
   weatherArt(weather, scene).forEach((layer, i) => {
     let body = layer.svg ? layer.svg(used) : layer.grid.paths(used);
     if (layer.fall) {
-      const { h, dur } = layer.fall;
+      const { h, dur, sway } = layer.fall;
       const cls = `w-fall${i}`;
       animated.push(cls);
       rules.push(`.${cls}{animation:${cls} ${dur}s steps(${h}) infinite}`, `@keyframes ${cls}{from{transform:translateY(-${h}px)}to{transform:translateY(0)}}`);
+      if (sway) {
+        const swayCls = `w-sway${sway}`;
+        if (!sways.has(swayCls)) {
+          sways.add(swayCls);
+          animated.push(swayCls);
+          rules.push(`.${swayCls}{animation:w-sway ${sway}s step-end infinite}`);
+        }
+        body = `<g class="${swayCls}">${body}</g>`;
+      }
       const [top, end] = layer.clip;
       body = `<clipPath id="w-clip${i}"><rect y="${top}" width="${scene.W}" height="${end - top}"/></clipPath>` +
         `<g clip-path="url(#w-clip${i})"><g transform="translate(0 ${layer.y})"><g class="${cls}">${body}</g></g></g>`;
@@ -342,6 +355,7 @@ export function weatherLayers(weather, scene, used) {
     out[layer.z] += body;
   });
   if (!animated.length && !out.sky && !out.ground) return out;
+  if (sways.size) rules.unshift(swayKeyframe('w-sway'));
   if (rules.some((r) => r.includes('w-flash'))) {
     rules.unshift(`@keyframes w-flash{${FLASH.keys.map(([at, v]) => `${+(at * 100).toFixed(1)}%{opacity:${v}}`).join('')}}`);
   }
