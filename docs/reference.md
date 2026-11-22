@@ -15,7 +15,7 @@
 | `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](usage.md#seasons-and-holidays)) |
 | `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
 | `weather` | `off` | For the `jalisco` skyline: `live` (the current weather from Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm`, `hail`, or one state per place separated by commas (see [Weather](#weather)) |
-| `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto` |
+| `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto`, or `local`: day or night where the scene is (see [Weather](#weather)) |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
 | `exclude-languages` | | Comma-separated languages to leave out, e.g. `HTML, Jupyter Notebook` |
@@ -85,6 +85,12 @@ The Jalisco scene can wear the weather of its three places. Add `weather` to the
 ![Guadalajara in a storm, rain in Los Altos and clouds around the volcano of Tequila](../examples/jalisco/jalisco-clima.svg)
 
 The image is drawn when the Action runs, not when someone opens the README. To keep the weather current, schedule the workflow every few hours, for example `cron: "0 */3 * * *"`. GitHub can delay scheduled runs by a few minutes.
+
+With `theme: local`, the scene also follows day and night in Guadalajara:
+- The Action writes a single `train.svg`: light while the sun is up there and dark after sunset, as it stands when the Action runs.
+- It computes the sun's position from the coordinates and the clock, so it needs no network and works even when the weather can't be read. The log says what it chose, such as `Theme local: the sun is 44° above the horizon in Guadalajara -> light`.
+- To switch close to sunrise and sunset, run the workflow every hour (`cron: "0 * * * *"`).
+- Skylines without real places fall back to `auto`, which follows the viewer's light or dark mode.
 
 Open-Meteo reports WMO weather codes. Code 0 gives `clear` and codes 1 and 2 give `partly`. For all three codes, temperatures of 2 °C or below give `frost`, and temperatures of 32 °C or above give `heat`. Code 3 gives `cloudy`, and codes 45 and 48 give `fog`. Code 95 gives `storm`, and codes 96 and 99 give `hail`. Snow counts as `rain`. The art for those and other weather is listed, with ready-to-use prompts, in the [weather backlog](weather-backlog.md). The image title names each place's weather for screen readers. Weather data by [Open-Meteo](https://open-meteo.com/), licensed CC BY 4.0.
 

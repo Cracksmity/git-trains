@@ -20,14 +20,15 @@ import { parseSkyline } from '../landscape/skyline-parse.js';
 import { HEMISPHERES } from '../activity/seasons.js';
 import { parseWeatherInput } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
-import { weatherFor } from './weather.js';
+import { themeFor, weatherFor } from './weather.js';
 import { input, readJson, isJsonPath, list, oneOf, parseCards } from './inputs.js';
 import { THEMES, RANKS, BOOLEANS } from '../../config/action-inputs.js';
 
 export async function runAction() {
   const sample = process.argv.includes('--sample');
 
-  const theme = oneOf('theme', input('theme', 'both'), THEMES);
+  // theme: local is decided below, from the sun over the skyline's place when the Action runs.
+  const themeIn = oneOf('theme', input('theme', 'both'), THEMES);
   const scale = Number(input('scale', '2'));
   if (!Number.isFinite(scale) || scale < 1 || scale > 6) throw new Error('"scale" must be between 1 and 6');
   const language = oneOf('language', input('language', 'en'), LANGUAGES);
@@ -118,6 +119,7 @@ export async function runAction() {
     }
   }
 
+  const theme = themeFor(themeIn, options.skyline, now);
   const { files, write } = createOutputWriter(outDir);
   // A repository's files carry "repo" in the name (train-repo.svg, card-repo-stats.svg...), so one
   // workflow can draw a profile and a repository into the same folder.

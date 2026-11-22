@@ -25,7 +25,7 @@ inputs:
     description: "single (one train in your top language) or multi (3 tracks, one train per language)."
     default: single
   theme:
-    description: "both (writes light, dark and automatic), light, dark or auto."
+    description: "both (writes light, dark and automatic), light, dark, auto, or local: one train.svg, light while the sun is up over the skyline's first place (Guadalajara for jalisco) when the Action runs and dark after sunset. Skylines without places use auto with local."
     default: both
   language:
     description: "Language of the texts: en or es. Changes the word on the LED sign (STREAK / RACHA) and the cards."

@@ -2,6 +2,7 @@
 // reading at the skyline's places. If it can't be read the scene still stands.
 import { fetchWeather } from '../weather/open-meteo.js';
 import { placesFor } from '../weather/places.js';
+import { localTheme } from '../weather/sun.js';
 import { sampleWeather } from '../demo/sample.js';
 
 // Workflow commands end at a newline and decode %: keep foreign text on one line.
@@ -35,4 +36,25 @@ export async function weatherFor(request, skyline, { sample = false, fetchImpl =
     log(`::notice::Could not read the weather, the scene stays without it: ${annotation(error.message)}`);
     return null;
   }
+}
+
+/**
+ * The theme to draw with. `local` becomes light while the sun is up over the skyline's
+ * first place when the Action runs, and dark after sunset; a skyline without places
+ * falls back to auto, which follows the viewer.
+ * @param {string} theme
+ * @param {{ preset?: string } | null} skyline
+ * @param {Date} now
+ * @param {(line: string) => void} [log]
+ */
+export function themeFor(theme, skyline, now, log = console.log) {
+  if (theme !== 'local') return theme;
+  const local = localTheme(skyline, now);
+  if (!local) {
+    log('::notice::theme local needs a skyline with real places behind its tracks (jalisco); using auto');
+    return 'auto';
+  }
+  const where = local.elevation >= 0 ? 'above' : 'below';
+  log(`Theme local: the sun is ${Math.abs(Math.round(local.elevation))}° ${where} the horizon in ${local.place} -> ${local.theme}`);
+  return local.theme;
 }
