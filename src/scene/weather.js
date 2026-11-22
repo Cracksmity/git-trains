@@ -10,6 +10,8 @@ import { fallTile, windTileCopies } from './weather-fall.js';
 import { heatSky } from './weather-heat.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
 import { jaliscoWind } from '../landscape/jalisco-weather-wind.js';
+import { guadalajaraHaze } from '../landscape/jalisco-weather-haze.js';
+import { showsHaze } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 
 /**
@@ -278,6 +280,7 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
     const art = PLACE_ART[places[band.k]?.id];
     if (!state || !art) return;
     const wind = sky?.[band.k]?.wind === true;
+    const haze = showsHaze(places[band.k].id, sky?.[band.k]);
     const cover = skyState(state);
     if (state === 'heat') {
       layers.push(...heatSky(band, backdrop));
@@ -292,13 +295,14 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
         layers.push({ grid: countrySky(cover, band, backdrop, W), z: 'ground', y: band.top });
       }
     }
+    if (haze) layers.push(guadalajaraHaze(band, backdrop));
     if (wind && state !== 'fog' && state !== 'frost') layers.push(...jaliscoWind(band, backdrop, state));
     if (state === 'clear' || state === 'partly' || state === 'heat') return;
     if (cover === 'rain' || cover === 'storm') layers.push({ grid: veil(cover, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
     // The flash lights the sky behind the place's own clouds, such as the volcano's cap.
     if (cover === 'storm') layers.push(lightning(band, backdrop, W, art));
-    art.paint(ground, state, band, backdrop);
+    art.paint(ground, state, band, backdrop, haze);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
     if (wind && (state === 'fog' || state === 'frost')) layers.push(...jaliscoWind(band, backdrop, state));
     if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W, wind));

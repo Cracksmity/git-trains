@@ -22,6 +22,10 @@ const HEAT_DAY = 'rgba(255,226,180,0.5)';
 const HEAT_DAY_LOW = 'rgba(255,206,146,0.58)';
 
 const SHARED = {
+  // Guadalajara's suspended dust looks tawny by day and catches amber streetlight at night.
+  wHazeThin: ['rgba(185,149,115,0.28)', 'rgba(174,109,76,0.25)'],
+  wHaze: ['rgba(185,149,115,0.50)', 'rgba(174,109,76,0.42)'],
+  wHazeLow: ['rgba(185,149,115,0.70)', 'rgba(174,109,76,0.58)'],
   // Loose red earth above the plowed parcels of Los Altos.
   wDust: ['rgba(193,112,78,0.85)', 'rgba(153,89,81,0.8)'],
   // Transparent warmth preserves the dither of the sky beneath it.

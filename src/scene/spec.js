@@ -6,7 +6,7 @@ import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
 import { UNLOCK_IDS, unlockThreshold } from '../activity/unlocks.js';
-import { WEATHER_MODIFIERS, WEATHER_NAMES, placeSky } from '../weather/conditions.js';
+import { WEATHER_MODIFIERS, WEATHER_NAMES, placeSky, showsHaze } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -27,7 +27,7 @@ const TEXT = {
       mail: (n) => `Mail car unlocked: ${n}+ pull requests`,
     },
     weather: 'Weather',
-    modifiers: { wind: 'wind' },
+    modifiers: { wind: 'wind', haze: 'haze' },
     withModifiers: (words) => ` with ${words.join(' and ')}`,
   },
   es: {
@@ -41,7 +41,7 @@ const TEXT = {
       mail: (n) => `Vagón postal desbloqueado: más de ${n} pull requests`,
     },
     weather: 'Clima',
-    modifiers: { wind: 'viento' },
+    modifiers: { wind: 'viento', haze: 'calima' },
     withModifiers: (words) => ` con ${words.join(' y ')}`,
   },
 };
@@ -119,7 +119,9 @@ export function buildSpec(stats, opts = {}) {
   const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
   const descriptions = sky?.flatMap((place, i) => {
     if (!place) return [];
-    const modifiers = WEATHER_MODIFIERS.filter((mod) => place[mod] === true).map((mod) => text.modifiers[mod]);
+    const modifiers = WEATHER_MODIFIERS
+      .filter((mod) => mod === 'haze' ? showsHaze(places[i].id, place) : place[mod] === true)
+      .map((mod) => text.modifiers[mod]);
     return [`${places[i].name} ${names[place.state]}${modifiers.length ? text.withModifiers(modifiers) : ''}`];
   });
   const forecast = descriptions?.length ? `${text.weather}: ${descriptions.join(', ')}` : '';

@@ -3,7 +3,8 @@
 
 /** The weather states the scenes know how to draw, from calm to wild. */
 export const WEATHER_STATES = ['clear', 'frost', 'heat', 'partly', 'cloudy', 'fog', 'drizzle', 'rain', 'storm', 'hail'];
-export const WEATHER_MODIFIERS = ['wind'];
+export const WEATHER_MODIFIERS = ['wind', 'haze'];
+const HAZY_STATES = new Set(['clear', 'partly', 'cloudy', 'heat', 'fog']);
 
 /** The name of each state in the scene's accessible title. */
 export const WEATHER_NAMES = {
@@ -44,6 +45,7 @@ export function stateOfCode(code) {
  * @property {number | null} code the WMO code as reported
  * @property {number | null} temperature degrees Celsius at 2 m
  * @property {number | null} windSpeed km/h at 10 m
+ * @property {number | null} [pm25] fine particles in µg/m³, measured separately for Guadalajara
  */
 
 /**
@@ -90,7 +92,13 @@ export function readCurrentWeather(data, count) {
  * @property {string} state a key of WEATHER_STATES
  * @property {number | null} [temperature] degrees Celsius at 2 m, from a live reading only
  * @property {boolean} [wind] set by +wind or a live wind speed of at least 40 km/h
+ * @property {boolean} [haze] set by +haze or a live Guadalajara PM2.5 reading above 55 µg/m³
  */
+
+/** @param {string} placeId @param {PlaceSky | null | undefined} sky */
+export function showsHaze(placeId, sky) {
+  return placeId === 'guadalajara' && sky?.haze === true && HAZY_STATES.has(sky.state);
+}
 
 /**
  * One entry of a scene's weather, a state name or a PlaceSky, as a PlaceSky. Null when it
@@ -107,13 +115,15 @@ export function placeSky(entry) {
 
 /**
  * What a live reading draws, or null when its state could not be read.
- * @param {{ state: string | null, temperature: number | null, windSpeed?: number | null }} reading
+ * @param {{ state: string | null, temperature: number | null, windSpeed?: number | null, pm25?: number | null }} reading
  * @returns {PlaceSky | null}
  */
 export function skyOfReading(reading) {
   if (!reading.state) return null;
   const sky = { state: reading.state, temperature: reading.temperature };
-  return reading.windSpeed >= WIND_MIN_KMH ? { ...sky, wind: true } : sky;
+  if (reading.windSpeed >= WIND_MIN_KMH) sky.wind = true;
+  if (reading.pm25 > 55) sky.haze = true;
+  return sky;
 }
 
 /**

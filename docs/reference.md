@@ -68,6 +68,8 @@ The Jalisco scene can wear the weather of its three places. Add `weather` to the
 - `live` reads the current weather in Guadalajara, Los Altos (at Arandas) and Tequila from [Open-Meteo](https://open-meteo.com/) when the Action runs. It needs no key. If the reading fails, the scene is drawn without weather and the log says why.
 - `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` or `hail` fixes one state for every place. `storm, rain, cloudy` gives one state per place, in track order.
 - Append `+wind` to any state. `rain+wind` brings wind to all three places, while `storm+wind, clear, hail+wind` leaves Los Altos calm. Live weather adds wind wherever the speed reaches 40 km/h. Trees sway, red dust blows off the plowed fields in Los Altos, and rain and hail fall diagonally.
+- Append `+haze` for a brown layer over Guadalajara’s distant ridge and west-side towers. It appears with `clear`, `partly`, `cloudy`, `heat` and `fog`, and combines with wind in either order, as in `cloudy+wind+haze`. The Cathedral and the landmarks in front stay sharp.
+- In `live` mode a second, optional request reads PM2.5 from Open-Meteo’s air-quality API for Guadalajara alone. Haze appears in those states above 55 µg/m³. If this reading fails, the Action logs a notice and draws the weather it received.
 - `off`, the default, leaves the scene as it is.
 
 | State | Guadalajara | Los Altos | Tequila |
@@ -93,6 +95,6 @@ With `theme: local`, the scene also follows day and night in Guadalajara:
 - To switch close to sunrise and sunset, run the workflow every hour (`cron: "0 * * * *"`).
 - Skylines without real places fall back to `auto`, which follows the viewer's light or dark mode.
 
-Open-Meteo reports WMO weather codes. Code 0 gives `clear` and codes 1 and 2 give `partly`. For all three codes, temperatures of 2 °C or below give `frost`, and temperatures of 32 °C or above give `heat`. Code 3 gives `cloudy`, and codes 45 and 48 give `fog`. Code 95 gives `storm`, and codes 96 and 99 give `hail`. Snow counts as `rain`. The art for those and other weather is listed, with ready-to-use prompts, in the [weather backlog](weather-backlog.md). The image title names each place's weather for screen readers. Weather data by [Open-Meteo](https://open-meteo.com/), licensed CC BY 4.0.
+Open-Meteo reports WMO weather codes. Code 0 gives `clear` and codes 1 and 2 give `partly`. For all three codes, temperatures of 2 °C or below give `frost`, and temperatures of 32 °C or above give `heat`. Code 3 gives `cloudy`, and codes 45 and 48 give `fog`. Code 95 gives `storm`, and codes 96 and 99 give `hail`. Snow counts as `rain`. The art for those and other weather is listed, with ready-to-use prompts, in the [weather backlog](weather-backlog.md). The image title names each place's weather for screen readers. Weather and air-quality data by [Open-Meteo](https://open-meteo.com/), licensed CC BY 4.0.
 
 In Jalisco the weather replaces the seasonal snow, blossom and leaves; holidays stay. Other skylines keep their seasons. To change that rule, edit the `WEATHER_OVER_SEASONS` list in [src/scene/weather.js](../src/scene/weather.js).

@@ -1,13 +1,13 @@
 // The weather the scene wears: a fixed state from the workflow, or the current
 // reading at the skyline's places. If it can't be read the scene still stands.
-import { skyOfReading } from '../weather/conditions.js';
-import { fetchWeather } from '../weather/open-meteo.js';
+import { showsHaze, skyOfReading } from '../weather/conditions.js';
+import { fetchLiveWeather } from '../weather/live.js';
 import { placesFor } from '../weather/places.js';
 import { localTheme } from '../weather/sun.js';
 import { sampleWeather } from '../demo/sample.js';
 
 // Workflow commands end at a newline and decode %: keep foreign text on one line.
-const annotation = (text) => String(text).replace(/%/g, '%25').replace(/\r?\n/g, '%0A');
+const annotation = (text) => String(text).replace(/%/g, '%25').replace(/\r?\n/g, '%0A').replace(/\r/g, '%0D');
 
 /**
  * One weather entry per place, in track order, or null for no weather. A fixed input
@@ -26,7 +26,9 @@ export async function weatherFor(request, skyline, { sample = false, fetchImpl =
   }
   if (request.mode === 'fixed') return request.states.slice(0, places.length);
   try {
-    const { places: readings, problems } = sample ? sampleWeather() : await fetchWeather({ places, fetchImpl });
+    const { places: readings, problems, airQuality } = sample
+      ? { ...sampleWeather(), airQuality: null }
+      : await fetchLiveWeather({ places, fetchImpl });
     for (const problem of problems) log(`::notice::Weather: ${annotation(problem)}`);
     const sky = readings.map(skyOfReading);
     const summary = places.map((place, i) => {
@@ -36,6 +38,15 @@ export async function weatherFor(request, skyline, { sample = false, fetchImpl =
       return `${place.name} ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}${wind}`;
     });
     log(`Weather (Open-Meteo): ${summary.join(', ')}`);
+    if (airQuality) {
+      const [city] = places;
+      if (airQuality.pm25 === null) {
+        log(`::notice::Air quality (Open-Meteo): ${city.name}: ${annotation(airQuality.problems.join(', '))}`);
+      } else {
+        const effect = showsHaze(city.id, sky[0]) ? ' -> haze' : '';
+        log(`Air quality (Open-Meteo): ${city.name} PM2.5 ${airQuality.pm25} µg/m³${effect}`);
+      }
+    }
     return sky;
   } catch (error) {
     log(`::notice::Could not read the weather, the scene stays without it: ${annotation(error.message)}`);

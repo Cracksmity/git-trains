@@ -18,5 +18,5 @@ export default [
     },
   },
   { files: ['scripts/**/*.js', 'tools/**/*.js', 'tests/**/*.js', 'bin/*.js', 'config/*.js', 'src/action/*.js', 'src/cli/*.js', 'src/github/*.js', 'eslint.config.js'], languageOptions: { globals: globals.node } },
-  { files: ['assets/**/*.js', 'src/studio/**/*.js', 'src/sharing/*.js', 'src/browser/*.js', 'src/weather/open-meteo.js'], languageOptions: { globals: globals.browser } },
+  { files: ['assets/**/*.js', 'src/studio/**/*.js', 'src/sharing/*.js', 'src/browser/*.js', 'src/weather/open-meteo.js', 'src/weather/air-quality.js'], languageOptions: { globals: globals.browser } },
 ];
