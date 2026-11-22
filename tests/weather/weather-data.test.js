@@ -18,7 +18,8 @@ test('every WMO code Open-Meteo documents maps to a state the scenes draw', () =
   assert.equal(stateOfCode(2), 'clear');
   assert.equal(stateOfCode(3), 'cloudy');
   assert.equal(stateOfCode(45), 'cloudy');
-  assert.equal(stateOfCode(61), 'rain');
+  for (const code of [51, 53, 55, 56, 57]) assert.equal(stateOfCode(code), 'drizzle', `code ${code}`);
+  for (const code of [61, 63, 65, 66, 67, 80, 81, 82]) assert.equal(stateOfCode(code), 'rain', `code ${code}`);
   assert.equal(stateOfCode(95), 'storm');
   for (const bad of [4, 68, 100, -1, 1.5, '61', null, undefined]) assert.equal(stateOfCode(bad), null, String(bad));
 });
@@ -27,9 +28,10 @@ test('the weather input accepts off, live, one state or one per place', () => {
   assert.deepEqual(parseWeatherInput(''), { mode: 'off' });
   assert.deepEqual(parseWeatherInput('off'), { mode: 'off' });
   assert.deepEqual(parseWeatherInput(' Live '), { mode: 'live' });
+  assert.deepEqual(parseWeatherInput('drizzle'), { mode: 'fixed', states: ['drizzle', 'drizzle', 'drizzle'] });
   assert.deepEqual(parseWeatherInput('rain'), { mode: 'fixed', states: ['rain', 'rain', 'rain'] });
   assert.deepEqual(parseWeatherInput('storm, cloudy ,clear'), { mode: 'fixed', states: ['storm', 'cloudy', 'clear'] });
-  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, cloudy, rain, storm/);
+  assert.throws(() => parseWeatherInput('snow'), /Unknown weather: "snow"\. Options: off, live, clear, cloudy, drizzle, rain, storm/);
   assert.throws(() => parseWeatherInput('rain,clear'), /one state per place/);
 });
 

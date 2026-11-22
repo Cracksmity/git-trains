@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja cuatro estados: `clear`, `cloudy`, `rain` y `storm` (ver [Clima](reference.md#clima)). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja cinco estados: `clear`, `cloudy`, `drizzle`, `rain` y `storm` (ver [Clima](reference.md#clima)). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -30,7 +30,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
 | [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
-| [Llovizna](#llovizna) | WMO 51–57 | `rain` | Gotas finas y escasas con brillo mojado, sin velo |
 | [Granizo](#granizo) | WMO 96, 99 | `storm` | Una granizada tapatía: bolitas blancas que rebotan y se juntan en la plaza y los techos |
 | [Helada](#helada) | `clear` con 2 °C o menos | `clear` | Escarcha blanca en el pasto y los techos de Los Altos |
 | [Calor](#calor) | `clear` con 32 °C o más | `clear` | El aire que vibra sobre el agave de Tequila |
@@ -54,18 +53,6 @@ Arte:
 Usa bordes tramados (el patrón 25/50/75 % de src/scene/sky.js) en vez de transparencias, para que el pixel art siga nítido. La neblina no se mueve, o se desliza con el ciclo de nubes que ya existe.
 
 Listo cuando: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` se ve bien en los dos temas y `npm run check` pasa.
-```
-
-### Llovizna
-
-```text
-En git-trains, agrega el estado de clima "drizzle" (llovizna) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: códigos WMO 51, 53, 55, 56 y 57, que hoy cuentan como "rain".
-
-Arte: como la lluvia pero más ligera. Usa el cielo y el techo de "cloudy", no el cielo de lluvia, y no agregues el velo que oscurece. Usa más o menos un tercio de las gotas de la lluvia, de un píxel de largo y más lentas, con las capas de caída que ya existen en src/scene/weather.js. Los detalles mojados se quedan: los brillos de la plaza de Guadalajara, las tejas brillantes de Los Altos y algunos charcos en el balasto. Quita el agua de los surcos de Tequila.
-
-Listo cuando: la llovizna se ve claramente más ligera que la lluvia en los dos temas a tamaño README y `npm run check` pasa.
 ```
 
 ### Granizo

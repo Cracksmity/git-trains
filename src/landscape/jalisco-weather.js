@@ -4,7 +4,9 @@
 // the rain and the flashes; these painters only touch the ground they own.
 import { skyInk } from '../weather/inks.js';
 
-const wet = (state) => state === 'rain' || state === 'storm';
+const wet = (state) => state === 'drizzle' || state === 'rain' || state === 'storm';
+const heavy = (state) => state === 'rain' || state === 'storm';
+const skyOf = (state) => (state === 'drizzle' ? 'cloudy' : state);
 
 /**
  * Swap inks inside a band, reading the painted backdrop and writing to the weather grid.
@@ -20,8 +22,9 @@ function recolor(g, backdrop, band, swaps, pick = (x, y) => true) {
 }
 
 // Water standing between the sleepers: short glints on the ballast, kept off the captions.
-function puddles(g, backdrop, band, seed) {
+function puddles(g, backdrop, band, seed, every = 1) {
   const y = band.base + 9;
+  let n = 0;
   for (let x = 6 + (seed % 7); x < g.w - 6; x += 17 + ((x * seed) % 13)) {
     const w = 2 + ((x + seed) % 4);
     let clear = true;
@@ -29,7 +32,7 @@ function puddles(g, backdrop, band, seed) {
       const ink = backdrop.get(x + dx, y);
       if (ink && ink !== '@ballast2') clear = false;
     }
-    if (clear) g.hline(x, y, w, '@wPuddle');
+    if (clear && n++ % every === 0) g.hline(x, y, w, '@wPuddle');
   }
 }
 
@@ -47,19 +50,19 @@ function lens(g, cx, top, rows, state) {
  */
 function guadalajara(g, state, band, backdrop) {
   if (!wet(state)) return;
-  lens(g, 340, band.base - 61, state === 'storm' ? [9, 15, 13] : [7, 12, 9], state);
+  if (heavy(state)) lens(g, 340, band.base - 61, state === 'storm' ? [9, 15, 13] : [7, 12, 9], state);
   const row = band.base - 1;
   for (let x = 0; x < g.w; x++) if (backdrop.get(x, row) === '@stoneShade' && (x * 7) % 12 < 3) g.set(x, row, '@wPuddle');
   for (const x of [88, 194, 258, 326, 380]) g.set(x, row, '@glassWarm');
-  puddles(g, backdrop, band, 3);
+  puddles(g, backdrop, band, 3, state === 'drizzle' ? 3 : 1);
 }
 
-/** Los Altos: the tile roofs shine and the furrows of red earth hold water. */
+/** Los Altos: the tile roofs shine and, in rain, the furrows of red earth hold water. */
 function altos(g, state, band, backdrop) {
   if (!wet(state)) return;
   recolor(g, backdrop, band, { '@tileLit': '@wTileWet' });
-  recolor(g, backdrop, band, { '@earthLit': '@wPuddle' }, (x, y) => (x * 5 + y * 3) % 23 === 0);
-  puddles(g, backdrop, band, 5);
+  if (heavy(state)) recolor(g, backdrop, band, { '@earthLit': '@wPuddle' }, (x, y) => (x * 5 + y * 3) % 23 === 0);
+  puddles(g, backdrop, band, 5, state === 'drizzle' ? 3 : 1);
 }
 
 const VOLCANO = new Set(['@ridgeShade', '@ridge', '@rimLit', '@rimShade']);
@@ -88,16 +91,17 @@ function scarf(g, backdrop, top, trails, state) {
  */
 function tequila(g, state, band, backdrop) {
   const peak = band.base - 38;
+  const sky = skyOf(state);
   const trails = {
     cloudy: [[-6, -3], [2, 4], [3, 6]],
     rain: [[-6, -2], [2, 4], [4, 7], [3, 5]],
     storm: [[-4, -1], [3, 5], [5, 8], [6, 9], [4, 6]],
-  }[state];
-  if (trails) scarf(g, backdrop, peak + 4, trails, state);
+  }[sky];
+  if (trails) scarf(g, backdrop, peak + 4, trails, sky);
   if (!wet(state)) return;
   const horizon = band.base - 22;
-  recolor(g, backdrop, band, { '@furrow': '@wPuddle' }, (x, y) => y > horizon + 8 && (x + 2 * y) % 9 === 0);
-  puddles(g, backdrop, band, 9);
+  if (heavy(state)) recolor(g, backdrop, band, { '@furrow': '@wPuddle' }, (x, y) => y > horizon + 8 && (x + 2 * y) % 9 === 0);
+  puddles(g, backdrop, band, 9, state === 'drizzle' ? 3 : 1);
 }
 
 /**

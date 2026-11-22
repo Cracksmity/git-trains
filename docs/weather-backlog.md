@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws four states: `clear`, `cloudy`, `rain` and `storm` (see [Weather](reference.md#weather)). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws five states: `clear`, `cloudy`, `drizzle`, `rain` and `storm` (see [Weather](reference.md#weather)). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -30,7 +30,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
 | [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
-| [Drizzle](#drizzle) | WMO 51–57 | `rain` | Fine, sparse drops and a wet sheen, with no veil |
 | [Hail](#hail) | WMO 96, 99 | `storm` | A Guadalajara hailstorm: white pellets bounce and pile up on the plaza and roofs |
 | [Frost](#frost) | `clear` and 2 °C or less | `clear` | White frost on the pasture and roofs of Los Altos |
 | [Heat](#heat) | `clear` and 32 °C or more | `clear` | Heat shimmer over the Tequila agave field |
@@ -54,18 +53,6 @@ Art:
 Use dithered edges (the 25/50/75% pattern of src/scene/sky.js) rather than translucency, so the pixel art stays crisp. Fog does not move, or drifts with the existing cloud loop.
 
 Done when: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` looks right in both themes, and `npm run check` passes.
-```
-
-### Drizzle
-
-```text
-In git-trains, add a "drizzle" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 51, 53, 55, 56 and 57, which map to "rain" today.
-
-Art: like rain but lighter. Use the "cloudy" sky and ceiling, not the rain sky, and add no dimming veil. Use about a third of the rain's drops, one pixel long, falling slower, with the existing fall layers in src/scene/weather.js. Wet details stay: the Guadalajara plaza glints, the shining Los Altos tile roofs and a few puddles on the ballast. Skip the Tequila furrow water.
-
-Done when: drizzle is clearly lighter than rain in both themes at README size, and `npm run check` passes.
 ```
 
 ### Hail

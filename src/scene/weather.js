@@ -22,10 +22,14 @@ export const FLASH = { period: 9, keys: /** @type {Array<[number, number]>} */ (
 // How far into its cycle each place's lightning starts: Guadalajara's first flash is
 // on in frame 0, so the static PNG shows a storm over the Cathedral.
 const FLASH_OFFSET = [0.225, 3, 6];
-// Pixels per second of the far and near rain.
-const RAIN_SPEED = { rain: [44, 64], storm: [60, 90] };
+// Pixels per second of the far and near drops.
+const RAIN_SPEED = { drizzle: [24, 36], rain: [44, 64], storm: [60, 90] };
 // Area per drop, in square pixels: smaller is denser.
-const RAIN_SPACING = { rain: [330, 520], storm: [170, 260] };
+const RAIN_SPACING = { drizzle: [1200, 1100], rain: [330, 520], storm: [170, 260] };
+// Drop height in pixels, far and near.
+const RAIN_LENGTH = { drizzle: [1, 1], rain: [2, 3], storm: [2, 4] };
+// Seed offset per state so rain and storm keep their exact patterns.
+const RAIN_SEED = { drizzle: 2, rain: 0, storm: 5 };
 
 // The inks that paint the sky of a country strip.
 const COUNTRY_SKY = new Set(['@dusk', '@haze', '@afterglow', '@starlight']);
@@ -186,8 +190,8 @@ function rainLayers(state, band, W) {
   const h = band.bottom - band.top;
   return [0, 1].map((near) => {
     const count = Math.round((W * h) / RAIN_SPACING[state][near]);
-    const length = near ? (state === 'storm' ? 4 : 3) : 2;
-    const rand = rng(7100 + 10 * band.k + near + (state === 'storm' ? 5 : 0));
+    const length = RAIN_LENGTH[state][near];
+    const rand = rng(7100 + 10 * band.k + near + RAIN_SEED[state]);
     const g = new Grid(W, 2 * h);
     for (let i = 0; i < count; i++) {
       const x = Math.floor(((i + rand()) * W) / count);
@@ -251,19 +255,20 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
     const state = weather[band.k];
     const art = PLACE_ART[places[band.k]?.id];
     if (!state || state === 'clear' || !art) return;
+    const sky = state === 'drizzle' ? 'cloudy' : state;
     if (band.k === 0) {
-      layers.push({ ...citySky(state, W), z: 'sky', y: 0 });
-      layers.push({ grid: cityDeck(state, W), z: 'sky', y: 0, drift: true });
+      layers.push({ ...citySky(sky, W), z: 'sky', y: 0 });
+      layers.push({ grid: cityDeck(sky, W), z: 'sky', y: 0, drift: true });
     } else {
-      layers.push({ grid: countrySky(state, band, backdrop, W), z: 'ground', y: band.top });
+      layers.push({ grid: countrySky(sky, band, backdrop, W), z: 'ground', y: band.top });
     }
-    if (state !== 'cloudy') layers.push({ grid: veil(state, band, W), z: 'ground', y: band.top });
+    if (state === 'rain' || state === 'storm') layers.push({ grid: veil(state, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
     // The flash lights the sky behind the place's own clouds, such as the volcano's cap.
     if (state === 'storm') layers.push(lightning(band, backdrop, W, art));
     art.paint(ground, state, band, backdrop);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
-    if (state === 'rain' || state === 'storm') layers.push(...rainLayers(state, band, W));
+    if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W));
   });
   return layers;
 }

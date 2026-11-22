@@ -97,10 +97,64 @@ test('in Jalisco the weather replaces the seasonal particles but never a holiday
 
 test('the title names each place with its weather in the scene language', () => {
   assert.match(spec({ weather: ['rain', 'clear', 'storm'] }).title, /\nWeather: Guadalajara rain, Los Altos clear, Tequila storm$/);
+  assert.match(spec({ weather: ['cloudy', 'drizzle', 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Los Altos llovizna, Tequila lluvia$/);
   assert.match(spec({ weather: ['cloudy', null, 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Tequila lluvia$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);
+});
+
+test('drizzle uses the cloudy sky without a veil, sparse slow 1-pixel drops and dry Tequila furrows', () => {
+  const out = svg({ weather: ['drizzle', 'drizzle', 'drizzle'] });
+  assert.ok(out.includes('--wCloudy0:') && out.includes('--wCloudyCloud:'), 'uses cloudy sky and cloud inks');
+  assert.ok(!out.includes('--wRain0:') && !out.includes('--wDimRain:'), 'skips the rain sky and dimming veil');
+  assert.match(out, /prefers-reduced-motion:reduce\)\{[^}]*\.w-fall\d+/);
+
+  const bands = weatherBands(3);
+  const drizzleArt = weatherArt(['drizzle', 'drizzle', 'drizzle'], sceneContext(spec({ weather: ['drizzle', 'drizzle', 'drizzle'] })));
+  const rainArt = weatherArt(['rain', 'rain', 'rain'], sceneContext(spec({ weather: ['rain', 'rain', 'rain'] })));
+  const drizzleFall = drizzleArt.filter((l) => l.fall);
+  const rainFall = rainArt.filter((l) => l.fall);
+  assert.equal(drizzleFall.length, 6, 'two fall layers per place');
+
+  const countColumns = (layer) => {
+    let cols = 0;
+    let pixels = 0;
+    for (let x = 0; x < layer.grid.w; x++) {
+      let col = 0;
+      for (let y = 0; y < layer.fall.h; y++) if (layer.grid.get(x, y)) col++;
+      if (col) cols++;
+      pixels += col;
+    }
+    return { cols, pixels };
+  };
+  for (let i = 0; i < drizzleFall.length; i++) {
+    const d = drizzleFall[i];
+    const r = rainFall[i];
+    assert.ok(d.fall.dur > r.fall.dur, `fall layer ${i} falls slower than rain`);
+    for (let y = 0; y < d.fall.h; y++) {
+      for (let x = 0; x < d.grid.w; x++) assert.equal(d.grid.get(x, y), d.grid.get(x, y + d.fall.h), 'seamless loop');
+    }
+    const stats = countColumns(d);
+    assert.equal(stats.pixels, stats.cols, `fall layer ${i} uses 1-pixel drops`);
+  }
+  // Across all places, drizzle has about a third of rain's drops.
+  const drizzleDrops = drizzleFall.reduce((sum, l) => sum + countColumns(l).cols, 0);
+  const rainDrops = rainFall.reduce((sum, l) => sum + countColumns(l).cols, 0);
+  const ratio = drizzleDrops / rainDrops;
+  assert.ok(ratio > 0.25 && ratio < 0.42, `expected ~1/3 of rain drops, got ${drizzleDrops}/${rainDrops}`);
+
+  // Ground details: wet plaza, wet tile roofs, ballast puddles, no Tequila furrow water.
+  const ground = drizzleArt.filter((l) => l.z === 'ground' && !l.fall && l.y === 0);
+  const hasInkInRows = (ink, y0, y1) => ground.some((l) => {
+    for (let y = y0; y < y1; y++) for (let x = 0; x < l.grid.w; x++) if (l.grid.get(x, y) === ink) return true;
+    return false;
+  });
+  assert.ok(hasInkInRows('@wPuddle', bands[0].base - 1, bands[0].base), 'Guadalajara plaza glints');
+  assert.ok(hasInkInRows('@glassWarm', bands[0].base - 1, bands[0].base), 'Guadalajara lamp reflections');
+  assert.ok(hasInkInRows('@wTileWet', bands[1].top, bands[1].base), 'Los Altos shining tile roofs');
+  for (const band of bands) assert.ok(hasInkInRows('@wPuddle', band.base, band.bottom), `ballast puddles on track ${band.k}`);
+  assert.equal(hasInkInRows('@wPuddle', bands[2].top, bands[2].base), false, 'no water in Tequila furrows');
 });
 
 function sceneContext(scene) {
