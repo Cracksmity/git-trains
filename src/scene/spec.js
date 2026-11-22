@@ -11,6 +11,16 @@ import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+/**
+ * Rounded Celsius reading for a caption (never "-0°"), or empty when missing.
+ * @param {number | null | undefined} temperature
+ * @returns {string}
+ */
+function formatTemperature(temperature) {
+  if (typeof temperature !== 'number' || !Number.isFinite(temperature)) return '';
+  return `${Math.round(temperature) || 0}°`;
+}
+
 export const MODES = ['single', 'multi'];
 export const LANGUAGES = ['en', 'es'];
 
@@ -95,12 +105,15 @@ export function buildSpec(stats, opts = {}) {
   }));
 
   const places = placesFor(skyline);
+  // The art reads the states; the designs that need a reading's extras read `sky`.
+  const sky = places && Array.isArray(opts.weather) ? tracks.map((_, i) => placeSky(opts.weather[i])) : null;
   if (jalisco) {
     tracks.forEach((track, i) => {
       track.model = JALISCO_TRAINS[i];
-      // Every caption reads "place / language %"; the regional trains carry no
-      // LED sign, so the streak hangs on a plaque beneath the station sign.
-      const place = skyline?.preset === 'jalisco' ? `${places[i].name} / ` : '';
+      // Every caption reads "place / language %" (with the rounded temperature for live readings);
+      // the regional trains carry no LED sign, so the streak hangs on a plaque beneath the station sign.
+      const temp = formatTemperature(sky?.[i]?.temperature);
+      const place = skyline?.preset === 'jalisco' ? `${places[i].name}${temp ? ` ${temp}` : ''} / ` : '';
       track.caption = place + track.caption;
     });
     tracks[0].plaque = `${label} ${stats.streak} ${text.days(stats.streak)}`;
@@ -113,8 +126,6 @@ export function buildSpec(stats, opts = {}) {
     while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
   }
 
-  // The art reads the states; the designs that need a reading's extras read `sky`.
-  const sky = places && Array.isArray(opts.weather) ? tracks.map((_, i) => placeSky(opts.weather[i])) : null;
   const weather = sky ? sky.map((place) => place?.state ?? null) : null;
   const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
   const descriptions = sky?.flatMap((place, i) => {

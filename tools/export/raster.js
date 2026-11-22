@@ -138,9 +138,10 @@ function paintWeather(c, scene, z, t) {
   for (const layer of scene.weather ?? []) {
     if (layer.z !== z) continue;
     if (layer.fall) {
-      const { h, dur, dx = 0 } = layer.fall;
+      const { h, dur, dx = 0, flutter = 0 } = layer.fall;
       const step = Math.floor(cycle(t / dur) * h) - h;
-      const x = Math.round(dx * step / h);
+      // w-flutter holds the flakes one pixel right for the second half of its period.
+      const x = Math.round(dx * step / h) + (flutter && cycle(t / flutter) >= 0.5 ? 1 : 0);
       const y = layer.y + step;
       c.paint(layer.grid, x, y, scene.color, 1, layer.clip);
       if (dx) {

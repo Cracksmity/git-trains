@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja diez estados (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja once estados (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` y `hail`). Ver [Clima](reference.md#clima). El viento y la calima se combinan con ellos como modificadores. Esta página fija las reglas que sigue cada diseño nuevo y reúne los que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -27,34 +27,4 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 
 ## Diseños pendientes
 
-| Estado | Cuándo | Hoy usa | Lo que lo distingue |
-| --- | --- | --- | --- |
-| [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
-| [Temperatura en las leyendas](#temperatura-en-las-leyendas) | Cualquier lectura en vivo | Nada | "Tequila 20° / Rust 15%" |
-
-### Nieve
-
-```text
-En git-trains, agrega el estado de clima "snow" (nieve) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: códigos WMO 71, 73, 75, 77, 85 y 86, que hoy cuentan como "rain". La nieve es rara en Jalisco; Guadalajara la vio en diciembre de 1997.
-
-Arte: reutiliza lo más posible la decoración de invierno de src/scene/decor.js: los copos que caen y la nieve sobre los techos encontrados en la cuadrícula del fondo. Recorta los copos a la franja de cada lugar con las capas de caída de src/scene/weather.js. Usa el cielo de "cloudy". Agrega nieve en las torres de la Catedral, el techo del estadio, los techos de Los Altos y las laderas altas del volcán. No dupliques decor.js; si los dos necesitan una función, muévela a un módulo pequeño compartido.
-
-Listo cuando: la nieve se lee a tamaño README en los dos temas, la decoración de invierno sigue pasando sus pruebas y `npm run check` pasa.
-```
-
-### Temperatura en las leyendas
-
-```text
-En git-trains, muestra la temperatura de cada lugar en las leyendas de Jalisco cuando el clima es en vivo, por ejemplo "Tequila 20° / Rust 15%".
-
-Pasos:
-- weatherFor en src/action/weather.js ya lee temperature_2m. Pasa las temperaturas redondeadas a buildSpec junto a los estados.
-- Revisa si src/graphics/font.js tiene el símbolo de grado. Si no lo tiene, agrégalo con el estilo de la fuente y pruébalo.
-- Los estados fijos no tienen temperatura: sus leyendas quedan igual.
-- Revisa que la leyenda más larga siga cabiendo junto al semáforo en los dos sentidos de marcha.
-Actualiza las dos referencias.
-
-Listo cuando: las leyendas muestran la temperatura solo con lecturas en vivo, los recursos generados no cambian (ahí el clima está apagado) y `npm run check` pasa.
-```
+Por ahora ninguno: la nieve, el viento, la calima y la temperatura en las leyendas eran los últimos de la lista. Agrega aquí el siguiente diseño con su prompt. `tools/conductor/tasks/weather-brief.md` es el brief que el conductor le da a un agente para cualquier diseño nuevo del clima.

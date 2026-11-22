@@ -35,8 +35,9 @@ test('wind moves the plaza trees, mesquites, piruls and red field dust in every 
       assert.ok(grid.cells.includes('@foliage'), `${state} on track ${k}`);
     });
     const dust = weather.filter(({ grid }) => grid.cells.includes('@wDust'));
-    assert.equal(dust.length, 1);
-    assert.ok(dust[0].y >= bands[1].top && dust[0].y + dust[0].grid.h <= bands[1].base);
+    // Snow covers the parcels, so it has no dust to lift.
+    assert.equal(dust.length, state === 'snow' ? 0 : 1, state);
+    for (const layer of dust) assert.ok(layer.y >= bands[1].top && layer.y + layer.grid.h <= bands[1].base);
     const svg = renderScene(scene);
     assert.match(svg, /\.w-sway\{[^{}]*animation:w-sway [\d.]+s step-end infinite/);
     const stopped = svg.match(/prefers-reduced-motion:reduce\)\{([^{}]*\.w-sway[^{}]*)\{animation:none!important\}/)[1].split(',');

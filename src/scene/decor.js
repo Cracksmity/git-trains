@@ -5,6 +5,7 @@ import { clean, textWidth } from '../graphics/font.js';
 import { GY0, PITCH } from './layout.js';
 import { TRAIN_H } from '../trains/geometry.js';
 import { DECORATIONS } from '../activity/seasons.js';
+import { capRoofs, flakeGrid, swayKeyframe } from './snow.js';
 
 export { DECORATIONS };
 
@@ -58,26 +59,28 @@ function falling(art, kind) {
   // Two identical H-row periods. Wrapping each pixel also preserves particles
   // that straddle the seam; steps(H) ends each step exactly one pixel lower.
   art.rules.push(`@keyframes d-fall-step-end{from{transform:translateY(-${art.H}px)}to{transform:translateY(0)}}`);
-  art.rules.push('@keyframes d-sway{0%,100%{transform:translateX(0)}50%{transform:translateX(1px)}}');
+  art.rules.push(swayKeyframe('d-sway'));
   counts.forEach((count, layer) => {
-    const g = new Grid(art.W, art.H * 2);
-    for (let i = 0; i < count; i++) {
-      const x = 3 + Math.floor((i + rand()) * (art.W - 7) / count);
-      const y = Math.floor(rand() * art.H);
-      const pixel = (dx, dy, color) => {
-        const row = (y + dy) % art.H;
-        for (const offset of [0, art.H]) g.set(x + dx, row + offset, color);
-      };
-      if (snow) {
-        pixel(0, 0, '@dIce');
-        if (i % 3 === 0) pixel(1, 0, '@dSnow');
-      } else if (leaf) {
-        pixel(0, 0, '@dLeaf');
-        pixel(1, 1, '@dLeafShade');
-        if (i % 2 === 0) pixel(1, 0, '@dLeaf');
-      } else {
-        pixel(0, 0, '@dPetal');
-        if (i % 2 === 0) pixel(1, 0, '@dPetalShade');
+    let g;
+    if (snow) {
+      g = flakeGrid(art.W, art.H, count, rand, '@dIce', '@dSnow');
+    } else {
+      g = new Grid(art.W, art.H * 2);
+      for (let i = 0; i < count; i++) {
+        const x = 3 + Math.floor((i + rand()) * (art.W - 7) / count);
+        const y = Math.floor(rand() * art.H);
+        const pixel = (dx, dy, color) => {
+          const row = (y + dy) % art.H;
+          for (const offset of [0, art.H]) g.set(x + dx, row + offset, color);
+        };
+        if (leaf) {
+          pixel(0, 0, '@dLeaf');
+          pixel(1, 1, '@dLeafShade');
+          if (i % 2 === 0) pixel(1, 0, '@dLeaf');
+        } else {
+          pixel(0, 0, '@dPetal');
+          if (i % 2 === 0) pixel(1, 0, '@dPetalShade');
+        }
       }
     }
     const cls = `d-fall${layer}`;
@@ -91,17 +94,11 @@ function winter(art) {
   const g = grid(art);
   const b = art.backdrop;
   const city = new Set(['@city', '@city2', '@cityWin']);
+  // Use the painted skyline, including custom spires, rather than guessing
+  // roof heights. Do not paint over a mast or wire immediately above it.
+  capRoofs(g, b, { fromY: 0, toY: GY0 - 3, roofs: city, ink: '@dSnow', firstOnly: true });
+  capRoofs(g, b, { fromY: GY0, toY: art.H, roofs: new Set(['@houseRoof']), ink: '@dSnow' });
   for (let x = 0; x < art.W; x++) {
-    // Use the painted skyline, including custom spires, rather than guessing
-    // roof heights. Do not paint over a mast or wire immediately above it.
-    for (let y = 0; y < GY0 - 3; y++) {
-      if (!city.has(b.get(x, y))) continue;
-      if (y > 0 && !b.get(x, y - 1)) g.set(x, y - 1, '@dSnow');
-      break;
-    }
-    for (let y = GY0; y < art.H; y++) {
-      if (b.get(x, y) === '@houseRoof' && !b.get(x, y - 1)) g.set(x, y - 1, '@dSnow');
-    }
     if (b.get(x, GY0 - 3) === '@hill') g.set(x, GY0 - 3, '@dSnow');
   }
   art.tracks.forEach((track, k) => {

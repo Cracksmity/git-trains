@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws ten states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws eleven states (`clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` and `hail`). See [Weather](reference.md#weather). Wind and haze combine with them as modifiers. This page sets the rules every new design follows and lists the ones still to draw, with a prompt for each. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -27,34 +27,4 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 
 ## Pending designs
 
-| State | Trigger | Borrows today | Signature |
-| --- | --- | --- | --- |
-| [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
-| [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
-
-### Snow
-
-```text
-In git-trains, add a "snow" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 71, 73, 75, 77, 85 and 86, which map to "rain" today. Snow is rare in Jalisco; Guadalajara saw it in December 1997.
-
-Art: reuse the winter decoration of src/scene/decor.js as much as possible: the falling flakes and the snow resting on roofs found from the backdrop grid. Clip the flakes to each place's strip with the fall layers of src/scene/weather.js. Use the "cloudy" sky. Add snow on the Cathedral spires, the stadium roof, the Los Altos roofs and the volcano's upper slopes. Do not duplicate decor.js; move a shared helper into a small module if both need it.
-
-Done when: snow reads at README size in both themes and the winter decoration still passes its tests, and `npm run check` passes.
-```
-
-### Temperature in captions
-
-```text
-In git-trains, show each place's temperature in the Jalisco captions when the weather is live, for example "Tequila 20° / Rust 15%".
-
-Steps:
-- weatherFor in src/action/weather.js already reads temperature_2m. Pass the rounded temperatures to buildSpec next to the states.
-- Check that src/graphics/font.js has a degree glyph. If it does not, add one in the font's style and test it.
-- Fixed states have no temperature: their captions stay as they are.
-- Check that the longest caption still fits beside the signal in both directions of travel.
-Update both reference docs.
-
-Done when: captions show temperatures only for live readings, the generated assets do not change (weather is off there), and `npm run check` passes.
-```
+None right now: snow, wind, haze and the caption temperatures were the last ones on this list. Add the next design here with a prompt. `tools/conductor/tasks/weather-brief.md` is the brief the conductor gives an agent for any new weather design.

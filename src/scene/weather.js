@@ -8,6 +8,8 @@ import { WEATHER_THEMES, skyInk, skyState } from '../weather/inks.js';
 import { hailLayers } from './weather-hail.js';
 import { fallTile, windTileCopies } from './weather-fall.js';
 import { heatSky } from './weather-heat.js';
+import { snowLayers } from './weather-snow.js';
+import { swayKeyframe } from './snow.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
 import { jaliscoWind } from '../landscape/jalisco-weather-wind.js';
 import { guadalajaraHaze } from '../landscape/jalisco-weather-haze.js';
@@ -49,7 +51,8 @@ const COUNTRY_SKY = new Set(['@dusk', '@haze', '@afterglow', '@starlight']);
  * @property {'sky' | 'ground'} z sky: behind the city and countryside; ground: over them, behind the trains
  * @property {number} y scene row of the grid's first row
  * @property {[number, number]} [clip] scene rows the layer may paint, end exclusive
- * @property {{ h: number, dur: number, dx?: number }} [fall] drops h rows and drifts dx pixels every dur seconds
+ * @property {{ h: number, dur: number, dx?: number, flutter?: number }} [fall] drops h rows and drifts dx pixels every dur seconds,
+ *   looping; flutter shifts the falling flakes one pixel and back over that many seconds
  * @property {boolean} [sway] moves a crown one pixel in the gust
  * @property {boolean} [drift] shares the clouds' loop: a 2W-wide grid sliding W pixels
  * @property {{ offset: number }} [blink] lightning, `offset` seconds into its cycle at frame 0
@@ -282,6 +285,8 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
     const wind = sky?.[band.k]?.wind === true;
     const haze = showsHaze(places[band.k].id, sky?.[band.k]);
     const cover = skyState(state);
+    // Fog hides the crowns and frost and snow rest on them: their wind goes over the painted ground.
+    const settled = state === 'fog' || state === 'frost' || state === 'snow';
     if (state === 'heat') {
       layers.push(...heatSky(band, backdrop));
       if (art.heat) layers.push(...art.heat(band, backdrop));
@@ -296,7 +301,7 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
       }
     }
     if (haze) layers.push(guadalajaraHaze(band, backdrop));
-    if (wind && state !== 'fog' && state !== 'frost') layers.push(...jaliscoWind(band, backdrop, state));
+    if (wind && !settled) layers.push(...jaliscoWind(band, backdrop, state));
     if (state === 'clear' || state === 'partly' || state === 'heat') return;
     if (cover === 'rain' || cover === 'storm') layers.push({ grid: veil(cover, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
@@ -304,8 +309,9 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
     if (cover === 'storm') layers.push(lightning(band, backdrop, W, art));
     art.paint(ground, state, band, backdrop, haze);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
-    if (wind && (state === 'fog' || state === 'frost')) layers.push(...jaliscoWind(band, backdrop, state));
+    if (wind && settled) layers.push(...jaliscoWind(band, backdrop, state, state === 'fog' ? null : ground));
     if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W, wind));
+    if (state === 'snow') layers.push(...snowLayers(band, W));
     if (state === 'hail') layers.push(...hailLayers(band, W, wind));
   });
   return layers;
@@ -324,7 +330,7 @@ export function weatherLayers(weather, scene, used) {
   weatherArt(weather, scene).forEach((layer, i) => {
     let body = layer.svg ? layer.svg(used) : layer.grid.paths(used);
     if (layer.fall) {
-      const { h, dur, dx } = layer.fall;
+      const { h, dur, dx, flutter } = layer.fall;
       const cls = `w-fall${i}`;
       animated.add(cls);
       const from = dx ? `translate(-${dx}px,-${h}px)` : `translateY(-${h}px)`;
@@ -334,6 +340,15 @@ export function weatherLayers(weather, scene, used) {
         const tile = `w-tile${i}`;
         body = `<g id="${tile}">${body}</g>` + windTileCopies(scene.W, h, dx)
           .map(([x, y]) => `<use href="#${tile}" x="${x}" y="${y}"/>`).join('');
+      }
+      // Flakes share one keyframe per period; the crowns' gust owns w-sway.
+      if (flutter) {
+        const flutterCls = `w-flutter${flutter}`;
+        if (!animated.has(flutterCls)) {
+          animated.add(flutterCls);
+          rules.push(`.${flutterCls}{animation:w-flutter ${flutter}s step-end infinite}`);
+        }
+        body = `<g class="${flutterCls}">${body}</g>`;
       }
       const [top, end] = layer.clip;
       body = `<clipPath id="w-clip${i}"><rect y="${top}" width="${scene.W}" height="${end - top}"/></clipPath>` +
@@ -355,6 +370,7 @@ export function weatherLayers(weather, scene, used) {
     out[layer.z] += body;
   });
   if (!animated.size && !out.sky && !out.ground) return out;
+  if ([...animated].some((cls) => cls.startsWith('w-flutter'))) rules.unshift(swayKeyframe('w-flutter'));
   if (rules.some((r) => r.includes('w-flash'))) {
     rules.unshift(`@keyframes w-flash{${FLASH.keys.map(([at, v]) => `${+(at * 100).toFixed(1)}%{opacity:${v}}`).join('')}}`);
   }
