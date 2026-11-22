@@ -31,7 +31,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | --- | --- | --- | --- |
 | [Viento](#viento) | Viento de 40 km/h o más | Nada | Lluvia inclinada, polvo rojo en Los Altos, árboles que se mecen |
 | [Calima](#calima) | Mala calidad del aire (PM2.5) | Nada | Una capa café sobre Guadalajara en días de contingencia |
-| [Temperatura en las leyendas](#temperatura-en-las-leyendas) | Cualquier lectura en vivo | Nada | "Tequila 20° / Rust 15%" |
 
 ### Viento
 
@@ -58,19 +57,4 @@ Datos: una segunda consulta a la API de calidad del aire de Open-Meteo (https://
 Arte: una capa café tramada sobre la mitad baja del cielo de Guadalajara. La loma del fondo y las torres del poniente se desvanecen hacia el color del cielo. La Catedral y los monumentos del frente siguen nítidos. La calima se combina con despejado y nublado. La lluvia la limpia, así que no la dibujes con lluvia ni tormenta.
 
 Listo cuando: la segunda consulta tiene pruebas con un fetch falso, su falla no afecta nada y `npm run check` pasa.
-```
-
-### Temperatura en las leyendas
-
-```text
-En git-trains, muestra la temperatura de cada lugar en las leyendas de Jalisco cuando el clima es en vivo, por ejemplo "Tequila 20° / Rust 15%".
-
-Pasos:
-- weatherFor en src/action/weather.js ya lee temperature_2m. Pasa las temperaturas redondeadas a buildSpec junto a los estados.
-- Revisa si src/graphics/font.js tiene el símbolo de grado. Si no lo tiene, agrégalo con el estilo de la fuente y pruébalo.
-- Los estados fijos no tienen temperatura: sus leyendas quedan igual.
-- Revisa que la leyenda más larga siga cabiendo junto al semáforo en los dos sentidos de marcha.
-Actualiza las dos referencias.
-
-Listo cuando: las leyendas muestran la temperatura solo con lecturas en vivo, los recursos generados no cambian (ahí el clima está apagado) y `npm run check` pasa.
 ```

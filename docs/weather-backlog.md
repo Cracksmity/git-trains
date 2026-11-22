@@ -31,7 +31,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | --- | --- | --- | --- |
 | [Wind](#wind) | Wind at 40 km/h or more | Nothing | Slanted rain, red dust in Los Altos, swaying trees |
 | [Haze](#haze) | Poor air quality (PM2.5) | Nothing | A brownish layer over Guadalajara on environmental-alert days |
-| [Temperature in captions](#temperature-in-captions) | Any live reading | Nothing | "Tequila 20° / Rust 15%" |
 
 ### Wind
 
@@ -58,19 +57,4 @@ Data: a second Open-Meteo request to the air-quality API (https://air-quality-ap
 Art: a brownish dithered layer over the lower half of Guadalajara's sky. The distant ridge and the west-side towers fade toward the sky color. The Cathedral and the landmarks in front stay crisp. Haze combines with clear and cloudy. Rain washes it away, so do not draw it in rain or storm.
 
 Done when: the second request is tested with a fake fetch, its failure is harmless, and `npm run check` passes.
-```
-
-### Temperature in captions
-
-```text
-In git-trains, show each place's temperature in the Jalisco captions when the weather is live, for example "Tequila 20° / Rust 15%".
-
-Steps:
-- weatherFor in src/action/weather.js already reads temperature_2m. Pass the rounded temperatures to buildSpec next to the states.
-- Check that src/graphics/font.js has a degree glyph. If it does not, add one in the font's style and test it.
-- Fixed states have no temperature: their captions stay as they are.
-- Check that the longest caption still fits beside the signal in both directions of travel.
-Update both reference docs.
-
-Done when: captions show temperatures only for live readings, the generated assets do not change (weather is off there), and `npm run check` passes.
 ```

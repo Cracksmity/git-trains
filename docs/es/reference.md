@@ -65,8 +65,8 @@ Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres pri
 
 La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather` al bloque `with`:
 
-- `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action. No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
-- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action y muestra la temperatura de cada lugar en su leyenda (por ejemplo `Tequila 20° / Rust 15%`). No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
+- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` o `hail` fija el mismo estado en todos los lugares, sin temperatura en las leyendas. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
 - `off`, el valor por defecto, deja la escena como está.
 
 | Estado | Guadalajara | Los Altos | Tequila |

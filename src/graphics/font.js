@@ -46,6 +46,7 @@ const GLYPHS = {
   '_': ['...', '...', '...', '...', '###'],
   '#': ['#.#', '###', '#.#', '###', '#.#'],
   '%': ['#.#', '..#', '.#.', '#..', '#.#'],
+  '°': ['.#.', '#.#', '.#.', '...', '...'],
 };
 
 const SPACE = 2;
@@ -57,14 +58,14 @@ export function clean(text) {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toUpperCase()
-    .replace(/[^A-Z0-9\-.,:/+_# %]/g, '');
+    .replace(/[^A-Z0-9\-.,:/+_# %°]/g, '');
 }
 
 export function textWidth(text) {
   const t = clean(text);
   if (!t) return 0;
   let w = 0;
-  for (const ch of t) w += (ch === ' ' ? SPACE : 3) + 1;
+  for (const ch of t) w += (ch === ' ' ? SPACE : GLYPHS[ch][0].length) + 1;
   return w - 1;
 }
 
@@ -78,10 +79,11 @@ export function drawText(grid, text, x, y, color) {
       continue;
     }
     const g = GLYPHS[ch];
+    const w = g[0].length;
     for (let r = 0; r < GLYPH_H; r++) {
-      for (let c = 0; c < 3; c++) if (g[r][c] === '#') grid.set(cx + c, y + r, color);
+      for (let c = 0; c < w; c++) if (g[r][c] === '#') grid.set(cx + c, y + r, color);
     }
-    cx += 4;
+    cx += w + 1;
   }
   return cx - x - 1;
 }

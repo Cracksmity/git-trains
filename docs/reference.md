@@ -65,8 +65,8 @@ Set both `train` and `skyline` to `jalisco`. In `mode: multi`, the first three l
 
 The Jalisco scene can wear the weather of its three places. Add `weather` to the `with` block:
 
-- `live` reads the current weather in Guadalajara, Los Altos (at Arandas) and Tequila from [Open-Meteo](https://open-meteo.com/) when the Action runs. It needs no key. If the reading fails, the scene is drawn without weather and the log says why.
-- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` or `hail` fixes one state for every place. `storm, rain, cloudy` gives one state per place, in track order.
+- `live` reads the current weather in Guadalajara, Los Altos (at Arandas) and Tequila from [Open-Meteo](https://open-meteo.com/) when the Action runs and shows each place's temperature in its caption (for example `Tequila 20° / Rust 15%`). It needs no key. If the reading fails, the scene is drawn without weather and the log says why.
+- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` or `hail` fixes one state for every place without temperatures in the captions. `storm, rain, cloudy` gives one state per place, in track order.
 - `off`, the default, leaves the scene as it is.
 
 | State | Guadalajara | Los Altos | Tequila |
