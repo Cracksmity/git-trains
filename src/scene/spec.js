@@ -6,6 +6,8 @@ import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
 import { UNLOCK_IDS, unlockThreshold } from '../activity/unlocks.js';
+import { WEATHER_NAMES, WEATHER_STATES } from '../weather/conditions.js';
+import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -24,6 +26,7 @@ const TEXT = {
       observation: (n) => `Observation car unlocked: ${n}+ stars`,
       mail: (n) => `Mail car unlocked: ${n}+ pull requests`,
     },
+    weather: 'Weather',
   },
   es: {
     label: 'RACHA',
@@ -35,6 +38,7 @@ const TEXT = {
       observation: (n) => `Vagón mirador desbloqueado: más de ${n} estrellas`,
       mail: (n) => `Vagón postal desbloqueado: más de ${n} pull requests`,
     },
+    weather: 'Clima',
   },
 };
 
@@ -49,6 +53,8 @@ const TEXT = {
 // opts.unlock: the special car the profile earned (see unlocks.js), or null. It joins the
 //   main train right behind the cab and adds a line to the title. Next to a full-length
 //   train it takes the place of the last regular car, so the train still fits the scene.
+// opts.weather: one weather state per track (see src/weather/conditions.js), or null. Only
+//   skylines with real places behind their tracks (the jalisco preset) wear it; the title names it.
 export function buildSpec(stats, opts = {}) {
   const { train = 'auto', mode = 'single', theme = 'auto', language = 'en', scale = 2, skyline = null } = opts;
   const unlock = opts.unlock ?? null;
@@ -83,13 +89,13 @@ export function buildSpec(stats, opts = {}) {
         : `${l.name} - ${stats.total}`,
   }));
 
+  const places = placesFor(skyline);
   if (jalisco) {
-    const places = ['Guadalajara', 'Los Altos', 'Tequila'];
     tracks.forEach((track, i) => {
       track.model = JALISCO_TRAINS[i];
       // Every caption reads "place / language %"; the regional trains carry no
       // LED sign, so the streak hangs on a plaque beneath the station sign.
-      const place = skyline?.preset === 'jalisco' ? `${places[i]} / ` : '';
+      const place = skyline?.preset === 'jalisco' ? `${places[i].name} / ` : '';
       track.caption = place + track.caption;
     });
     tracks[0].plaque = `${label} ${stats.streak} ${text.days(stats.streak)}`;
@@ -102,16 +108,26 @@ export function buildSpec(stats, opts = {}) {
     while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
   }
 
+  const weather = places && Array.isArray(opts.weather)
+    ? tracks.map((_, i) => (WEATHER_STATES.includes(opts.weather[i]) ? opts.weather[i] : null))
+    : null;
+  const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
+  const forecast = weather?.some(Boolean)
+    ? `${text.weather}: ${weather.flatMap((state, i) => (state ? [`${places[i].name} ${names[state]}`] : [])).join(', ')}`
+    : '';
+
   // Repo mode (see repo.js): the title names the repository, and the city is seeded with its full name.
   const title = stats.kind === 'repo' ? text.repoTitle(stats) : text.title(stats);
+  const lines = [title, unlock ? text.unlock[unlock](unlockThreshold(unlock)) : '', forecast].filter(Boolean);
   return {
     theme,
     scale,
     user: stats.user,
     ...(stats.seed ? { seed: stats.seed } : {}),
-    title: unlock ? `${title}\n${text.unlock[unlock](unlockThreshold(unlock))}` : title,
+    title: lines.join('\n'),
     skyline,
     tracks,
     ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),
+    ...(forecast ? { weather } : {}),
   };
 }

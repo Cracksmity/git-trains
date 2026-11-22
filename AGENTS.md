@@ -14,6 +14,7 @@
 - `src/graphics/`, `src/trains/`, `src/landscape/`, `src/scene/`: pure pixel rendering and validated scene data.
 - `src/cards/`, `src/calendar/`, `src/review/`: output formats. Review calculation lives separately in `data.js`.
 - `src/github/`: HTTP retry policy and user/repository adapters. Tests inject fetch; do not require live tokens.
+- `src/weather/`: weather states, places, inks and the Open-Meteo adapter (injected fetch); `src/scene/weather.js` draws it.
 - `src/action/`, `src/cli/`: I/O adapters; `src/studio/`, `src/browser/`, `assets/`: browser interfaces.
 - `src/sharing/`: bounded share-link codec, reused by CLI and browser.
 - `src/demo/`: sample data used by the Action, pages and tests, not just fixtures.
@@ -34,7 +35,7 @@ npm run preview
 npm run sample
 node --test tests/trains/custom.test.js
 ```
-`npm run check:docs` compares 29 generated assets in memory and checks the community index, links and AI examples. Use `npm run docs`, `npm run logo` and `npm run export -- social` to intentionally regenerate images.
+`npm run check:docs` compares 38 generated assets in memory and checks the community index, links and AI examples. Use `npm run docs`, `npm run logo` and `npm run export -- social` to intentionally regenerate images.
 
 ## Change rules
 - Prefer feature folders, lower-case kebab-case filenames, named exports and explicit interfaces documented with JSDoc.

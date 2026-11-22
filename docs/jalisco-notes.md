@@ -52,7 +52,8 @@ Real signs and logos are replaced with shapes and colors, such as a red sign or 
 | Give each track a different train | [Scene specification](../src/scene/spec.js). A custom train JSON applies to the first track in `multi`. The Jalisco preset assigns all three models. |
 | Adjust the Jalisco palette, silhouettes or cars | [Models](../src/trains/jalisco.js), [locomotives](../src/trains/jalisco-diesels.js) and [cars](../src/trains/jalisco-cars.js) |
 | Adjust the Jalisco backdrops | [Guadalajara composition](../src/landscape/jalisco-city.js); [Cathedral, Sagrario and Degollado](../src/landscape/jalisco-centro.js); [Stadium, Cabañas and La Minerva](../src/landscape/jalisco-landmarks.js); [west-side towers](../src/landscape/jalisco-towers.js); [Los Altos and Tequila](../src/landscape/jalisco-country.js); [palette](../src/landscape/jalisco-palette.js) |
-| Review up close | `npm run zoom -- x0 y0 x1 y1`, with `--no-trains` to see the whole backdrop |
+| Adjust the weather | [Sky, rain, lightning and the season rule](../src/scene/weather.js); [what each place does in each state](../src/landscape/jalisco-weather.js); [weather colors](../src/weather/inks.js); [WMO codes to states](../src/weather/conditions.js); [places and coordinates](../src/weather/places.js). Designs still to draw are in the [weather backlog](weather-backlog.md) |
+| Review up close | `npm run zoom -- x0 y0 x1 y1`, with `--no-trains` to see the whole backdrop and `--weather storm` (or one state per place) to see the weather |
 | Regenerate the previews | [Example generator](../scripts/jalisco-examples.js), run by `npm run docs` |
 
 From the repository root, `npm run check:docs` checks that the saved previews match their generators and verifies the links. `node --test tests/scene/jalisco.test.js` covers the order of the trains, the streak plaque, the maximum width and both directions.

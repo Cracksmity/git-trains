@@ -11,6 +11,7 @@ git-trains is a Node 24 Action and CLI with a static browser interface. Both int
 | Scene | Layout, themes, sky, terrain, rails, backdrop and composition |
 | Formats | Cards, calendar and annual review; annual calculation is separate from rendering |
 | GitHub | Shared request retry policy plus user and repository response interpretation |
+| Weather | Weather states, places and inks, and the Open-Meteo reading with an injected fetch; the scene draws it in `scene/weather.js` |
 | Interfaces | Action, terminal CLI, static pages and studio controllers |
 | Tooling | PNG/GIF codecs, raster export, community validation/previews, conductor |
 

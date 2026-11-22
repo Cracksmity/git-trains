@@ -13,8 +13,9 @@ import { skyLayer, celestialLayer, starsLayers, cloudsLayer } from './sky.js';
 import { bandsLayer } from './terrain.js';
 import { railsLayer } from './rails.js';
 import { paintBackdrop } from './backdrop.js';
-import { decorationFor } from '../activity/seasons.js';
+import { decorationFor, SEASON_DECORATIONS } from '../activity/seasons.js';
 import { decorLayers } from './decor.js';
+import { weatherLayers, WEATHER_OVER_SEASONS } from './weather.js';
 
 export { SCENE_W, sceneHeight };
 
@@ -96,18 +97,24 @@ export function renderScene(spec) {
   const stars = starsLayers(W, used);
   const backdrop = paintBackdrop(W, H, tracks, user, spec.skyline ?? null, spec.seed ?? user);
   // Season or holiday of spec.date (see seasons.js); no date or a plain day adds nothing.
-  const kind = spec.date ? decorationFor(spec.date, spec.hemisphere) : null;
+  // Where the weather replaces the seasons (see weather.js), only holidays remain.
+  const seasonal = spec.date ? decorationFor(spec.date, spec.hemisphere) : null;
+  const overruled = spec.weather && SEASON_DECORATIONS.includes(seasonal) && WEATHER_OVER_SEASONS.includes(spec.skyline?.preset);
+  const kind = overruled ? null : seasonal;
   const decor = kind && decorLayers(kind, { W, H, tracks, user, backdrop }, used);
+  const weather = spec.weather ? weatherLayers(spec.weather, { W, H, tracks, backdrop, skyline: spec.skyline }, used) : null;
   svg +=
     skyLayer(W, used) +
     celestialLayer(W, used) +
     `<g class="tw twa">${stars.a}</g><g class="tw twb">${stars.b}</g>` +
     `<g class="cl">${cloudsLayer(W, used)}</g>` +
     (decor?.back ?? '') +
+    (weather?.sky ?? '') +
     bandsLayer(W, tracks, used) +
     railsLayer(W, tracks, used) +
     backdrop.paths(used) +
-    (decor?.front ?? '');
+    (decor?.front ?? '') +
+    (weather?.ground ?? '');
   used.add('shadow');
 
   trains.forEach(({ train, dir, st, moving, y0, rest, from, to, steps, delay, puff }, k) => {
@@ -152,7 +159,7 @@ export function renderScene(spec) {
   });
 
   const themeVars = (name) =>
-    Object.entries({ ...scenePalette(name, spec.skyline), ...decor?.vars[name] }).map(([key, v]) => `--${key}:${v}`).join(';');
+    Object.entries({ ...scenePalette(name, spec.skyline), ...decor?.vars[name], ...weather?.vars[name] }).map(([key, v]) => `--${key}:${v}`).join(';');
   const rootCss =
     theme === 'auto'
       ? `:root{${themeVars('light')}}@media (prefers-color-scheme:dark){:root{${themeVars('dark')}}}`
@@ -185,6 +192,6 @@ export function renderScene(spec) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W * scale}" height="${H * scale}" ` +
     `shape-rendering="crispEdges" role="img" aria-label="${safeTitle}">` +
-    `<title>${safeTitle}</title><style>${rootCss}${classCss}${shared}${css.join('')}${decor?.css ?? ''}</style>${svg}</svg>`
+    `<title>${safeTitle}</title><style>${rootCss}${classCss}${shared}${css.join('')}${decor?.css ?? ''}${weather?.css ?? ''}</style>${svg}</svg>`
   );
 }

@@ -14,6 +14,7 @@
 | `review-year` | current year | The year the poster shows (2008 to the current one). Empty: the current year so far, or the year that just ended in January |
 | `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](usage.md#seasons-and-holidays)) |
 | `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
+| `weather` | `off` | For the `jalisco` skyline: `live` (the current weather from Open-Meteo), `clear`, `cloudy`, `rain`, `storm`, or one state per place separated by commas (see [Weather](#weather)) |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto` |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
@@ -59,3 +60,26 @@ Set both `train` and `skyline` to `jalisco`. In `mode: multi`, the first three l
 ![The three trains crossing Jalisco](../examples/jalisco/jalisco-sobre-rieles.svg)
 
 [Design and publishing notes from the Jalisco scene](jalisco-notes.md)
+
+#### Weather
+
+The Jalisco scene can wear the weather of its three places. Add `weather` to the `with` block:
+
+- `live` reads the current weather in Guadalajara, Los Altos (at Arandas) and Tequila from [Open-Meteo](https://open-meteo.com/) when the Action runs. It needs no key. If the reading fails, the scene is drawn without weather and the log says why.
+- `clear`, `cloudy`, `rain` or `storm` fixes one state for every place. `storm, rain, cloudy` gives one state per place, in track order.
+- `off`, the default, leaves the scene as it is.
+
+| State | Guadalajara | Los Altos | Tequila |
+| --- | --- | --- | --- |
+| `clear` | The usual scene | The usual scene | The usual scene |
+| `cloudy` | A cloud ceiling with banks drifting over the city | A ceiling and low banks behind the hills | A scarf of cloud around the volcano, with the summit above it |
+| `rain` | Lower, darker clouds, rain, a wisp across the tallest tower and a wet plaza that reflects the lamps | Rain, shining tile roofs and water in the furrows | Rain, a thicker scarf and water in the nearer furrows |
+| `storm` | The darkest sky, heavy rain and lightning behind the Cathedral's spires | Lightning over the far hills | Lightning beside the volcano |
+
+![Guadalajara in a storm, rain in Los Altos and clouds around the volcano of Tequila](../examples/jalisco/jalisco-clima.svg)
+
+The image is drawn when the Action runs, not when someone opens the README. To keep the weather current, schedule the workflow every few hours, for example `cron: "0 */3 * * *"`. GitHub can delay scheduled runs by a few minutes.
+
+Open-Meteo reports WMO weather codes. Fog counts as `cloudy`, drizzle and snow as `rain`, and hail as `storm`. The art for those and other weather is listed, with ready-to-use prompts, in the [weather backlog](weather-backlog.md). The image title names each place's weather for screen readers. Weather data by [Open-Meteo](https://open-meteo.com/), licensed CC BY 4.0.
+
+In Jalisco the weather replaces the seasonal snow, blossom and leaves; holidays stay. Other skylines keep their seasons. To change that rule, edit the `WEATHER_OVER_SEASONS` list in [src/scene/weather.js](../src/scene/weather.js).

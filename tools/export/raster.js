@@ -9,6 +9,8 @@ import { paintSky, celestialGrid, starsGrids, cloudsGrid } from '../../src/scene
 import { paintBands } from '../../src/scene/terrain.js';
 import { paintRails } from '../../src/scene/rails.js';
 import { paintBackdrop } from '../../src/scene/backdrop.js';
+import { FLASH, weatherArt } from '../../src/scene/weather.js';
+import { WEATHER_THEMES } from '../../src/weather/inks.js';
 
 
 
@@ -35,9 +37,10 @@ export class Canvas {
     this.px = new Uint8Array(w * h * 3);
   }
 
-  paint(grid, ox, oy, color, opacity = 1) {
+  // clip: scene rows [from, to) the grid may cover, as an SVG clip path does.
+  paint(grid, ox, oy, color, opacity = 1, clip = [0, this.h]) {
     if (opacity <= 0) return;
-    for (let y = Math.max(0, -oy); y < grid.h && oy + y < this.h; y++) {
+    for (let y = Math.max(0, clip[0] - oy); y < grid.h && oy + y < Math.min(this.h, clip[1]); y++) {
       for (let x = Math.max(0, -ox); x < grid.w && ox + x < this.w; x++) {
         const c = grid.cells[y * grid.w + x];
         if (!c) continue;
@@ -82,7 +85,9 @@ const DOORS = [[0, 0], [0.08, 1], [0.78, 0]];
 export function rasterScene(spec, theme = spec.theme === 'dark' ? 'dark' : 'light') {
   const plan = planScene(spec);
   const { W, H, tracks, trains } = plan;
-  const vars = scenePalette(theme, spec.skyline);
+  // Painting the backdrop adds a region's countryside inks to the themes, so read the palette after it.
+  const backdrop = paintBackdrop(W, H, tracks, spec.user ?? '', spec.skyline ?? null, spec.seed ?? spec.user ?? '');
+  const vars = { ...scenePalette(theme, spec.skyline), ...(spec.weather ? WEATHER_THEMES[theme] : {}) };
   const cache = new Map();
   const color = (c) => {
     let v = cache.get(c);
@@ -102,7 +107,8 @@ export function rasterScene(spec, theme = spec.theme === 'dark' ? 'dark' : 'ligh
     stars: starsGrids(W),
     clouds: cloudsGrid(W),
     ground,
-    backdrop: paintBackdrop(W, H, tracks, spec.user ?? '', spec.skyline ?? null, spec.seed ?? spec.user ?? ''),
+    backdrop,
+    weather: spec.weather ? weatherArt(spec.weather, { W, H, tracks, backdrop, skyline: spec.skyline }) : [],
     trains: trains.map((tr, k) => {
       const shadow = new Grid(tr.train.width, TRAIN_H + 4);
       shadow.rect(0, TRAIN_H + 2, tr.train.width, 2, '@shadow');
@@ -126,6 +132,22 @@ export function timeAt(scene, k = 0, x = scene.trains[k].rest) {
   return cycle((tr.delay + ((n + 0.5) / tr.steps) * tr.st.dur) / tr.st.dur) * tr.st.dur;
 }
 
+// The weather layers of one depth at time t, with the keyframes weather.js writes as CSS.
+function paintWeather(c, scene, z, t) {
+  for (const layer of scene.weather ?? []) {
+    if (layer.z !== z) continue;
+    if (layer.fall) {
+      const { h, dur } = layer.fall;
+      c.paint(layer.grid, 0, layer.y - h + Math.floor(cycle(t / dur) * h), scene.color, 1, layer.clip);
+    } else if (layer.drift) {
+      c.paint(layer.grid, -Math.floor(cycle(t / TIMING.clouds) * scene.plan.W), layer.y, scene.color);
+    } else {
+      const opacity = layer.blink ? keyframe((t + layer.blink.offset) / FLASH.period, FLASH.keys) : 1;
+      c.paint(layer.grid, 0, layer.y, scene.color, opacity);
+    }
+  }
+}
+
 export function renderFrame(scene, t) {
   const { plan, color } = scene;
   const c = new Canvas(plan.W, plan.H);
@@ -134,8 +156,10 @@ export function renderFrame(scene, t) {
   c.paint(scene.stars.a, 0, 0, color, keyframe(t / TIMING.twinkle, TWA));
   c.paint(scene.stars.b, 0, 0, color, keyframe(t / TIMING.twinkle, TWB));
   c.paint(scene.clouds, -Math.floor(cycle(t / TIMING.clouds) * plan.W), 0, color);
+  paintWeather(c, scene, 'sky', t);
   c.paint(scene.ground, 0, 0, color);
   c.paint(scene.backdrop, 0, 0, color);
+  paintWeather(c, scene, 'ground', t);
   for (const tr of scene.trains) {
     const { layers: L, width } = tr.train;
     const x = trainX(tr, t);

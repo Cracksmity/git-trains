@@ -14,6 +14,9 @@ import { buildReview } from '../../src/review/data.js';
 import { renderReview } from '../../src/review/render.js';
 import { sampleYear } from '../../src/demo/sample.js';
 import { DECORATIONS, decorationFor } from '../../src/activity/seasons.js';
+import { WEATHER_STATES, parseWeatherInput } from '../../src/weather/conditions.js';
+import { fetchWeather } from '../../src/weather/open-meteo.js';
+import { JALISCO_PLACES } from '../../src/weather/places.js';
 
 /** Dynamic page IDs address mixed form and image elements. @returns {any} */
 const $ = (id) => document.getElementById(id);
@@ -61,6 +64,38 @@ function fillJump() {
   $('jump').innerHTML = '<option value="">Choose a season or a holiday…</option>' +
     Object.entries(DECORATIONS).map(([kind, name]) => `<option value="${sampleDay(kind)}">${name} · ${sampleDay(kind)}</option>`).join('') +
     `<option value="${year}-${state.hemisphere === 'north' ? '07' : '01'}-15">Summer · plain scene</option>`;
+}
+
+// --- weather: fixed states, or the current reading at the Jalisco places (asked once, on demand)
+$('weather').innerHTML = '<option value="off">Off · seasons as usual</option>' +
+  '<option value="live">Live · current weather from Open-Meteo</option>' +
+  WEATHER_STATES.map((s) => `<option value="${s}">${s[0].toUpperCase() + s.slice(1)} in every place</option>`).join('') +
+  '<option value="cloudy,rain,storm">Mixed · cloudy, rain, storm</option>';
+let liveWeather = null;
+async function readLiveWeather() {
+  $('st-weather').className = 'status';
+  $('st-weather').textContent = 'Asking Open-Meteo…';
+  try {
+    const { places } = await fetchWeather({ places: JALISCO_PLACES, fetchImpl: (url, init) => fetch(url, init) });
+    liveWeather = places.map((p) => p.state);
+    $('st-weather').className = 'status ok';
+    $('st-weather').textContent = JALISCO_PLACES.map((place, i) => {
+      const { state, temperature } = places[i];
+      return `${place.name}: ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}`;
+    }).join(' · ');
+  } catch (err) {
+    liveWeather = null;
+    $('st-weather').className = 'status bad';
+    $('st-weather').textContent = `Could not read the weather: ${err.message}`;
+  }
+  render();
+}
+function pickedWeather() {
+  const v = $('weather').value;
+  if (v === 'off') return null;
+  if (v === 'live') return liveWeather;
+  const fixed = parseWeatherInput(v);
+  return fixed.mode === 'fixed' ? fixed.states : null;
 }
 
 function statsFromControls() {
@@ -181,7 +216,7 @@ function render() {
   $('o-streak').textContent = $('streak').value;
   $('o-yesterday').textContent = $('yesterday').value;
   const s = statsFromControls();
-  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme: state.theme, language: state.language, scale: 2, skyline: pickedSkyline(), date: $('day').value || undefined, hemisphere: state.hemisphere });
+  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme: state.theme, language: state.language, scale: 2, skyline: pickedSkyline(), date: $('day').value || undefined, hemisphere: state.hemisphere, weather: pickedWeather() });
   const svg = renderScene(spec);
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
@@ -203,7 +238,7 @@ function render() {
   if (reviewUrl) URL.revokeObjectURL(reviewUrl);
   reviewUrl = URL.createObjectURL(new Blob([poster], { type: 'image/svg+xml' }));
   $('review').src = reviewUrl;
-  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span><span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span><span>year in review ${(poster.length / 1024).toFixed(1)} KB</span>`;
+  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span>${spec.weather ? `<span>weather: <b>${spec.weather.map((w) => w ?? '?').join(' / ')}</b></span>` : ''}<span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span><span>year in review ${(poster.length / 1024).toFixed(1)} KB</span>`;
   zoom(t);
   elements('.card').forEach((c) => c.classList.toggle('pick', c.dataset.id === t.model));
 }
@@ -252,6 +287,10 @@ seg('doors', 'doors', render);
 seg('hemisphere', 'hemisphere', () => { fillJump(); render(); });
 $('day').addEventListener('input', () => { fillJump(); render(); });
 $('today').addEventListener('click', () => { $('day').value = todayUtc(); fillJump(); render(); });
+$('weather').addEventListener('change', () => {
+  if ($('weather').value === 'live' && !liveWeather) readLiveWeather();
+  else render();
+});
 $('jump').addEventListener('change', () => { if (!$('jump').value) return; $('day').value = $('jump').value; fillJump(); render(); });
 fillJump();
 gallery(); render();
