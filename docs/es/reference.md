@@ -98,4 +98,6 @@ Con `theme: local`, la escena también sigue el día y la noche de Guadalajara:
 
 Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. Los códigos 51 a 57 corresponden a `drizzle`, del 61 al 67 y del 80 al 82 a `rain`, y el 71, 73, 75, 77, 85 y 86 a `snow`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. Las reglas para un diseño nuevo del clima están en la [lista de climas pendientes](clima-pendiente.md). El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima y de la calidad del aire de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
 
+Idea de Estrellita ✨: mostrar en la escena el clima real de Guadalajara, Los Altos y Tequila.
+
 En Jalisco el clima reemplaza la nieve, los pétalos y las hojas de cada estación; las fiestas se quedan. Los demás skylines conservan sus estaciones. Para cambiar esa regla, edita la lista `WEATHER_OVER_SEASONS` en [src/scene/weather.js](../../src/scene/weather.js).
