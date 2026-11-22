@@ -1,6 +1,6 @@
 # Weather backlog
 
-The Jalisco scene draws six states (`clear`, `partly`, `cloudy`, `drizzle`, `rain` and `storm`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
+The Jalisco scene draws seven states (`clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` and `hail`). See [Weather](reference.md#weather). Until they get their own art, other kinds of weather borrow the closest state. This page lists the designs still to draw, with a prompt for each one. Paste a prompt into an AI coding agent working in this repository.
 
 [Versión en español](es/clima-pendiente.md)
 
@@ -30,7 +30,6 @@ Check every design with `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | State | Trigger | Borrows today | Signature |
 | --- | --- | --- | --- |
 | [Fog](#fog) | WMO 45, 48 | `cloudy` | Los Altos valleys fill with fog; the church tower rises out of it |
-| [Hail](#hail) | WMO 96, 99 | `storm` | A Guadalajara hailstorm: white pellets bounce and pile up on the plaza and roofs |
 | [Frost](#frost) | WMO 0–2 and 2 °C or less | `clear` or `partly` | White frost on the pasture and roofs of Los Altos |
 | [Heat](#heat) | WMO 0–2 and 32 °C or more | `clear` or `partly` | Heat shimmer over the Tequila agave field |
 | [Snow](#snow) | WMO 71–77, 85, 86 | `rain` | Rare snow over Jalisco, as in December 1997 |
@@ -52,22 +51,6 @@ Art:
 Use dithered edges (the 25/50/75% pattern of src/scene/sky.js) rather than translucency, so the pixel art stays crisp. Fog does not move, or drifts with the existing cloud loop.
 
 Done when: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` looks right in both themes, and `npm run check` passes.
-```
-
-### Hail
-
-```text
-In git-trains, add a "hail" weather state to the Jalisco scene. Read the "Rules every new state follows" in docs/weather-backlog.md first and follow them.
-
-Trigger: WMO codes 96 and 99 (thunderstorm with hail), which map to "storm" today.
-
-Art: the storm sky and lightning, with hail instead of rain:
-- Falling white pellets of 1 to 2 pixels. They are fewer than raindrops and fall faster. Every few pellets, one bounces a pixel when it reaches the ground row of its place.
-- Guadalajara, the signature: white accumulation along the plaza row, on the Cathedral and Sagrario roofs, on the stadium roof and at the foot of La Minerva. It reads like the hailstorm of 30 June 2019. Find roof rows from the backdrop grid, as the winter decoration does in src/scene/decor.js.
-- Los Altos and Tequila: white specks gathered in the furrows and on the ballast.
-Accumulation is static; only the pellets move. Pellets stop with prefers-reduced-motion.
-
-Done when: hail is clearly different from rain at README size in both themes, and `npm run check` passes.
 ```
 
 ### Frost

@@ -100,6 +100,7 @@ test('the title names each place with its weather in the scene language', () => 
   assert.match(spec({ weather: ['rain', 'clear', 'storm'] }).title, /\nWeather: Guadalajara rain, Los Altos clear, Tequila storm$/);
   assert.match(spec({ weather: ['cloudy', 'drizzle', 'rain'], language: 'es' }).title, /\nClima: Guadalajara nublado, Los Altos llovizna, Tequila lluvia$/);
   assert.match(spec({ weather: ['partly', null, 'rain'], language: 'es' }).title, /\nClima: Guadalajara medio nublado, Tequila lluvia$/);
+  assert.match(spec({ weather: ['hail', null, 'storm'], language: 'es' }).title, /\nClima: Guadalajara granizo, Tequila tormenta$/);
   const single = buildSpec(sampleStats(), { train: 'jalisco', skyline: jalisco, mode: 'single', weather: ['storm', 'rain', 'rain'] });
   assert.deepEqual(single.weather, ['storm'], 'one track, one place');
   assert.match(single.title, /Weather: Guadalajara storm$/);
@@ -198,6 +199,76 @@ test('drizzle uses the cloudy sky without a veil, sparse slow 1-pixel drops and 
   assert.ok(hasInkInRows('@wTileWet', bands[1].top, bands[1].base), 'Los Altos shining tile roofs');
   for (const band of bands) assert.ok(hasInkInRows('@wPuddle', band.base, band.bottom), `ballast puddles on track ${band.k}`);
   assert.equal(hasInkInRows('@wPuddle', bands[2].top, bands[2].base), false, 'no water in Tequila furrows');
+});
+
+test('hail falls faster and more sparsely than rain, with a one-pixel rebound at impact', () => {
+  const context = sceneContext(spec());
+  const layers = weatherArt(['hail', 'clear', 'clear'], context);
+  assert.ok(layers.some((layer) => layer.blink), 'the storm lightning is present');
+  assert.ok(!layers.some((layer) => layer.grid.cells.includes('@wDrop')), 'hail replaces the rain');
+  const moving = layers.filter((layer) => layer.fall);
+  const flight = moving.find((layer) => layer.clip[0] === 0);
+  const { h, dur } = flight.fall;
+  const pellets = [];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < flight.grid.w; x++) {
+      if (!flight.grid.get(x, y) || flight.grid.get(x - 1, y)) continue;
+      const width = flight.grid.get(x + 1, y) ? 2 : 1;
+      assert.equal(flight.grid.get(x + width, y), null);
+      assert.equal(flight.grid.get(x, (y + 1) % h), null);
+      pellets.push({ x, y, width });
+    }
+  }
+  assert.deepEqual(new Set(pellets.map((p) => p.width)), new Set([1, 2]));
+  for (const layer of weatherArt(['rain', 'clear', 'clear'], context).filter((l) => l.fall)) {
+    assert.ok(h / dur > layer.fall.h / layer.fall.dur);
+    const rainColumns = new Set(layer.grid.cells.flatMap((ink, i) => ink ? [i % context.W] : []));
+    assert.ok(pellets.length < rainColumns.size);
+  }
+
+  // Sample the clipped fall layers one pixel-step at a time, including across the loop seam.
+  const visible = (x, row, step) => moving.some((layer) => {
+    const [from, to] = layer.clip;
+    return row >= from && row < to && layer.grid.get(x, row - layer.y + h - (step % h));
+  });
+  const ground = weatherBands(1)[0].base;
+  let bounces = 0;
+  for (const { x, y } of pellets) {
+    const impact = (ground - y + h) % h;
+    assert.ok(visible(x, ground, impact));
+    if (!visible(x, ground - 1, impact + 1)) continue;
+    bounces++;
+    assert.ok(!visible(x, ground, impact + 1), 'the pellet leaves the ground');
+    assert.ok([2, 3, 4, 5, 6].some((tick) => visible(x, ground, impact + tick)), 'it lands again');
+  }
+  assert.ok(bounces > 1 && bounces < pellets.length / 2);
+  const out = svg({ weather: ['hail', 'clear', 'clear'] });
+  const frozen = out.match(/prefers-reduced-motion:reduce\)\{([^{}]*\.w-fall[^{}]*)\{animation:none!important\}/)[1].split(',');
+  for (const [, cls] of out.matchAll(/class="(w-fall\d+)"/g)) assert.ok(frozen.includes(`.${cls}`));
+});
+
+test('hail banks rest on Guadalajara landmarks, rural furrows and ballast', () => {
+  const context = sceneContext(spec());
+  const layers = weatherArt(['hail', 'hail', 'hail'], context);
+  const banks = layers.filter((l) => l.z === 'ground' && !l.fall && l.grid.cells.includes('@wHail'));
+  assert.equal(banks.length, 3);
+  assert.ok(banks.every((l) => !l.blink && !l.drift));
+  const grains = banks.map(({ grid }) => grid.cells.flatMap((ink, i) =>
+    ink === '@wHail' || ink === '@wHailShade' ? [[i % grid.w, Math.floor(i / grid.w)]] : []));
+  const bands = weatherBands(3);
+  const onRoof = (left, right, inks) => grains[0].some(([x, y]) =>
+    x >= left && x <= right && inks.includes(context.backdrop.get(x, y + 1)));
+  assert.ok(onRoof(25, 84, ['@roofWhite']), 'stadium roof ring');
+  assert.ok(onRoof(91, 152, ['@tileBlue', '@ochreLit', '@stoneLit']), 'Cathedral');
+  assert.ok(onRoof(155, 189, ['@tile', '@tileLit']), 'Sagrario dome');
+  assert.ok(grains[0].some(([x, y]) => x >= 384 && x <= 412 && context.backdrop.get(x, y) === '@water'), 'Minerva basin');
+  assert.ok(grains[0].filter(([, y]) => y === bands[0].base - 1).length > context.W / 2, 'banks along the plaza');
+  for (const k of [1, 2]) {
+    const field = grains[k].filter(([, y]) => y < bands[k].base);
+    assert.ok(field.length > 0);
+    assert.ok(field.every(([x, y]) => context.backdrop.get(x, y) === (k === 1 ? '@earthLit' : '@furrow')));
+    assert.ok(grains[k].some(([x, y]) => context.backdrop.get(x, y) === '@ballast2'));
+  }
 });
 
 function sceneContext(scene) {

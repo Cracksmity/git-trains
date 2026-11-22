@@ -2,16 +2,16 @@
 // Only the classification and the input format live here; src/scene/weather.js draws it.
 
 /** The weather states the scenes know how to draw, from calm to wild. */
-export const WEATHER_STATES = ['clear', 'partly', 'cloudy', 'drizzle', 'rain', 'storm'];
+export const WEATHER_STATES = ['clear', 'partly', 'cloudy', 'drizzle', 'rain', 'storm', 'hail'];
 
 /** The name of each state in the scene's accessible title. */
 export const WEATHER_NAMES = {
-  en: { clear: 'clear', partly: 'partly cloudy', cloudy: 'cloudy', drizzle: 'drizzle', rain: 'rain', storm: 'storm' },
-  es: { clear: 'despejado', partly: 'medio nublado', cloudy: 'nublado', drizzle: 'llovizna', rain: 'lluvia', storm: 'tormenta' },
+  en: { clear: 'clear', partly: 'partly cloudy', cloudy: 'cloudy', drizzle: 'drizzle', rain: 'rain', storm: 'storm', hail: 'hail' },
+  es: { clear: 'despejado', partly: 'medio nublado', cloudy: 'nublado', drizzle: 'llovizna', rain: 'lluvia', storm: 'tormenta', hail: 'granizo' },
 };
 
-// WMO weather interpretation codes, as Open-Meteo reports them. Fog, snow
-// and hail do not have their own art yet: they borrow the closest state
+// WMO weather interpretation codes, as Open-Meteo reports them. Fog
+// and snow borrow the closest state
 // (see docs/weather-backlog.md for the designs still to draw).
 const CODES = {
   clear: [0],
@@ -19,7 +19,8 @@ const CODES = {
   cloudy: [3, 45, 48],
   drizzle: [51, 53, 55, 56, 57],
   rain: [61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86],
-  storm: [95, 96, 99],
+  storm: [95],
+  hail: [96, 99],
 };
 const STATE_OF_CODE = new Map(Object.entries(CODES).flatMap(([state, codes]) => codes.map((code) => [code, state])));
 

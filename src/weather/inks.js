@@ -27,6 +27,9 @@ const SHARED = {
   // Rain streaks are translucent so they read over the sky and the buildings alike.
   wDrop: ['rgba(74,104,134,0.6)', 'rgba(176,196,240,0.55)'],
   wDropFar: ['rgba(74,104,134,0.35)', 'rgba(176,196,240,0.3)'],
+  // Packed hail shades to blue beneath the loose white grains.
+  wHail: ['#f6fbfc', '#d4e1f2'],
+  wHailShade: ['#b5cbd5', '#869bb8'],
   // Lightning: the sky behind the silhouettes, and the bolt itself.
   wFlash: ['#a8b2bf', '#56597f'],
   wBolt: ['#ffffff', '#f3f0ff'],
@@ -49,6 +52,9 @@ function theme(index) {
 
 /** Weather inks by theme; renderScene emits only the ones a scene uses. */
 export const WEATHER_THEMES = { light: theme(0), dark: theme(1) };
+
+/** The cloud and sky palette shared by states with the same cloud cover. */
+export const skyState = (state) => ({ drizzle: 'cloudy', hail: 'storm' })[state] ?? state;
 
 /**
  * The ink of a state's sky band (0-3) or cloud part: '@wRain2', '@wStormCloudShade'...

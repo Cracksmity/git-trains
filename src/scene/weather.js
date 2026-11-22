@@ -4,7 +4,8 @@
 // its grids, so scripts/export.js paints the same pixels with the same timing.
 import { Grid, rng } from '../graphics/pixel.js';
 import { BALLAST, GY0, PITCH } from './layout.js';
-import { WEATHER_THEMES, skyInk } from '../weather/inks.js';
+import { WEATHER_THEMES, skyInk, skyState } from '../weather/inks.js';
+import { hailLayers } from './weather-hail.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
 import { placesFor } from '../weather/places.js';
 
@@ -277,20 +278,21 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
       layers.push(partlyClouds(art.partly, band, backdrop, W));
       return;
     }
-    const sky = state === 'drizzle' ? 'cloudy' : state;
+    const sky = skyState(state);
     if (band.k === 0) {
       layers.push({ ...citySky(sky, W), z: 'sky', y: 0 });
-      layers.push({ grid: cityDeck(sky, W), z: 'sky', y: 0, drift: true });
+      layers.push({ grid: cityDeck(sky, W), z: 'sky', y: 0, drift: state !== 'hail' });
     } else {
       layers.push({ grid: countrySky(sky, band, backdrop, W), z: 'ground', y: band.top });
     }
-    if (state === 'rain' || state === 'storm') layers.push({ grid: veil(state, band, W), z: 'ground', y: band.top });
+    if (sky === 'rain' || sky === 'storm') layers.push({ grid: veil(sky, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
     // The flash lights the sky behind the place's own clouds, such as the volcano's cap.
-    if (state === 'storm') layers.push(lightning(band, backdrop, W, art));
+    if (sky === 'storm') layers.push(lightning(band, backdrop, W, art));
     art.paint(ground, state, band, backdrop);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
     if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W));
+    if (state === 'hail') layers.push(...hailLayers(band, W));
   });
   return layers;
 }

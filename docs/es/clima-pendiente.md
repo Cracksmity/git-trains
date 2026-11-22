@@ -1,6 +1,6 @@
 # Climas pendientes
 
-La escena de Jalisco dibuja seis estados (`clear`, `partly`, `cloudy`, `drizzle`, `rain` y `storm`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
+La escena de Jalisco dibuja siete estados (`clear`, `partly`, `cloudy`, `drizzle`, `rain`, `storm` y `hail`). Ver [Clima](reference.md#clima). Mientras no tengan arte propio, los demás climas usan el estado más parecido. Esta página reúne los diseños que faltan, con un prompt para cada uno. Pega el prompt en un agente de IA que trabaje en este repositorio.
 
 [English version](../weather-backlog.md)
 
@@ -30,7 +30,6 @@ Revisa cada diseño con `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --wea
 | Estado | Cuándo | Hoy usa | Lo que lo distingue |
 | --- | --- | --- | --- |
 | [Neblina](#neblina) | WMO 45, 48 | `cloudy` | Los valles de Los Altos se llenan de neblina y la torre de la parroquia sobresale |
-| [Granizo](#granizo) | WMO 96, 99 | `storm` | Una granizada tapatía: bolitas blancas que rebotan y se juntan en la plaza y los techos |
 | [Helada](#helada) | WMO 0–2 con 2 °C o menos | `clear` o `partly` | Escarcha blanca en el pasto y los techos de Los Altos |
 | [Calor](#calor) | WMO 0–2 con 32 °C o más | `clear` o `partly` | El aire que vibra sobre el agave de Tequila |
 | [Nieve](#nieve) | WMO 71–77, 85, 86 | `rain` | La rara nevada sobre Jalisco, como la de diciembre de 1997 |
@@ -52,22 +51,6 @@ Arte:
 Usa bordes tramados (el patrón 25/50/75 % de src/scene/sky.js) en vez de transparencias, para que el pixel art siga nítido. La neblina no se mueve, o se desliza con el ciclo de nubes que ya existe.
 
 Listo cuando: `npm run zoom -- 0 0 448 204 --no-trains --scale 3 --weather fog` se ve bien en los dos temas y `npm run check` pasa.
-```
-
-### Granizo
-
-```text
-En git-trains, agrega el estado de clima "hail" (granizo) a la escena de Jalisco. Primero lee "Reglas para cada estado nuevo" en docs/es/clima-pendiente.md y síguelas.
-
-Cuándo: códigos WMO 96 y 99 (tormenta con granizo), que hoy cuentan como "storm".
-
-Arte: el cielo y los relámpagos de la tormenta, con granizo en vez de lluvia:
-- Bolitas blancas de 1 a 2 píxeles que caen. Son menos que las gotas de lluvia y caen más rápido. Cada pocas bolitas, una rebota un píxel al llegar a la fila del suelo de su lugar.
-- Guadalajara, lo que la distingue: granizo blanco acumulado en la fila de la plaza, en los techos de la Catedral y del Sagrario, en el techo del estadio y al pie de La Minerva. Se lee como la granizada del 30 de junio de 2019. Encuentra las filas de los techos en la cuadrícula del fondo, como lo hace la decoración de invierno en src/scene/decor.js.
-- Los Altos y Tequila: puntos blancos juntos en los surcos y en el balasto.
-Lo acumulado no se mueve; solo caen las bolitas. Las bolitas se detienen con prefers-reduced-motion.
-
-Listo cuando: el granizo se distingue claramente de la lluvia a tamaño README en los dos temas y `npm run check` pasa.
 ```
 
 ### Helada
