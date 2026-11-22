@@ -27,7 +27,7 @@ export const LEGACY_INPUTS = {
 
 export const LEGACY_VALUES = { rank: { letra: 'letter' } };
 
-export const THEMES = ['light', 'dark', 'auto', 'both'];
+export const THEMES = ['light', 'dark', 'auto', 'both', 'local'];
 
 export const CARDS = ['none', 'stats', 'languages', 'departures', 'both'];
 

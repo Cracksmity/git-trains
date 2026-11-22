@@ -15,7 +15,7 @@
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](usage.md#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
 | `weather` | `off` | Para el skyline `jalisco`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
-| `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |
+| `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto`, o `local`: día o noche donde está la escena (ver [Clima](#clima)) |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
 | `exclude-languages` | | Lenguajes a dejar fuera, separados por comas, por ejemplo `HTML, Jupyter Notebook` |
@@ -85,6 +85,12 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 ![Guadalajara con tormenta, lluvia en Los Altos y nubes alrededor del volcán de Tequila](../../examples/jalisco/jalisco-clima.svg)
 
 La imagen se dibuja cuando corre la Action, no cuando alguien abre el README. Para que el clima esté al día, programa el workflow cada pocas horas, por ejemplo `cron: "0 */3 * * *"`. GitHub puede retrasar unos minutos las ejecuciones programadas.
+
+Con `theme: local`, la escena también sigue el día y la noche de Guadalajara:
+- La Action escribe un solo `train.svg`: claro mientras el sol está arriba allá y oscuro después del atardecer, según la hora en que corre.
+- Calcula la posición del sol con las coordenadas y el reloj, así que no necesita red y funciona aunque no se pueda leer el clima. El log dice qué eligió, por ejemplo `Theme local: the sun is 44° above the horizon in Guadalajara -> light`.
+- Para que cambie cerca del amanecer y el atardecer, programa el workflow cada hora (`cron: "0 * * * *"`).
+- Los skylines sin lugares reales usan `auto`, que sigue el modo claro u oscuro de quien ve el README.
 
 Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La nieve cuenta como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
 

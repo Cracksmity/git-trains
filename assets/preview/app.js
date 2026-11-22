@@ -17,6 +17,7 @@ import { DECORATIONS, decorationFor } from '../../src/activity/seasons.js';
 import { WEATHER_STATES, parseWeatherInput } from '../../src/weather/conditions.js';
 import { fetchWeather } from '../../src/weather/open-meteo.js';
 import { JALISCO_PLACES } from '../../src/weather/places.js';
+import { localTheme } from '../../src/weather/sun.js';
 
 /** Dynamic page IDs address mixed form and image elements. @returns {any} */
 const $ = (id) => document.getElementById(id);
@@ -96,6 +97,15 @@ function pickedWeather() {
   if (v === 'live') return liveWeather;
   const fixed = parseWeatherInput(v);
   return fixed.mode === 'fixed' ? fixed.states : null;
+}
+
+// theme: local, as the Action decides it: the sun over the skyline's first place, now.
+function pickedTheme() {
+  if (state.theme !== 'local') return { theme: state.theme, note: '' };
+  const local = localTheme(pickedSkyline(), new Date());
+  if (!local) return { theme: 'auto', note: 'local → auto (no places)' };
+  const where = local.elevation >= 0 ? 'up' : 'down';
+  return { theme: local.theme, note: `local → ${local.theme} (sun ${Math.abs(Math.round(local.elevation))}° ${where} in ${local.place})` };
 }
 
 function statsFromControls() {
@@ -216,7 +226,8 @@ function render() {
   $('o-streak').textContent = $('streak').value;
   $('o-yesterday').textContent = $('yesterday').value;
   const s = statsFromControls();
-  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme: state.theme, language: state.language, scale: 2, skyline: pickedSkyline(), date: $('day').value || undefined, hemisphere: state.hemisphere, weather: pickedWeather() });
+  const { theme, note: themeNote } = pickedTheme();
+  const spec = buildSpec(s, { train: pickedTrain(), mode: state.mode, theme, language: state.language, scale: 2, skyline: pickedSkyline(), date: $('day').value || undefined, hemisphere: state.hemisphere, weather: pickedWeather() });
   const svg = renderScene(spec);
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
@@ -224,7 +235,7 @@ function render() {
   $('scene').alt = spec.title;
   const t = spec.tracks[0];
   const dressed = spec.date && decorationFor(spec.date, spec.hemisphere);
-  const cal = renderCalendar(s, { model: t.model, stripe: t.stripe, label: t.label, language: state.language, theme: state.theme });
+  const cal = renderCalendar(s, { model: t.model, stripe: t.stripe, label: t.label, language: state.language, theme });
   if (calUrl) URL.revokeObjectURL(calUrl);
   calUrl = URL.createObjectURL(new Blob([cal], { type: 'image/svg+xml' }));
   $('calendar').src = calUrl;
@@ -234,11 +245,11 @@ function render() {
   year.days = year.days.map((d) => ({ ...d, count: Math.round((d.count * s.total) / sum) }));
   year.user = s.user;
   year.languages = s.languages;
-  const poster = renderReview(buildReview(year, { year: 2025 }), { language: state.language, theme: state.theme, model: t.model, stripe: t.stripe });
+  const poster = renderReview(buildReview(year, { year: 2025 }), { language: state.language, theme, model: t.model, stripe: t.stripe });
   if (reviewUrl) URL.revokeObjectURL(reviewUrl);
   reviewUrl = URL.createObjectURL(new Blob([poster], { type: 'image/svg+xml' }));
   $('review').src = reviewUrl;
-  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span>${spec.weather ? `<span>weather: <b>${spec.weather.map((w) => w ?? '?').join(' / ')}</b></span>` : ''}<span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span><span>year in review ${(poster.length / 1024).toFixed(1)} KB</span>`;
+  $('meta').innerHTML = `<span>${s.cars} car(s)</span><span>state: <b>${s.state}</b></span><span>streak ${s.streak}</span><span>day: <b>${dressed ? DECORATIONS[dressed] : spec.date ? 'plain (summer)' : 'seasons off'}</b></span>${spec.weather ? `<span>weather: <b>${spec.weather.map((w) => w ?? '?').join(' / ')}</b></span>` : ''}${themeNote ? `<span>theme: <b>${themeNote}</b></span>` : ''}<span>SVG ${(svg.length / 1024).toFixed(1)} KB</span><span>calendar ${(cal.length / 1024).toFixed(1)} KB</span><span>year in review ${(poster.length / 1024).toFixed(1)} KB</span>`;
   zoom(t);
   elements('.card').forEach((c) => c.classList.toggle('pick', c.dataset.id === t.model));
 }
