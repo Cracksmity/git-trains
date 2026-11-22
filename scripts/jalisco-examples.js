@@ -65,6 +65,11 @@ export function writeJaliscoExamples() {
   writeFileSync(`${directory}/jalisco-sobre-rieles.svg`, renderScene(spec));
   const scene = rasterScene(spec, 'dark');
   writeFileSync(`${directory}/jalisco-sobre-rieles.png`, pngOf(renderFrame(scene, 0), 2));
+  // The weather, one state per place: frame 0 catches the lightning behind the Cathedral.
+  const weather = buildSpec(stats, { train: 'jalisco', skyline, mode: 'multi', theme: 'auto', language: 'es', weather: ['storm', 'rain', 'cloudy'] });
+  weather.tracks.forEach((track) => { track.cars = 2; });
+  weather.title = 'Jalisco con clima · tormenta en Guadalajara, lluvia en Los Altos, nubes en el volcán de Tequila';
+  writeFileSync(`${directory}/jalisco-clima.svg`, renderScene(weather));
   background('guadalajara', 'Guadalajara desde las vías', GY0, paintGuadalajara);
   background('los-altos', 'Ranchos y lomas de Los Altos de Jalisco', PITCH - BALLAST, paintLosAltos);
   background('campos-de-agave', 'Hileras de agave al pie del volcán de Tequila', PITCH - BALLAST, paintTequila);

@@ -93,6 +93,11 @@ The first Gemini runs all ended in a denied `RunCommand`. `agy -p` can't ask for
 - **Sandbox.** `--sandbox` plus `"toolPermission": "proceed-in-sandbox"` in `--settings`: commands run in agy's terminal sandbox without asking.
 - **Allowlist hook.** A `PreToolUse` hook, [agy-hook.js](agy-hook.js), narrows that to the prefixes in `commands`: `node`, `npm test`, `git status`/`diff`/`log` and plain reads, one plain command per call (no `;`, `&&`, `||`, pipes, redirections, `$( )` or backticks outside quotes). While the agent runs, the conductor writes `<worktree>/.agents/hooks.json` to point at it; it removes the file before the gates, and fails the attempt if the agent edited the hook. A refusal from the hook doesn't end the turn: the agent reads the reason and carries on with its file tools.
 - **Exact grants for the gates.** Each gate is also passed as `command(<gate>)`, so the gates still run where the sandbox is unavailable (Windows before 11 24H2).
+- **Idle watchdog.** agy turns any command that runs longer than a few seconds into a background task. When its own turn is over, it prints `root agent idle; waiting for N background task(s) to finish` and doesn't exit until those tasks end.
+  - In the weather-fog run, Gemini 4 Neon finished its work in 16 minutes. It then waited 29 more for two runs of `scripts/checks/docs.js` that never finished inside the sandbox.
+  - Its second attempt hung the same way on a short `node --test` run, ten minutes in. The work in the worktree already passed every gate.
+  - Now [agent.js](agent.js) stops the agent two minutes after that line, and the conductor runs the gates as after a normal exit. `runs.jsonl` marks the attempt `idleStop`. Its token counts are zero, because agy reports usage only when it exits.
+  - The Gemini rules in [routes.json](routes.json) also ask it to set `WaitMsBeforeAsync` to 300000, so commands run in the foreground, and to leave the docs check to the conductor.
 
 The hook keeps the agent on task, but `node` can run any code, so the sandbox is the real boundary. A hook that answers `allow`, even with `permissionOverrides`, doesn't get past headless mode by itself, and `--dangerously-skip-permissions` is still not used.
 

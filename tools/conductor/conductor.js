@@ -12,11 +12,12 @@
 //   node tools/conductor/conductor.js routes
 //   node tools/conductor/conductor.js log [n]
 
-import { spawn, execFileSync, execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runAgent } from './agent.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
@@ -172,28 +173,6 @@ function deniedActions(kind, stdout) {
   }
 }
 
-function runAgent(cmd, cwd, timeoutMin, logFile) {
-  return new Promise((done) => {
-    const started = Date.now();
-    const child = spawn(cmd.bin, cmd.args, { cwd, windowsHide: true, env: { ...process.env, ...cmd.env } });
-    let stdout = '';
-    const log = (chunk) => appendFileSync(logFile, chunk);
-    child.stdout.on('data', (c) => { stdout += c; log(c); });
-    child.stderr.on('data', log);
-    const timer = setTimeout(() => child.kill(), timeoutMin * 60_000);
-    child.on('error', (err) => {
-      clearTimeout(timer);
-      done({ code: -1, stdout, seconds: (Date.now() - started) / 1000, error: err.message });
-    });
-    child.on('close', (code) => {
-      clearTimeout(timer);
-      done({ code, stdout, seconds: (Date.now() - started) / 1000 });
-    });
-    if (cmd.stdin !== null) child.stdin.end(cmd.stdin);
-    else child.stdin.end();
-  });
-}
-
 // --- Gates ------------------------------------------------------------------
 
 const globRe = (g) =>
@@ -294,7 +273,9 @@ async function run(file, flags) {
         const removeHook = installHook(dir, cmd.hook);
         const res = await runAgent(cmd, dir, task.timeoutMin ?? 30, logFile);
         const tampered = removeHook();
-        failures = res.code === 0 ? runGates(task, dir) : [`The agent exited with code ${res.code}${res.error ? `: ${res.error}` : ''} (log: ${logFile})`];
+        // An agent the idle watchdog stopped had finished its turn: judge its work like any other.
+        if (res.idle) console.log(`[${task.name}]   the agent finished but kept waiting on background tasks; stopped it (see ${logFile})`);
+        failures = res.code === 0 || res.idle ? runGates(task, dir) : [`The agent exited with code ${res.code}${res.error ? `: ${res.error}` : ''} (log: ${logFile})`];
         failures.push(...tampered);
         const denied = deniedActions(cmd.usage, res.stdout);
         if (denied.length && failures.length) failures.push(`The agent was denied these actions: ${denied.join(', ')} (see ${logFile})`);
@@ -306,6 +287,7 @@ async function run(file, flags) {
             at: new Date().toISOString(), task: task.name, route: routeName, rung: r + 1, attempt,
             backend: rung.backend, model: rung.model, effort: rung.effort ?? null,
             seconds: Math.round(res.seconds), usage, passed, failures: failures.map((f) => f.split('\n')[0]),
+            ...(res.idle ? { idleStop: true } : {}),
           }) + '\n',
         );
         console.log(

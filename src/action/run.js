@@ -18,6 +18,9 @@ import { renderReview } from '../review/render.js';
 import { parseCustomModel } from '../trains/parse.js';
 import { parseSkyline } from '../landscape/skyline-parse.js';
 import { HEMISPHERES } from '../activity/seasons.js';
+import { parseWeatherInput } from '../weather/conditions.js';
+import { placesFor } from '../weather/places.js';
+import { weatherFor } from './weather.js';
 import { input, readJson, isJsonPath, list, oneOf, parseCards } from './inputs.js';
 import { THEMES, RANKS, BOOLEANS } from '../../config/action-inputs.js';
 
@@ -46,6 +49,8 @@ export async function runAction() {
     hemisphere: oneOf('hemisphere', input('hemisphere', 'north'), HEMISPHERES),
     date: new Date().toISOString().slice(0, 10),
   };
+  // Weather: off, live (Open-Meteo, read when the Action runs) or fixed states, for skylines with real places.
+  const weatherIn = parseWeatherInput(input('weather', 'off'), placesFor(options.skyline)?.length);
   const cardStyle = {
     language,
     rank,
@@ -99,6 +104,8 @@ export async function runAction() {
   // The year in review: `review-year`, or the current year so far (the last one in January). A year
   // that can't be reviewed stops the run before anything is fetched.
   const reviewYear = yearInReview ? parseReviewYear(input('review-year'), now) : null;
+
+  options.weather = await weatherFor(weatherIn, options.skyline, { sample });
 
   // Special cars the profile earned (a 100-day streak, 100+ stars, 500+ PRs). They need
   // the profile numbers; if those can't be read the scene still stands, without them.

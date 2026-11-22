@@ -161,3 +161,16 @@ export function sampleReleases() {
     { name: 'v2.0.0', pushedAt: '2026-06-18T16:20:00Z', kind: 'release' },
   ];
 }
+
+// The live weather the sample Action and the playground show without asking Open-Meteo:
+// one state per Jalisco place, as readCurrentWeather returns it.
+export function sampleWeather() {
+  return {
+    places: [
+      { state: 'cloudy', code: 3, temperature: 19.8 },
+      { state: 'rain', code: 61, temperature: 18.2 },
+      { state: 'storm', code: 95, temperature: 22.4 },
+    ],
+    problems: [],
+  };
+}

@@ -18,6 +18,9 @@ export const DECORATIONS = {
   newyear: 'New Year',
 };
 
+// The decorations that belong to a season rather than a holiday. Real weather can replace them.
+export const SEASON_DECORATIONS = ['winter', 'spring', 'autumn'];
+
 // Meteorological seasons by month (1 = January), as seen from the northern hemisphere.
 const SEASON_BY_MONTH = [
   null,

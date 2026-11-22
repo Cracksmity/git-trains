@@ -6,7 +6,7 @@ import { SourceTextModule } from 'node:vm';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const roots = ['src', 'assets', 'config', 'bin', 'scripts', 'tools', 'tests'];
-const core = new Set(['activity', 'graphics', 'trains', 'landscape', 'scene', 'cards', 'calendar', 'review', 'validation', 'demo', 'sharing']);
+const core = new Set(['activity', 'graphics', 'trains', 'landscape', 'scene', 'cards', 'calendar', 'review', 'validation', 'demo', 'sharing', 'weather']);
 const graph = new Map();
 const problems = [];
 const key = (file) => relative(root, file).split(sep).join('/');
