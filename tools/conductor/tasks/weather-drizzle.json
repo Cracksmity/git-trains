@@ -1,0 +1,31 @@
+{
+  "name": "weather-drizzle",
+  "route": "design",
+  "promptFile": "weather-drizzle.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/weather*.js",
+    "src/landscape/jalisco-weather*.js",
+    "tests/weather/**",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-state.js drizzle --reads 51:18,53:18,55:17,56:4,57:3 --others 61:18=rain,80:18=rain,0:20=clear,3:15=cloudy --same clear:6d289072b3a8bce5,cloudy:88996a8bb5aee1ab,rain:47d8cee530e60922,storm:008848f9e84599d1",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "gemini",
+      "model": "gemini-4-neon-xhigh",
+      "why": "Weather comparison: Gemini 4 Neon draws three of the six pending designs"
+    }
+  ]
+}

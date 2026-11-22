@@ -1,0 +1,31 @@
+{
+  "name": "weather-frost",
+  "route": "design",
+  "promptFile": "weather-frost.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/weather*.js",
+    "src/landscape/jalisco-weather*.js",
+    "tests/weather/**",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-state.js frost --reads 0:1,1:-2,2:2,0:-4 --others 0:3=clear,0:20=clear,61:1=rain,3:0=cloudy --same clear:6d289072b3a8bce5,cloudy:88996a8bb5aee1ab,rain:47d8cee530e60922,storm:008848f9e84599d1",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "gemini",
+      "model": "gemini-4-neon-xhigh",
+      "why": "Weather comparison: Gemini 4 Neon draws three of the six pending designs"
+    }
+  ]
+}

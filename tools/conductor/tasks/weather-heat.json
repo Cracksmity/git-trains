@@ -1,0 +1,32 @@
+{
+  "name": "weather-heat",
+  "route": "design",
+  "promptFile": "weather-heat.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/weather*.js",
+    "src/landscape/jalisco-weather*.js",
+    "tests/weather/**",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-state.js heat --reads 0:32,2:35,1:38 --others 0:31=clear,95:33=storm,61:33=rain --same clear:6d289072b3a8bce5,cloudy:88996a8bb5aee1ab,rain:47d8cee530e60922,storm:008848f9e84599d1",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.2-astra",
+      "effort": "xhigh",
+      "why": "Weather comparison: GPT-6.2-Astra draws three of the six pending designs"
+    }
+  ]
+}
