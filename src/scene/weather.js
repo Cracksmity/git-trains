@@ -263,7 +263,7 @@ function lightning(band, backdrop, W, art) {
 /**
  * The layers of a scene's weather, bottom to top within each depth.
  * @param {Array<string | null>} weather one state per track
- * @param {{ W: number, H: number, tracks: unknown[], backdrop: Grid, skyline?: { preset?: string } | null }} scene
+ * @param {{ W: number, H: number, tracks: unknown[], backdrop: Grid, skyline?: { preset?: string } | null, sky?: Array<import('../weather/conditions.js').PlaceSky | null> }} scene each place's state and a live reading's extras (see placeSky)
  * @returns {WeatherLayer[]}
  */
 export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {

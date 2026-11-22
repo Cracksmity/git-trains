@@ -4,7 +4,7 @@
 
 ## Built with a conductor of AIs
 
-This project is built by one AI directing others. [tools/conductor](../tools/conductor) hands each task to Codex or Antigravity (Gemini) depending on its kind, runs it in an isolated git worktree, checks the result with gates (tests, the validator, link and translation checks), feeds failures back and climbs to a stronger model when one keeps failing. The routing comes from the [Medellín benchmark](https://cracksmity.github.io/git-trains/benchmarks/medellin/), where ten AI runs designed the same train and skyline. Every attempt is logged, and the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) shows which model did which task: how often it passed on the first try, how long it took and how many tokens it used.
+This project is built by one AI directing others. [tools/conductor](../tools/conductor) hands each task to Codex or Antigravity (Gemini) depending on its kind, runs it in an isolated git worktree, checks the result with gates (tests, the validator, link and translation checks), feeds failures back and climbs to a stronger model when one keeps failing. The routing comes from the [Medellín benchmark](https://cracksmity.github.io/git-trains/benchmarks/medellin/), where ten AI runs designed the same train and skyline. Independent chains of tasks can run at the same time, in lanes, one branch per lane. Every attempt is logged, and the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) shows which model did which task: how often it passed on the first try, how long it took and how many tokens it used.
 ## Development
 
 ```bash

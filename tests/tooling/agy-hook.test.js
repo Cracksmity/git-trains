@@ -23,7 +23,7 @@ test('the Antigravity hook refuses other commands and chained ones', () => {
 
 test('operators inside quotes are fine, so the gates of every task can run', () => {
   const dir = new URL('../../tools/conductor/tasks/', import.meta.url);
-  for (const name of ['gemini-smoke.json', 'regions-research.json', 'guides-en.json']) {
+  for (const name of ['gemini-smoke.json', 'regions-research.json', 'guides-en.json', 'weather-snow.json', 'weather-temperature.json']) {
     for (const gate of JSON.parse(readFileSync(new URL(name, dir), 'utf8')).gates) assert.equal(verdict(gate), 'allow', gate);
   }
 });

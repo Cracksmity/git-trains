@@ -79,6 +79,37 @@ export function readCurrentWeather(data, count) {
 }
 
 /**
+ * What a scene draws over one place: a state, plus what a live reading adds to it.
+ * A fixed state from the workflow carries only the state. New designs that need more
+ * from a reading (wind, haze) add their own fields here.
+ * @typedef {object} PlaceSky
+ * @property {string} state a key of WEATHER_STATES
+ * @property {number | null} [temperature] degrees Celsius at 2 m, from a live reading only
+ */
+
+/**
+ * One entry of a scene's weather, a state name or a PlaceSky, as a PlaceSky. Null when it
+ * names no state the scenes know. The other fields are kept for the designs that read them.
+ * @param {unknown} entry
+ * @returns {PlaceSky | null}
+ */
+export function placeSky(entry) {
+  if (typeof entry === 'string') return WEATHER_STATES.includes(entry) ? { state: entry } : null;
+  if (!entry || typeof entry !== 'object') return null;
+  const sky = /** @type {PlaceSky} */ (entry);
+  return WEATHER_STATES.includes(sky.state) ? { ...sky } : null;
+}
+
+/**
+ * What a live reading draws, or null when its state could not be read.
+ * @param {PlaceWeather} reading
+ * @returns {PlaceSky | null}
+ */
+export function skyOfReading(reading) {
+  return reading.state ? { state: reading.state, temperature: reading.temperature } : null;
+}
+
+/**
  * @typedef {{ mode: 'off' } | { mode: 'live' } | { mode: 'fixed', states: string[] }} WeatherInput
  */
 

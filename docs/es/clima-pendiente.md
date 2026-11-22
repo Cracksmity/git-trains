@@ -8,7 +8,7 @@ La escena de Jalisco dibuja diez estados (`clear`, `frost`, `heat`, `partly`, `c
 
 Un estado nuevo toca los mismos lugares que los cuatro primeros:
 
-1. **Datos:** [src/weather/conditions.js](../../src/weather/conditions.js) agrega el estado a `WEATHER_STATES` y a `WEATHER_NAMES` (inglés y español), y mueve sus códigos WMO en `CODES`. Si el estado depende de la temperatura o del viento, también hace falta un campo en la consulta a Open-Meteo ([src/weather/open-meteo.js](../../src/weather/open-meteo.js)). `readCurrentWeather` debe validar ese campo como los demás.
+1. **Datos:** [src/weather/conditions.js](../../src/weather/conditions.js) agrega el estado a `WEATHER_STATES` y a `WEATHER_NAMES` (inglés y español), y mueve sus códigos WMO en `CODES`. Si el estado depende de la temperatura o del viento, también hace falta un campo en la consulta a Open-Meteo ([src/weather/open-meteo.js](../../src/weather/open-meteo.js)). `readCurrentWeather` debe validar ese campo como los demás. Lo que una lectura agrega además del estado (la temperatura, el viento) llega a la escena en su entrada `PlaceSky`: ver `placeSky` y `skyOfReading`, y `scene.sky` en `weatherArt`.
 2. **Tintas:** [src/weather/inks.js](../../src/weather/inks.js) da a cada tinta nueva un valor claro y uno oscuro.
 3. **Capas compartidas:** [src/scene/weather.js](../../src/scene/weather.js) se encarga del cielo, las partículas que caen y los destellos. Reutiliza `rainLayers`, las capas `fall` y `blink`, `citySky` y `countrySky` antes de escribir mecanismos nuevos.
 4. **Cada lugar:** [src/landscape/jalisco-weather.js](../../src/landscape/jalisco-weather.js) pinta lo propio de Guadalajara, Los Altos o Tequila.

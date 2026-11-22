@@ -6,7 +6,7 @@ import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
 import { UNLOCK_IDS, unlockThreshold } from '../activity/unlocks.js';
-import { WEATHER_NAMES, WEATHER_STATES } from '../weather/conditions.js';
+import { WEATHER_NAMES, placeSky } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -53,8 +53,9 @@ const TEXT = {
 // opts.unlock: the special car the profile earned (see unlocks.js), or null. It joins the
 //   main train right behind the cab and adds a line to the title. Next to a full-length
 //   train it takes the place of the last regular car, so the train still fits the scene.
-// opts.weather: one weather state per track (see src/weather/conditions.js), or null. Only
-//   skylines with real places behind their tracks (the jalisco preset) wear it; the title names it.
+// opts.weather: one weather entry per track, a state name or a PlaceSky with a live reading's
+//   extras (see src/weather/conditions.js), or null. Only skylines with real places behind
+//   their tracks (the jalisco preset) wear it; the title names it.
 export function buildSpec(stats, opts = {}) {
   const { train = 'auto', mode = 'single', theme = 'auto', language = 'en', scale = 2, skyline = null } = opts;
   const unlock = opts.unlock ?? null;
@@ -108,9 +109,9 @@ export function buildSpec(stats, opts = {}) {
     while (lead.cars > 1 && trainWidth(model, lead.cars, true) > SCENE_W) lead.cars--;
   }
 
-  const weather = places && Array.isArray(opts.weather)
-    ? tracks.map((_, i) => (WEATHER_STATES.includes(opts.weather[i]) ? opts.weather[i] : null))
-    : null;
+  // The art reads the states; the designs that need a reading's extras read `sky`.
+  const sky = places && Array.isArray(opts.weather) ? tracks.map((_, i) => placeSky(opts.weather[i])) : null;
+  const weather = sky ? sky.map((place) => place?.state ?? null) : null;
   const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
   const forecast = weather?.some(Boolean)
     ? `${text.weather}: ${weather.flatMap((state, i) => (state ? [`${places[i].name} ${names[state]}`] : [])).join(', ')}`
@@ -128,6 +129,6 @@ export function buildSpec(stats, opts = {}) {
     skyline,
     tracks,
     ...(opts.date && opts.seasons !== false ? { date: opts.date, hemisphere: opts.hemisphere ?? 'north' } : {}),
-    ...(forecast ? { weather } : {}),
+    ...(forecast ? { weather, sky } : {}),
   };
 }

@@ -1,5 +1,6 @@
 // The weather the scene wears: a fixed state from the workflow, or the current
 // reading at the skyline's places. If it can't be read the scene still stands.
+import { skyOfReading } from '../weather/conditions.js';
 import { fetchWeather } from '../weather/open-meteo.js';
 import { placesFor } from '../weather/places.js';
 import { localTheme } from '../weather/sun.js';
@@ -9,11 +10,13 @@ import { sampleWeather } from '../demo/sample.js';
 const annotation = (text) => String(text).replace(/%/g, '%25').replace(/\r?\n/g, '%0A');
 
 /**
- * One weather state (or null) per place, in track order, or null for no weather.
+ * One weather entry per place, in track order, or null for no weather. A fixed input
+ * gives state names; a live reading gives PlaceSky entries with the temperature (or null
+ * for a place whose reading was unusable).
  * @param {import('../weather/conditions.js').WeatherInput} request
  * @param {{ preset?: string } | null} skyline
  * @param {{ sample?: boolean, fetchImpl?: typeof fetch, log?: (line: string) => void }} [options]
- * @returns {Promise<Array<string | null> | null>}
+ * @returns {Promise<Array<string | import('../weather/conditions.js').PlaceSky | null> | null>}
  */
 export async function weatherFor(request, skyline, { sample = false, fetchImpl = fetch, log = console.log } = {}) {
   if (request.mode === 'off') return null;
@@ -31,7 +34,7 @@ export async function weatherFor(request, skyline, { sample = false, fetchImpl =
       return `${place.name} ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}`;
     });
     log(`Weather (Open-Meteo): ${summary.join(', ')}`);
-    return readings.map((reading) => reading.state);
+    return readings.map(skyOfReading);
   } catch (error) {
     log(`::notice::Could not read the weather, the scene stays without it: ${annotation(error.message)}`);
     return null;

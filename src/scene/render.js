@@ -102,7 +102,7 @@ export function renderScene(spec) {
   const overruled = spec.weather && SEASON_DECORATIONS.includes(seasonal) && WEATHER_OVER_SEASONS.includes(spec.skyline?.preset);
   const kind = overruled ? null : seasonal;
   const decor = kind && decorLayers(kind, { W, H, tracks, user, backdrop }, used);
-  const weather = spec.weather ? weatherLayers(spec.weather, { W, H, tracks, backdrop, skyline: spec.skyline }, used) : null;
+  const weather = spec.weather ? weatherLayers(spec.weather, { W, H, tracks, backdrop, skyline: spec.skyline, sky: spec.sky }, used) : null;
   svg +=
     skyLayer(W, used) +
     celestialLayer(W, used) +

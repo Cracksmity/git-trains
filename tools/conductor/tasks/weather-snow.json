@@ -1,0 +1,35 @@
+{
+  "name": "weather-snow",
+  "route": "design",
+  "promptFile": "weather-snow.md",
+  "allow": [
+    "src/weather/**",
+    "src/scene/weather*.js",
+    "src/scene/decor.js",
+    "src/scene/snow*.js",
+    "src/landscape/jalisco-weather*.js",
+    "tests/weather/**",
+    "tests/activity/seasons.test.js",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/weather-backlog.md",
+    "docs/es/clima-pendiente.md",
+    "action.yml"
+  ],
+  "gates": [
+    "node tools/conductor/gates/weather-state.js snow --reads 71:-1,73:0,75:-2,77:1,85:0,86:-1 --others 61:18=rain,80:18=rain,82:20=rain,3:15=cloudy,0:1=frost,95:20=storm",
+    "node tools/conductor/gates/weather-unchanged.js",
+    "npm test",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 45,
+  "ladder": [
+    {
+      "backend": "gemini",
+      "model": "gemini-4-neon-xhigh",
+      "why": "Weather lanes: Gemini 4 Neon draws snow, then the caption temperatures"
+    }
+  ]
+}

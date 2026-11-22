@@ -61,7 +61,11 @@ test('a failed reading leaves the scene without weather and keeps the notice on 
 
   lines.length = 0;
   const partial = async () => ({ ok: true, status: 200, text: async () => JSON.stringify([{ current: { weather_code: 61, temperature_2m: 17.4 } }, {}, { current: { weather_code: 0 } }]) });
-  assert.deepEqual(await weatherFor({ mode: 'live' }, skyline, { fetchImpl: partial, log }), ['rain', null, 'clear']);
+  assert.deepEqual(await weatherFor({ mode: 'live' }, skyline, { fetchImpl: partial, log }), [
+    { state: 'rain', temperature: 17.4 },
+    null,
+    { state: 'clear', temperature: null },
+  ]);
   assert.deepEqual(lines, [
     '::notice::Weather: place 2: no "current" block',
     'Weather (Open-Meteo): Guadalajara rain 17°C, Los Altos unknown, Tequila clear',

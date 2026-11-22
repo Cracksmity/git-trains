@@ -8,7 +8,7 @@ The Jalisco scene draws ten states (`clear`, `frost`, `heat`, `partly`, `cloudy`
 
 A new state touches the same places as the first four:
 
-1. **Data:** [src/weather/conditions.js](../src/weather/conditions.js) adds the state to `WEATHER_STATES` and `WEATHER_NAMES` (English and Spanish), and moves its WMO codes in `CODES`. A state chosen by temperature or wind also needs a field in the Open-Meteo request ([src/weather/open-meteo.js](../src/weather/open-meteo.js)). `readCurrentWeather` must validate that field like the others.
+1. **Data:** [src/weather/conditions.js](../src/weather/conditions.js) adds the state to `WEATHER_STATES` and `WEATHER_NAMES` (English and Spanish), and moves its WMO codes in `CODES`. A state chosen by temperature or wind also needs a field in the Open-Meteo request ([src/weather/open-meteo.js](../src/weather/open-meteo.js)). `readCurrentWeather` must validate that field like the others. What a reading adds beyond the state (the temperature, the wind) reaches the scene in its `PlaceSky` entry: see `placeSky` and `skyOfReading`, and `scene.sky` in `weatherArt`.
 2. **Inks:** [src/weather/inks.js](../src/weather/inks.js) gives every new ink a light and a dark value.
 3. **Shared layers:** [src/scene/weather.js](../src/scene/weather.js) handles the sky, falling particles and flashes. Reuse `rainLayers`, the `fall` and `blink` layers, `citySky` and `countrySky` before writing new machinery.
 4. **Each place:** [src/landscape/jalisco-weather.js](../src/landscape/jalisco-weather.js) paints what is specific to Guadalajara, Los Altos or Tequila.

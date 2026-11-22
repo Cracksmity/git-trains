@@ -4,7 +4,7 @@
 
 ## Hecho con un director de IAs
 
-Este proyecto lo construye una IA que dirige a otras. [tools/conductor](../../tools/conductor) le pasa cada tarea a Codex o a Antigravity (Gemini) según su tipo, la corre en un worktree de git aislado, revisa el resultado con filtros (tests, el validador, enlaces, traducción), le devuelve los fallos y sube a un modelo más fuerte cuando uno sigue fallando. El reparto sale de la [comparativa de Medellín](https://cracksmity.github.io/git-trains/benchmarks/medellin/), donde diez corridas de IA diseñaron el mismo tren y skyline. Cada intento queda registrado, y la [tabla de posiciones de las IAs](https://cracksmity.github.io/git-trains/leaderboard/) muestra qué modelo hizo qué tarea: cuántas veces pasó a la primera, cuánto tardó y cuántos tokens usó.
+Este proyecto lo construye una IA que dirige a otras. [tools/conductor](../../tools/conductor) le pasa cada tarea a Codex o a Antigravity (Gemini) según su tipo, la corre en un worktree de git aislado, revisa el resultado con filtros (tests, el validador, enlaces, traducción), le devuelve los fallos y sube a un modelo más fuerte cuando uno sigue fallando. El reparto sale de la [comparativa de Medellín](https://cracksmity.github.io/git-trains/benchmarks/medellin/), donde diez corridas de IA diseñaron el mismo tren y skyline. Las cadenas de tareas independientes pueden correr al mismo tiempo, en carriles, con una rama por carril. Cada intento queda registrado, y la [tabla de posiciones de las IAs](https://cracksmity.github.io/git-trains/leaderboard/) muestra qué modelo hizo qué tarea: cuántas veces pasó a la primera, cuánto tardó y cuántos tokens usó.
 ## Desarrollo
 
 ```bash

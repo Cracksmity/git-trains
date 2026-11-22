@@ -8,6 +8,7 @@ node tools/conductor/conductor.js run tools/conductor/tasks/guides-en.json
 node tools/conductor/conductor.js run <task.json> --apply    # apply the patch when it passes
 node tools/conductor/conductor.js run <task.json> --dry-run  # print the command, run nothing
 node tools/conductor/conductor.js log                        # the last runs: model, time, tokens, pass/fail
+node tools/conductor/lanes.js tools/conductor/tasks/weather-lanes.json   # several chains at once, one branch each
 ```
 
 You need the CLIs installed and signed in: `codex` (`codex exec`) and/or `agy` (Antigravity, `agy -p`). They run on your own subscriptions.
@@ -24,6 +25,32 @@ You need the CLIs installed and signed in: `codex` (`codex exec`) and/or `agy` (
 Every attempt is logged to `.conductor/runs.jsonl` (model, effort, seconds, input/output/reasoning tokens, pass/fail): that log is how the routes should be tuned over time.
 
 `npm run leaderboard` merges those logs, from every checkout of the repository on your machine, into [docs/leaderboard.json](../../docs/leaderboard.json), and the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) reads that file: per model, how often it passed on the first try, its median time and tokens, the routes it served and where a ladder fell back to the next model. Only safe fields are kept (never prompts, file paths or your user name) and a run that is already in the file is skipped, so logs from several machines pile up. `npm run leaderboard -- --from <file>` adds another machine's `runs.jsonl`. After a merge conflict in the file, keep both sides and run it again.
+
+## Lanes
+
+[lanes.js](lanes.js) runs several chains of tasks at the same time. A plan such as [weather-lanes.json](tasks/weather-lanes.json) lists the lanes and the tasks of each:
+
+```json
+{
+  "name": "weather",
+  "lanes": [
+    { "name": "astra", "tasks": ["weather-wind.json", "weather-haze.json"], "onFailure": "stop" },
+    { "name": "neon", "tasks": ["weather-snow.json", "weather-temperature.json"], "onFailure": "continue" }
+  ],
+  "checks": ["npm run lint", "npm run typecheck"]
+}
+```
+
+- **One worktree and one branch per lane.** Every lane is cut from the same base, HEAD (or a snapshot when the checkout has uncommitted changes), into `.conductor/lanes/<plan>/<lane>` on the branch `lanes/<plan>/<lane>`.
+- **A chain inside each lane.** Its tasks run one after another through the conductor. Each task that passes its gates is committed to the lane's branch before the next starts, so the next one builds on it.
+- **Lanes run in parallel.** Lanes never touch each other's files while they work. Give each lane its own agent, so the lanes don't share a rate limit.
+- **`onFailure`.** `stop`, the default, skips the rest of the lane after a failed task; use it when the tasks build on each other. `continue` goes on with the next task.
+- **`checks`.** They run in the lane after every task it applies. Their results go in the summary but don't block anything: the gates already passed.
+- **The result.** The summary (`.conductor/lanes/<plan>/summary.md`) lists each task with its agent, attempts, minutes, checks and commit. The logs, patches and `runs.jsonl` lines land in the usual `.conductor/`. The lane worktrees are removed and the branches stay. Merge them into your branch one at a time and resolve the conflicts once.
+
+Tasks that edit the same lines will conflict when the branches meet. Fix the shared contract before you split the work (the weather designs share `PlaceSky`, see [weather-brief.md](tasks/weather-brief.md)). Gates such as [weather-unchanged.js](gates/weather-unchanged.js), which compares against the commit the run started from instead of fixed hashes, keep working at any point of a chain.
+
+`--dry-run` prints which agent each task would start and runs nothing. `--keep` leaves the lane worktrees in place. `--trailer "<line>"` adds a line to each commit message.
 
 ## Routes
 

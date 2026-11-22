@@ -107,6 +107,17 @@ test('the title names each place with its weather in the scene language', () => 
   assert.match(single.title, /Weather: Guadalajara storm$/);
 });
 
+test('a place takes a state name or a reading with extras, and draws the same either way', () => {
+  const live = [{ state: 'cloudy', temperature: 19.8 }, null, { state: 'storm', temperature: 22.4, gust: 1 }];
+  const scene = spec({ weather: live });
+  assert.deepEqual(scene.weather, ['cloudy', null, 'storm']);
+  assert.deepEqual(scene.sky, [{ state: 'cloudy', temperature: 19.8 }, null, { state: 'storm', temperature: 22.4, gust: 1 }]);
+  assert.notEqual(scene.sky[0], live[0], 'the spec keeps its own copy');
+  assert.equal(svg({ weather: live }), svg({ weather: ['cloudy', null, 'storm'] }));
+  assert.deepEqual(spec({ weather: ['rain', { state: 'sleet' }, 7] }).weather, ['rain', null, null]);
+  assert.deepEqual(spec({ weather: ['rain', 'rain', 'rain'] }).sky, [{ state: 'rain' }, { state: 'rain' }, { state: 'rain' }]);
+});
+
 function sceneContext(scene) {
   const tracks = scene.tracks.map((t) => ({ ...t, overhead: false }));
   const H = 204;

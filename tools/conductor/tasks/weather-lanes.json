@@ -1,0 +1,9 @@
+{
+  "$comment": "The four pending weather designs in two lanes, run at the same time by tools/conductor/lanes.js: GPT-6.2-Astra adds wind and then haze, which builds on it; Gemini 4 Neon draws snow and then the caption temperatures, which don't depend on each other. Lint and typecheck run in each lane after every design it applies.",
+  "name": "weather",
+  "lanes": [
+    { "name": "astra", "tasks": ["weather-wind.json", "weather-haze.json"], "onFailure": "stop" },
+    { "name": "neon", "tasks": ["weather-snow.json", "weather-temperature.json"], "onFailure": "continue" }
+  ],
+  "checks": ["npm run lint", "npm run typecheck"]
+}

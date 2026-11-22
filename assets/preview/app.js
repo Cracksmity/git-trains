@@ -14,7 +14,7 @@ import { buildReview } from '../../src/review/data.js';
 import { renderReview } from '../../src/review/render.js';
 import { sampleYear } from '../../src/demo/sample.js';
 import { DECORATIONS, decorationFor } from '../../src/activity/seasons.js';
-import { WEATHER_STATES, parseWeatherInput } from '../../src/weather/conditions.js';
+import { WEATHER_STATES, parseWeatherInput, skyOfReading } from '../../src/weather/conditions.js';
 import { fetchWeather } from '../../src/weather/open-meteo.js';
 import { JALISCO_PLACES } from '../../src/weather/places.js';
 import { localTheme } from '../../src/weather/sun.js';
@@ -78,7 +78,7 @@ async function readLiveWeather() {
   $('st-weather').textContent = 'Asking Open-Meteo…';
   try {
     const { places } = await fetchWeather({ places: JALISCO_PLACES, fetchImpl: (url, init) => fetch(url, init) });
-    liveWeather = places.map((p) => p.state);
+    liveWeather = places.map(skyOfReading);
     $('st-weather').className = 'status ok';
     $('st-weather').textContent = JALISCO_PLACES.map((place, i) => {
       const { state, temperature } = places[i];
