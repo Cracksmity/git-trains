@@ -22,6 +22,8 @@ const HEAT_DAY = 'rgba(255,226,180,0.5)';
 const HEAT_DAY_LOW = 'rgba(255,206,146,0.58)';
 
 const SHARED = {
+  // Loose red earth above the plowed parcels of Los Altos.
+  wDust: ['rgba(193,112,78,0.85)', 'rgba(153,89,81,0.8)'],
   // Transparent warmth preserves the dither of the sky beneath it.
   // The haze thickens toward the horizon, where hot air bleaches the sky most.
   wHeatHaze: [HEAT_DAY, 'rgba(158,98,107,0.28)'],

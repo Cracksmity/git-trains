@@ -6,7 +6,7 @@ import { DEFAULT_COLOR } from '../activity/languages.js';
 import { trainWidth } from '../trains/geometry.js';
 import { SCENE_W } from './layout.js';
 import { UNLOCK_IDS, unlockThreshold } from '../activity/unlocks.js';
-import { WEATHER_NAMES, placeSky } from '../weather/conditions.js';
+import { WEATHER_MODIFIERS, WEATHER_NAMES, placeSky } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -27,6 +27,8 @@ const TEXT = {
       mail: (n) => `Mail car unlocked: ${n}+ pull requests`,
     },
     weather: 'Weather',
+    modifiers: { wind: 'wind' },
+    withModifiers: (words) => ` with ${words.join(' and ')}`,
   },
   es: {
     label: 'RACHA',
@@ -39,6 +41,8 @@ const TEXT = {
       mail: (n) => `Vagón postal desbloqueado: más de ${n} pull requests`,
     },
     weather: 'Clima',
+    modifiers: { wind: 'viento' },
+    withModifiers: (words) => ` con ${words.join(' y ')}`,
   },
 };
 
@@ -113,9 +117,12 @@ export function buildSpec(stats, opts = {}) {
   const sky = places && Array.isArray(opts.weather) ? tracks.map((_, i) => placeSky(opts.weather[i])) : null;
   const weather = sky ? sky.map((place) => place?.state ?? null) : null;
   const names = WEATHER_NAMES[language] ?? WEATHER_NAMES.en;
-  const forecast = weather?.some(Boolean)
-    ? `${text.weather}: ${weather.flatMap((state, i) => (state ? [`${places[i].name} ${names[state]}`] : [])).join(', ')}`
-    : '';
+  const descriptions = sky?.flatMap((place, i) => {
+    if (!place) return [];
+    const modifiers = WEATHER_MODIFIERS.filter((mod) => place[mod] === true).map((mod) => text.modifiers[mod]);
+    return [`${places[i].name} ${names[place.state]}${modifiers.length ? text.withModifiers(modifiers) : ''}`];
+  });
+  const forecast = descriptions?.length ? `${text.weather}: ${descriptions.join(', ')}` : '';
 
   // Repo mode (see repo.js): the title names the repository, and the city is seeded with its full name.
   const title = stats.kind === 'repo' ? text.repoTitle(stats) : text.title(stats);

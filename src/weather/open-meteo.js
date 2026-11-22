@@ -16,7 +16,7 @@ export function weatherUrl(places) {
   const query = new URLSearchParams({
     latitude: coordinate('latitude'),
     longitude: coordinate('longitude'),
-    current: 'weather_code,temperature_2m',
+    current: 'weather_code,temperature_2m,wind_speed_10m',
   });
   return `${OPEN_METEO_URL}?${query}`;
 }

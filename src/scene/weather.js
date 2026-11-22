@@ -6,8 +6,10 @@ import { Grid, rng } from '../graphics/pixel.js';
 import { BALLAST, GY0, PITCH } from './layout.js';
 import { WEATHER_THEMES, skyInk, skyState } from '../weather/inks.js';
 import { hailLayers } from './weather-hail.js';
+import { fallTile, windTileCopies } from './weather-fall.js';
 import { heatSky } from './weather-heat.js';
 import { JALISCO_WEATHER } from '../landscape/jalisco-weather.js';
+import { jaliscoWind } from '../landscape/jalisco-weather-wind.js';
 import { placesFor } from '../weather/places.js';
 
 /**
@@ -24,6 +26,8 @@ export const FLASH = { period: 9, keys: /** @type {Array<[number, number]>} */ (
 // How far into its cycle each place's lightning starts: Guadalajara's first flash is
 // on in frame 0, so the static PNG shows a storm over the Cathedral.
 const FLASH_OFFSET = [0.225, 3, 6];
+// A gust bends the trees for the first part of the cycle, then lets them settle.
+export const SWAY = { period: 3, release: 0.4 };
 // Pixels per second of the far and near drops.
 const RAIN_SPEED = { drizzle: [24, 36], rain: [44, 64], storm: [60, 90] };
 // Area per drop, in square pixels: smaller is denser.
@@ -43,7 +47,8 @@ const COUNTRY_SKY = new Set(['@dusk', '@haze', '@afterglow', '@starlight']);
  * @property {'sky' | 'ground'} z sky: behind the city and countryside; ground: over them, behind the trains
  * @property {number} y scene row of the grid's first row
  * @property {[number, number]} [clip] scene rows the layer may paint, end exclusive
- * @property {{ h: number, dur: number }} [fall] drops h rows in steps of a pixel every dur seconds, looping
+ * @property {{ h: number, dur: number, dx?: number }} [fall] drops h rows and drifts dx pixels every dur seconds
+ * @property {boolean} [sway] moves a crown one pixel in the gust
  * @property {boolean} [drift] shares the clouds' loop: a 2W-wide grid sliding W pixels
  * @property {{ offset: number }} [blink] lightning, `offset` seconds into its cycle at frame 0
  */
@@ -206,23 +211,20 @@ function countrySky(state, band, backdrop, W) {
 }
 
 // Two depths of falling streaks over the whole place, ballast included.
-function rainLayers(state, band, W) {
+function rainLayers(state, band, W, wind) {
   const h = band.bottom - band.top;
   return [0, 1].map((near) => {
     const count = Math.round((W * h) / RAIN_SPACING[state][near]);
-    const length = RAIN_LENGTH[state][near];
+    const length = Math.max(wind ? 2 : 1, RAIN_LENGTH[state][near]);
     const rand = rng(7100 + 10 * band.k + near + RAIN_SEED[state]);
-    const g = new Grid(W, 2 * h);
+    const { grid, pixel } = fallTile(W, h, wind);
     for (let i = 0; i < count; i++) {
       const x = Math.floor(((i + rand()) * W) / count);
       const y = Math.floor(rand() * h);
-      // Two identical periods: a drop that crosses the seam is drawn whole in both.
-      for (let d = 0; d < length; d++) {
-        for (const o of [0, h]) g.set(x, ((y + d) % h) + o, near ? '@wDrop' : '@wDropFar');
-      }
+      for (let d = 0; d < length; d++) pixel(x, y + d, near ? '@wDrop' : '@wDropFar');
     }
     const dur = Math.round((h / RAIN_SPEED[state][near]) * 100) / 100;
-    return { grid: g, z: /** @type {const} */ ('ground'), y: band.top, clip: /** @type {[number, number]} */ ([band.top, band.bottom]), fall: { h, dur } };
+    return { grid, z: /** @type {const} */ ('ground'), y: band.top, clip: /** @type {[number, number]} */ ([band.top, band.bottom]), fall: { h, dur, dx: wind ? h : 0 } };
   });
 }
 
@@ -266,7 +268,7 @@ function lightning(band, backdrop, W, art) {
  * @param {{ W: number, H: number, tracks: unknown[], backdrop: Grid, skyline?: { preset?: string } | null, sky?: Array<import('../weather/conditions.js').PlaceSky | null> }} scene each place's state and a live reading's extras (see placeSky)
  * @returns {WeatherLayer[]}
  */
-export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
+export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
   const places = placesFor(skyline) ?? [];
   const bands = weatherBands(tracks.length);
   /** @type {WeatherLayer[]} */
@@ -274,37 +276,33 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
   bands.forEach((band) => {
     const state = weather[band.k];
     const art = PLACE_ART[places[band.k]?.id];
-    if (!state || state === 'clear' || !art) return;
+    if (!state || !art) return;
+    const wind = sky?.[band.k]?.wind === true;
+    const cover = skyState(state);
     if (state === 'heat') {
       layers.push(...heatSky(band, backdrop));
       if (art.heat) layers.push(...art.heat(band, backdrop));
-      return;
-    }
-    if (state === 'partly') {
+    } else if (state === 'partly') {
       layers.push(partlyClouds(art.partly, band, backdrop, W));
-      return;
+    } else if (state !== 'clear' && state !== 'frost') {
+      if (band.k === 0) {
+        layers.push({ ...citySky(cover, W), z: 'sky', y: 0 });
+        layers.push({ grid: cityDeck(cover, W), z: 'sky', y: 0, drift: state !== 'hail' });
+      } else {
+        layers.push({ grid: countrySky(cover, band, backdrop, W), z: 'ground', y: band.top });
+      }
     }
-    if (state === 'frost') {
-      const ground = new Grid(W, H);
-      art.paint(ground, state, band, backdrop);
-      if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
-      return;
-    }
-    const sky = skyState(state);
-    if (band.k === 0) {
-      layers.push({ ...citySky(sky, W), z: 'sky', y: 0 });
-      layers.push({ grid: cityDeck(sky, W), z: 'sky', y: 0, drift: state !== 'hail' });
-    } else {
-      layers.push({ grid: countrySky(sky, band, backdrop, W), z: 'ground', y: band.top });
-    }
-    if (sky === 'rain' || sky === 'storm') layers.push({ grid: veil(sky, band, W), z: 'ground', y: band.top });
+    if (wind && state !== 'fog' && state !== 'frost') layers.push(...jaliscoWind(band, backdrop, state));
+    if (state === 'clear' || state === 'partly' || state === 'heat') return;
+    if (cover === 'rain' || cover === 'storm') layers.push({ grid: veil(cover, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
     // The flash lights the sky behind the place's own clouds, such as the volcano's cap.
-    if (sky === 'storm') layers.push(lightning(band, backdrop, W, art));
+    if (cover === 'storm') layers.push(lightning(band, backdrop, W, art));
     art.paint(ground, state, band, backdrop);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
-    if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W));
-    if (state === 'hail') layers.push(...hailLayers(band, W));
+    if (wind && (state === 'fog' || state === 'frost')) layers.push(...jaliscoWind(band, backdrop, state));
+    if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W, wind));
+    if (state === 'hail') layers.push(...hailLayers(band, W, wind));
   });
   return layers;
 }
@@ -318,34 +316,49 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline }) {
 export function weatherLayers(weather, scene, used) {
   const out = { sky: '', ground: '', css: '', vars: { light: {}, dark: {} } };
   const rules = [];
-  const animated = [];
+  const animated = new Set();
   weatherArt(weather, scene).forEach((layer, i) => {
     let body = layer.svg ? layer.svg(used) : layer.grid.paths(used);
     if (layer.fall) {
-      const { h, dur } = layer.fall;
+      const { h, dur, dx } = layer.fall;
       const cls = `w-fall${i}`;
-      animated.push(cls);
-      rules.push(`.${cls}{animation:${cls} ${dur}s steps(${h}) infinite}`, `@keyframes ${cls}{from{transform:translateY(-${h}px)}to{transform:translateY(0)}}`);
+      animated.add(cls);
+      const from = dx ? `translate(-${dx}px,-${h}px)` : `translateY(-${h}px)`;
+      const to = dx ? 'translate(0,0)' : 'translateY(0)';
+      rules.push(`.${cls}{animation:${cls} ${dur}s steps(${h}) infinite}`, `@keyframes ${cls}{from{transform:${from}}to{transform:${to}}}`);
+      if (dx) {
+        const tile = `w-tile${i}`;
+        body = `<g id="${tile}">${body}</g>` + windTileCopies(scene.W, h, dx)
+          .map(([x, y]) => `<use href="#${tile}" x="${x}" y="${y}"/>`).join('');
+      }
       const [top, end] = layer.clip;
       body = `<clipPath id="w-clip${i}"><rect y="${top}" width="${scene.W}" height="${end - top}"/></clipPath>` +
         `<g clip-path="url(#w-clip${i})"><g transform="translate(0 ${layer.y})"><g class="${cls}">${body}</g></g></g>`;
     } else {
+      if (layer.sway) {
+        animated.add('w-sway');
+        body = `<g class="w-sway">${body}</g>`;
+      }
       if (layer.y) body = `<g transform="translate(0 ${layer.y})">${body}</g>`;
       if (layer.drift) body = `<g class="cl">${body}</g>`;
       if (layer.blink) {
         const cls = `w-flash${i}`;
-        animated.push(cls);
+        animated.add(cls);
         rules.push(`.${cls}{opacity:0;animation:w-flash ${FLASH.period}s step-end -${layer.blink.offset}s infinite}`);
         body = `<g class="${cls}">${body}</g>`;
       }
     }
     out[layer.z] += body;
   });
-  if (!animated.length && !out.sky && !out.ground) return out;
+  if (!animated.size && !out.sky && !out.ground) return out;
   if (rules.some((r) => r.includes('w-flash'))) {
     rules.unshift(`@keyframes w-flash{${FLASH.keys.map(([at, v]) => `${+(at * 100).toFixed(1)}%{opacity:${v}}`).join('')}}`);
   }
-  if (animated.length) rules.push(`@media (prefers-reduced-motion:reduce){${animated.map((c) => `.${c}`).join(',')}{animation:none!important}}`);
+  if (animated.has('w-sway')) {
+    rules.push(`.w-sway{transform:translateX(1px);animation:w-sway ${SWAY.period}s step-end infinite}`,
+      `@keyframes w-sway{0%{transform:translateX(1px)}${SWAY.release * 100}%{transform:translateX(0)}}`);
+  }
+  if (animated.size) rules.push(`@media (prefers-reduced-motion:reduce){${[...animated].map((c) => `.${c}`).join(',')}{animation:none!important}}`);
   out.css = rules.join('');
   for (const theme of /** @type {const} */ (['light', 'dark'])) {
     out.vars[theme] = Object.fromEntries(Object.entries(WEATHER_THEMES[theme]).filter(([name]) => used.has(name)));

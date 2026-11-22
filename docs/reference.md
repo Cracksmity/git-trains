@@ -67,6 +67,7 @@ The Jalisco scene can wear the weather of its three places. Add `weather` to the
 
 - `live` reads the current weather in Guadalajara, Los Altos (at Arandas) and Tequila from [Open-Meteo](https://open-meteo.com/) when the Action runs. It needs no key. If the reading fails, the scene is drawn without weather and the log says why.
 - `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` or `hail` fixes one state for every place. `storm, rain, cloudy` gives one state per place, in track order.
+- Append `+wind` to any state. `rain+wind` brings wind to all three places, while `storm+wind, clear, hail+wind` leaves Los Altos calm. Live weather adds wind wherever the speed reaches 40 km/h. Trees sway, red dust blows off the plowed fields in Los Altos, and rain and hail fall diagonally.
 - `off`, the default, leaves the scene as it is.
 
 | State | Guadalajara | Los Altos | Tequila |

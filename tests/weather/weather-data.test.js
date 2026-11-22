@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { WEATHER_STATES, parseWeatherInput, readCurrentWeather, stateOfCode } from '../../src/weather/conditions.js';
+import { WEATHER_MODIFIERS, WEATHER_STATES, parseWeatherInput, readCurrentWeather, skyOfReading, stateOfCode } from '../../src/weather/conditions.js';
 import { fetchWeather, weatherUrl } from '../../src/weather/open-meteo.js';
 import { JALISCO_PLACES, placesFor } from '../../src/weather/places.js';
 
@@ -61,6 +61,35 @@ test('clear and partly codes become frost at 2 °C or less, while other codes ke
   }
 });
 
+test('wind modifies a single fixed state or individual places', () => {
+  assert.ok(WEATHER_MODIFIERS.includes('wind'));
+  assert.deepEqual(parseWeatherInput('Rain+WIND'), { mode: 'fixed', states: Array(3).fill({ state: 'rain', wind: true }) });
+  assert.deepEqual(parseWeatherInput('storm+wind, clear, Hail+Wind'), {
+    mode: 'fixed', states: [{ state: 'storm', wind: true }, 'clear', { state: 'hail', wind: true }],
+  });
+  for (const invalid of ['wind', 'rain+gust', 'clear+wind+gust', 'live+wind', 'storm+']) {
+    assert.throws(() => parseWeatherInput(invalid), /Options: off, live, clear.*\+wind/);
+  }
+});
+
+test('wind speed is optional, validated separately, and draws wind from 40 km/h', () => {
+  const read = (fields) => readCurrentWeather({ current: { weather_code: 61, temperature_2m: 18, ...fields } }, 1);
+  assert.equal(read({}).places[0].windSpeed, null);
+  assert.deepEqual(read({}).problems, []);
+  for (const speed of [0, 39.9, 40, 40.1, 200]) {
+    const { places: [place], problems } = read({ wind_speed_10m: speed });
+    assert.equal(place.windSpeed, speed);
+    assert.deepEqual(problems, []);
+    assert.deepEqual(skyOfReading(place), { state: 'rain', temperature: 18, ...(speed >= 40 ? { wind: true } : {}) });
+  }
+  for (const speed of [-0.1, 200.1, '40', null, NaN, Infinity]) {
+    const { places: [place], problems } = read({ wind_speed_10m: speed });
+    assert.equal(place.windSpeed, null);
+    assert.deepEqual(skyOfReading(place), { state: 'rain', temperature: 18 });
+    assert.deepEqual(problems, ['place 1: wind_speed_10m out of range']);
+  }
+});
+
 test('only clear and partly codes become heat, starting at 32 °C', () => {
   const read = (code, temp) => readCurrentWeather(reading(code, temp), 1).places[0].state;
   for (const code of [0, 1, 2]) {
@@ -105,7 +134,7 @@ test('one request carries every place, and the answer is read per place', async 
   const query = new URL(urls[0]).searchParams;
   assert.equal(query.get('latitude'), '20.6767,20.7058,20.8826');
   assert.equal(query.get('longitude'), '-103.3475,-102.3466,-103.8360');
-  assert.equal(query.get('current'), 'weather_code,temperature_2m');
+  assert.equal(query.get('current'), 'weather_code,temperature_2m,wind_speed_10m');
   assert.deepEqual(result.places.map((p) => p.state), ['clear', 'cloudy', 'rain']);
 });
 

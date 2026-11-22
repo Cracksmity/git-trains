@@ -50,6 +50,16 @@ test('a skyline without places keeps its scene and says why', () => {
   assert.ok(!city.svg.includes('w-fall'));
 });
 
+test('live weather logs the speed beside each windy place', async () => {
+  const lines = [];
+  const data = [[61, 18, 45], [0, 20, 39.9], [95, 22, 40]].map(([weather_code, temperature_2m, wind_speed_10m]) =>
+    ({ current: { weather_code, temperature_2m, wind_speed_10m } }));
+  const fetchImpl = async () => new Response(JSON.stringify(data));
+  const sky = await weatherFor({ mode: 'live' }, parseSkyline('jalisco'), { fetchImpl, log: (line) => lines.push(line) });
+  assert.deepEqual(sky, [{ state: 'rain', temperature: 18, wind: true }, { state: 'clear', temperature: 20 }, { state: 'storm', temperature: 22, wind: true }]);
+  assert.deepEqual(lines, ['Weather (Open-Meteo): Guadalajara rain 18°C, wind 45 km/h, Los Altos clear 20°C, Tequila storm 22°C, wind 40 km/h']);
+});
+
 test('a failed reading leaves the scene without weather and keeps the notice on one line', async () => {
   const lines = [];
   const log = (line) => lines.push(line);

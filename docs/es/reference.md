@@ -67,6 +67,7 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 
 - `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action. No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
 - `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- Agrega `+wind` a cualquier estado. Con `rain+wind` sopla el viento en los tres lugares. Con `storm+wind, clear, hail+wind`, Los Altos queda en calma. El clima en vivo agrega viento donde la velocidad alcanza los 40 km/h. Los árboles se mecen, el viento levanta polvo rojo de las parcelas aradas de Los Altos y la lluvia y el granizo caen en diagonal.
 - `off`, el valor por defecto, deja la escena como está.
 
 | Estado | Guadalajara | Los Altos | Tequila |

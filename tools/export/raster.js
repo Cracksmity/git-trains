@@ -9,7 +9,8 @@ import { paintSky, celestialGrid, starsGrids, cloudsGrid } from '../../src/scene
 import { paintBands } from '../../src/scene/terrain.js';
 import { paintRails } from '../../src/scene/rails.js';
 import { paintBackdrop } from '../../src/scene/backdrop.js';
-import { FLASH, weatherArt } from '../../src/scene/weather.js';
+import { FLASH, SWAY, weatherArt } from '../../src/scene/weather.js';
+import { windTileCopies } from '../../src/scene/weather-fall.js';
 import { WEATHER_THEMES } from '../../src/weather/inks.js';
 
 
@@ -137,13 +138,22 @@ function paintWeather(c, scene, z, t) {
   for (const layer of scene.weather ?? []) {
     if (layer.z !== z) continue;
     if (layer.fall) {
-      const { h, dur } = layer.fall;
-      c.paint(layer.grid, 0, layer.y - h + Math.floor(cycle(t / dur) * h), scene.color, 1, layer.clip);
+      const { h, dur, dx = 0 } = layer.fall;
+      const step = Math.floor(cycle(t / dur) * h) - h;
+      const x = Math.round(dx * step / h);
+      const y = layer.y + step;
+      c.paint(layer.grid, x, y, scene.color, 1, layer.clip);
+      if (dx) {
+        for (const [tx, ty] of windTileCopies(scene.plan.W, h, dx)) {
+          c.paint(layer.grid, x + tx, y + ty, scene.color, 1, layer.clip);
+        }
+      }
     } else if (layer.drift) {
       c.paint(layer.grid, -Math.floor(cycle(t / TIMING.clouds) * scene.plan.W), layer.y, scene.color);
     } else {
       const opacity = layer.blink ? keyframe((t + layer.blink.offset) / FLASH.period, FLASH.keys) : 1;
-      c.paint(layer.grid, 0, layer.y, scene.color, opacity);
+      const x = layer.sway && cycle(t / SWAY.period) < SWAY.release ? 1 : 0;
+      c.paint(layer.grid, x, layer.y, scene.color, opacity);
     }
   }
 }

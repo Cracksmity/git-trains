@@ -71,6 +71,7 @@ function fillJump() {
 $('weather').innerHTML = '<option value="off">Off · seasons as usual</option>' +
   '<option value="live">Live · current weather from Open-Meteo</option>' +
   WEATHER_STATES.map((s) => `<option value="${s}">${s[0].toUpperCase() + s.slice(1)} in every place</option>`).join('') +
+  '<option value="rain+wind">Rain with wind</option><option value="clear+wind">Clear with wind</option>' +
   '<option value="cloudy,rain,storm">Mixed · cloudy, rain, storm</option>';
 let liveWeather = null;
 async function readLiveWeather() {
