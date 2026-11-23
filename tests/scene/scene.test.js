@@ -4,6 +4,9 @@ import { buildTrain } from '../../src/trains/render.js';
 import { trainWidth, LED_W } from '../../src/trains/geometry.js';
 import { MODELS, MODEL_ORDER } from '../../src/trains/models.js';
 import { renderScene, STATES, SCENE_W } from '../../src/scene/render.js';
+import { BEAM_LEN, headlightOf, headlightBeam } from '../../src/scene/headlight.js';
+import { THEMES } from '../../src/scene/themes.js';
+import { JALISCO_TRAINS } from '../../src/trains/jalisco.js';
 import { buildSpec } from '../../src/scene/spec.js';
 import { sampleStats } from '../../src/demo/sample.js';
 
@@ -190,4 +193,27 @@ test('with prefers-reduced-motion the clouds and stars stay still', () => {
   const svg = renderScene({ tracks: [{ model: 'tram', cars: 1, stripe: '#fff', state: 'normal' }] });
   const reduced = svg.slice(svg.indexOf('prefers-reduced-motion'));
   assert.ok(reduced.includes('.cl,.tw{animation:none!important}'));
+});
+
+test('headlight beam resolves every catalog and Jalisco train symmetrically and shines only at night', () => {
+  for (const model of [...MODEL_ORDER.map((id) => MODELS[id]), ...JALISCO_TRAINS]) {
+    const width = trainWidth(model, 2);
+    const anchor = headlightOf(model, width);
+    assert.ok(anchor && anchor.x > 0 && anchor.x < width, `${model.id} anchor`);
+    const right = headlightBeam(model, width, 1);
+    const left = headlightBeam(model, width, -1);
+    assert.ok(right && left, `${model.id} beams`);
+    assert.equal(right.dx, anchor.x + 1);
+    assert.equal(left.dx, -BEAM_LEN);
+    assert.deepEqual(left.grid.cells, right.grid.mirror().cells, `${model.id} mirrored beam`);
+  }
+  assert.equal(headlightBeam({ loco: { w: 16, rows: Array(30).fill('.'.repeat(16)) } }, 80, 1), null);
+  const spec = { user: 'x', tracks: [{ model: 'bullet', cars: 2, stripe: '#fff', state: 'normal' }] };
+  assert.doesNotMatch(renderScene({ ...spec, theme: 'light' }), /class="hl"/);
+  assert.match(renderScene({ ...spec, theme: 'dark' }), /class="hl"/);
+  assert.match(renderScene({ ...spec, theme: 'auto' }), /class="hl"/);
+  assert.equal(THEMES.light.beam, 'rgba(0,0,0,0)');
+  assert.equal(THEMES.light.beamSoft, 'rgba(0,0,0,0)');
+  assert.notEqual(THEMES.dark.beam, 'rgba(0,0,0,0)');
+  assert.deepEqual(Object.keys(THEMES.light).sort(), Object.keys(THEMES.dark).sort());
 });

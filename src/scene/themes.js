@@ -17,6 +17,7 @@ export const THEMES = {
     house: '#f3e8d4', houseRoof: '#c8693f', win: '#8db4d6',
     ballast: '#8f8a83', ballast2: '#7a766f', sleeper: '#6b5848',
     rail: '#c4c9d1', railDark: '#6b7079', mast: '#58606c', wire: '#3b414b', shadow: 'rgba(0,0,0,0.22)',
+    beam: 'rgba(0,0,0,0)', beamSoft: 'rgba(0,0,0,0)',
     text: '#2d3440', capbg: 'rgba(255,255,255,0.55)', speed: 'rgba(255,255,255,0.85)',
   },
   dark: {
@@ -27,7 +28,8 @@ export const THEMES = {
     haze: '#131d42', hill2: '#122a3a', hill: '#0b2029', tree: '#0a2a22', tree2: '#061f19',
     house: '#2a2e4d', houseRoof: '#3d2a35', win: '#ffd36a',
     ballast: '#2a2b32', ballast2: '#222329', sleeper: '#3b2f27',
-    rail: '#7a8191', railDark: '#363a45', mast: '#2d3340', wire: '#151821', shadow: 'rgba(0,0,0,0.5)',
+    rail: '#7a8191', railDark: '#363a45', mast: '#2d3340', wire: '#151821', shadow: 'rgba(0,0,0,0.28)',
+    beam: 'rgba(255,244,176,0.20)', beamSoft: 'rgba(255,238,155,0.09)',
     text: '#a7b4d0', capbg: 'rgba(0,0,0,0.45)', speed: 'rgba(255,255,255,0.7)',
   },
 };

@@ -3,6 +3,7 @@
 
 import { Grid } from '../../src/graphics/pixel.js';
 import { planScene, speedLines, TIMING } from '../../src/scene/render.js';
+import { headlightBeam } from '../../src/scene/headlight.js';
 import { TRAIN_H } from '../../src/trains/geometry.js';
 import { scenePalette } from '../../src/scene/themes.js';
 import { paintSky, celestialGrid, starsGrids, cloudsGrid } from '../../src/scene/sky.js';
@@ -113,8 +114,9 @@ export function rasterScene(spec, theme = spec.theme === 'dark' ? 'dark' : 'ligh
     trains: trains.map((tr, k) => {
       const shadow = new Grid(tr.train.width, TRAIN_H + 4);
       shadow.rect(0, TRAIN_H + 2, tr.train.width, 2, '@shadow');
+      const beam = theme === 'dark' ? headlightBeam(tracks[k].model, tr.train.width, tr.dir) : null;
       const lines = tr.moving && tr.st.lines ? speedLines(900 + k) : null;
-      return { ...tr, k, shadow, lines: lines && (tr.dir === 1 ? lines : lines.mirror()) };
+      return { ...tr, k, shadow, beam, lines: lines && (tr.dir === 1 ? lines : lines.mirror()) };
     }),
   };
 }
@@ -176,6 +178,7 @@ export function renderFrame(scene, t) {
     const x = trainX(tr, t);
     const at = (grid, opacity = 1, dx = 0) => c.paint(grid, x + dx, tr.y0, color, opacity);
     at(tr.shadow);
+    if (tr.beam) at(tr.beam.grid, 1, tr.beam.dx);
     if (tr.lines) at(tr.lines, 1, tr.dir === 1 ? -tr.lines.w : width);
     at(L.body);
     at(L.lit);

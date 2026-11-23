@@ -16,6 +16,7 @@ import { paintBackdrop } from './backdrop.js';
 import { decorationFor, SEASON_DECORATIONS } from '../activity/seasons.js';
 import { decorLayers } from './decor.js';
 import { weatherLayers, WEATHER_OVER_SEASONS } from './weather.js';
+import { headlightBeam } from './headlight.js';
 
 export { SCENE_W, sceneHeight };
 
@@ -121,8 +122,12 @@ export function renderScene(spec) {
     const L = train.layers;
     const group = (name, cls) => (L[name].isEmpty() ? '' : `<g class="${cls}">${L[name].paths(used)}</g>`);
 
-    // Shadow on the ballast, beneath the wheels.
+    // Shadow on the ballast, beneath the wheels, and the night headlight cone ahead.
     let inner = `<rect class="c-shadow" y="${TRAIN_H + 2}" width="${train.width}" height="2"/>`;
+    if (theme !== 'light') {
+      const beam = headlightBeam(tracks[k].model, train.width, dir);
+      if (beam) inner += `<g class="hl" transform="translate(${beam.dx} 0)">${beam.grid.paths(used)}</g>`;
+    }
     if (moving && st.lines) {
       const lg = dir === 1 ? speedLines(900 + k) : speedLines(900 + k).mirror();
       inner += `<g transform="translate(${dir === 1 ? -48 : train.width} 0)">${lg.paths(used)}</g>`;
