@@ -270,7 +270,7 @@ function lightning(band, backdrop, W, art) {
 /**
  * The layers of a scene's weather, bottom to top within each depth.
  * @param {Array<string | null>} weather one state per track
- * @param {{ W: number, H: number, tracks: unknown[], backdrop: Grid, skyline?: { preset?: string } | null, sky?: Array<import('../weather/conditions.js').PlaceSky | null> }} scene each place's state and a live reading's extras (see placeSky)
+ * @param {{ W: number, H: number, tracks: unknown[], backdrop: Grid, skyline?: { preset?: string, variant?: string } | null, sky?: Array<import('../weather/conditions.js').PlaceSky | null> }} scene each place's state and a live reading's extras (see placeSky)
  * @returns {WeatherLayer[]}
  */
 export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
@@ -280,15 +280,16 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
   const layers = [];
   bands.forEach((band) => {
     const state = weather[band.k];
-    const art = PLACE_ART[places[band.k]?.id];
+    const place = places[band.k]?.id;
+    const art = PLACE_ART[place];
     if (!state || !art) return;
     const wind = sky?.[band.k]?.wind === true;
-    const haze = showsHaze(places[band.k].id, sky?.[band.k]);
+    const haze = showsHaze(place, sky?.[band.k]);
     const cover = skyState(state);
     // Fog hides the crowns and frost and snow rest on them: their wind goes over the painted ground.
     const settled = state === 'fog' || state === 'frost' || state === 'snow';
     if (state === 'heat') {
-      layers.push(...heatSky(band, backdrop));
+      layers.push(...heatSky(band, backdrop, art.heatDepth ? band.top + art.heatDepth : undefined));
       if (art.heat) layers.push(...art.heat(band, backdrop));
     } else if (state === 'partly') {
       layers.push(partlyClouds(art.partly, band, backdrop, W));
@@ -301,7 +302,7 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
       }
     }
     if (haze) layers.push(guadalajaraHaze(band, backdrop));
-    if (wind && !settled) layers.push(...jaliscoWind(band, backdrop, state));
+    if (wind && !settled) layers.push(...jaliscoWind(place, band, backdrop, state));
     if (state === 'clear' || state === 'partly' || state === 'heat') return;
     if (cover === 'rain' || cover === 'storm') layers.push({ grid: veil(cover, band, W), z: 'ground', y: band.top });
     const ground = new Grid(W, H);
@@ -309,7 +310,7 @@ export function weatherArt(weather, { W, H, tracks, backdrop, skyline, sky }) {
     if (cover === 'storm') layers.push(lightning(band, backdrop, W, art));
     art.paint(ground, state, band, backdrop, haze);
     if (!ground.isEmpty()) layers.push({ grid: ground, z: 'ground', y: 0 });
-    if (wind && settled) layers.push(...jaliscoWind(band, backdrop, state, state === 'fog' ? null : ground));
+    if (wind && settled) layers.push(...jaliscoWind(place, band, backdrop, state, state === 'fog' ? null : ground));
     if (state in RAIN_SPEED) layers.push(...rainLayers(state, band, W, wind));
     if (state === 'snow') layers.push(...snowLayers(band, W));
     if (state === 'hail') layers.push(...hailLayers(band, W, wind));

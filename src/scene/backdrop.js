@@ -10,6 +10,7 @@ import { THEMES } from './themes.js';
 import { bush, paintBandFront } from './terrain.js';
 import { paintGuadalajara } from '../landscape/jalisco-city.js';
 import { paintLosAltos, paintTequila } from '../landscape/jalisco-country.js';
+import { paintSayula } from '../landscape/jalisco-sayula.js';
 
 // Signal: red if there was no activity yesterday, amber if low, green if normal or high.
 function signal(g, x, gy, state) {
@@ -102,7 +103,8 @@ export function paintBackdrop(W, H, tracks, user, skyline = null, seed = user) {
 
   tracks.forEach((t, k) => {
     const gy = GY0 + PITCH * k;
-    if (jalisco && k === 1) paintLosAltos(g, gy, PITCH - BALLAST);
+    if (jalisco && k === 1 && skyline.variant === 'sayula') paintSayula(g, gy, PITCH - BALLAST);
+    else if (jalisco && k === 1) paintLosAltos(g, gy, PITCH - BALLAST);
     else if (jalisco && k === 2) paintTequila(g, gy, PITCH - BALLAST);
     else if (k > 0) paintBandFront(g, W, gy - 1, k, rand, region, pick);
 

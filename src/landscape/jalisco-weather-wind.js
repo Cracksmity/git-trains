@@ -50,24 +50,50 @@ function parcelDust(sway, backdrop, top, base) {
   }
 }
 
+// Tolvaneras lift leaning dust plumes from the exposed crust (thick at the foot,
+// thinning as they rise). Clip to the open lake so birds, reeds and town stay in front.
+function saltDust(sway, backdrop, top, base) {
+  const lake = new Set(['@salt', '@saltSeam', '@laguna', '@lakeGlint']);
+  const tall = [[0, 6], [2, 7], [5, 6], [9, 5], [13, 4], [17, 2]];
+  const low = [[0, 5], [2, 6], [5, 5], [9, 3], [13, 2]];
+  for (const { x, shape } of [
+    { x: 48, shape: tall }, { x: 108, shape: low }, { x: 166, shape: tall }, { x: 224, shape: low },
+    { x: 262, shape: tall }, { x: 285, shape: low }, { x: 302, shape: tall },
+  ]) {
+    let row = base - 1;
+    while (row > base - 12 && backdrop.get(x, row) !== '@salt') row--;
+    if (backdrop.get(x, row) !== '@salt') continue;
+    shape.forEach(([shift, width], dy) => {
+      const y = row - dy;
+      for (let i = 0; i < width; i++) {
+        const px = x + shift + i;
+        if (dy >= 3 && i === 2) continue;
+        if (lake.has(backdrop.get(px, y))) sway.set(px, y - top, '@saltDust');
+      }
+    });
+  }
+}
+
 /**
  * Wind in the landscape of one Jalisco track.
- * @param {{ base: number, k: number }} band
+ * @param {string} place
+ * @param {{ base: number }} band
  * @param {Grid} backdrop
  * @param {string} state
  * @param {Grid | null} [cover] the place's painted ground, when frost or snow rests on the crowns
  * @returns {WeatherLayer[]}
  */
-export function jaliscoWind(band, backdrop, state, cover = null) {
+export function jaliscoWind(place, band, backdrop, state, cover = null) {
   const top = band.base - 32;
   const still = new Grid(backdrop.w, band.base - top);
   const sway = new Grid(still.w, still.h);
-  if (band.k === 2) {
+  if (place === 'tequila') {
     for (const x of [72, 329]) pirul(still, sway, x, band.base - 22 - top);
   } else {
     treeCrowns(still, sway, backdrop, top, cover);
     // Snow covers the parcels: no dust to lift.
-    if (band.k === 1 && state !== 'snow') parcelDust(sway, backdrop, top, band.base);
+    if (place === 'altos' && state !== 'snow') parcelDust(sway, backdrop, top, band.base);
+    if (place === 'sayula' && state !== 'snow') saltDust(sway, backdrop, top, band.base);
   }
   return [
     { grid: still, z: 'ground', y: top },

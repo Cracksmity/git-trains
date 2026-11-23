@@ -7,14 +7,14 @@
 | Input | Por defecto | Qué hace |
 | --- | --- | --- |
 | `train` | `auto` | `auto` evoluciona con tus vagones. Puedes elegir un [modelo](#modelos), los trenes de `jalisco` o la ruta al JSON de [tu propio tren](customization.md#haz-tu-propio-tren-a-mano-o-con-ia). |
-| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka`, `jalisco` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
+| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka`, `jalisco`, `jalisco-sayula` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` también escribe el calendario de contribuciones animado (ver arriba) |
 | `year-in-review` | `false` | `true` también escribe `year-in-review.svg`: un póster de un año natural, dibujado como un viaje en tren (ver [Resumen del año](usage.md#resumen-del-año)) |
 | `review-year` | año en curso | El año que muestra el póster (de 2008 al actual). Vacío: el año en curso hasta hoy, o el año que acaba de terminar en enero |
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](usage.md#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
-| `weather` | `off` | Para el skyline `jalisco`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
+| `weather` | `off` | Para `jalisco` y `jalisco-sayula`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto`, o `local`: día o noche donde está la escena (ver [Clima](#clima)) |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
@@ -56,6 +56,8 @@ Los seis modelos que evolucionan con tu actividad tienen cabinas en ambos extrem
 ### Jalisco
 
 Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres primeros lenguajes corresponden al TEG-90 articulado de Guadalajara, al carguero de Los Altos y al José Cuervo Express entre los agaves. La racha cuelga en una placa bajo el letrero con tu nombre. Si hay menos lenguajes, se dibuja el número de vías correspondiente.
+
+Con `skyline: jalisco-sayula`, el carguero pasa junto a la Laguna de Sayula entre Guadalajara y Tequila. Con `weather: live`, la leyenda de la segunda vía muestra la temperatura de Sayula.
 
 ![Los tres trenes cruzando Jalisco](../../examples/jalisco/jalisco-sobre-rieles.svg)
 

@@ -1,7 +1,7 @@
 import { jaliscoPalette } from '../landscape/jalisco-palette.js';
 
 export function scenePalette(theme, skyline) {
-  return skyline?.preset === 'jalisco' ? { ...THEMES[theme], ...jaliscoPalette(theme) } : THEMES[theme];
+  return skyline?.preset === 'jalisco' ? { ...THEMES[theme], ...jaliscoPalette(theme, skyline.variant) } : THEMES[theme];
 }
 
 

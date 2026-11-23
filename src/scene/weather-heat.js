@@ -7,13 +7,12 @@ const UPPER_SKY = new Set(['@sky0', '@sky1', '@dusk', '@haze']);
 const LOWER_SKY = new Set(['@sky2', '@sky3', '@afterglow']);
 
 /** @returns {WeatherLayer[]} */
-export function heatSky(band, backdrop) {
+export function heatSky(band, backdrop, countryEnd = band.base - 24) {
   const width = backdrop.w;
   const city = band.k === 0;
-  // The sky of each place, thin above and thick toward the horizon. In the countryside
-  // it stops above the two rows where Tequila's horizon shimmers, so the moving
-  // pixels and the haze never overlap.
-  const grid = new Grid(width, city ? band.base - band.top : band.base - 24 - band.top);
+  // Thin above and thick toward the horizon. The original country strips stop
+  // above Tequila's shimmer. Sayula's open sky reaches down to the lake.
+  const grid = new Grid(width, (city ? band.base : countryEnd) - band.top);
   const sky = city ? new Grid(width, grid.h) : backdrop;
   if (city) paintSky(sky);
   const stars = city ? starsGrids(width) : null;

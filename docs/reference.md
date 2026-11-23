@@ -7,14 +7,14 @@
 | Input | Default | What it does |
 | --- | --- | --- |
 | `train` | `auto` | `auto` evolves with your cars. Choose a [model](#models), the `jalisco` fleet, or a [custom train](customization.md#make-your-own-train-by-hand-or-with-ai) JSON path. |
-| `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka`, `jalisco` or the path to [your own skyline](customization.md#city-skylines) in JSON |
+| `skyline` | `city` | `city` (procedural, unique to you), `new-york`, `osaka`, `jalisco`, `jalisco-sayula` or the path to [your own skyline](customization.md#city-skylines) in JSON |
 | `mode` | `single` | `single`: one train in your top language · `multi`: 3 tracks, one train per language, running opposite ways |
 | `calendar` | `false` | `true` also writes the animated contribution calendar (see above) |
 | `year-in-review` | `false` | `true` also writes `year-in-review.svg`: a poster of one calendar year, drawn as a train journey (see [Year in review](usage.md#year-in-review)) |
 | `review-year` | current year | The year the poster shows (2008 to the current one). Empty: the current year so far, or the year that just ended in January |
 | `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](usage.md#seasons-and-holidays)) |
 | `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
-| `weather` | `off` | For the `jalisco` skyline: `live` (the current weather from Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, or one state per place separated by commas (see [Weather](#weather)) |
+| `weather` | `off` | For `jalisco` and `jalisco-sayula`: `live` (the current weather from Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, or one state per place separated by commas (see [Weather](#weather)) |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto`, or `local`: day or night where the scene is (see [Weather](#weather)) |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
@@ -56,6 +56,8 @@ The six evolving models have cabs at both ends. Trains with a pantograph run und
 ### Jalisco
 
 Set both `train` and `skyline` to `jalisco`. In `mode: multi`, the first three languages get Guadalajara's articulated TEG-90, a freight train in Los Altos, and the José Cuervo Express in the agave fields. The streak hangs on a plaque below your name sign. With fewer languages, the scene uses the corresponding number of tracks.
+
+Set `skyline: jalisco-sayula` to take the freight train past the Laguna de Sayula between Guadalajara and Tequila. With `weather: live`, the middle caption shows the temperature in Sayula.
 
 ![The three trains crossing Jalisco](../examples/jalisco/jalisco-sobre-rieles.svg)
 

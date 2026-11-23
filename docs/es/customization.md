@@ -42,6 +42,7 @@ El fondo predeterminado se genera a partir de tu usuario y es el mismo todos los
 | `new-york` | One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad |
 | `osaka` | La pagoda de Shitennō-ji, la rueda de la fortuna, Tsutenkaku, Abeno Harukas, el Umeda Sky Building, un puente atirantado y el castillo |
 | `jalisco` | El Estadio Jalisco, la Catedral y el Sagrario, el Teatro Degollado, el Hospicio Cabañas, La Minerva y las torres del poniente en Guadalajara; ranchos, tierra colorada y la parroquia de Los Altos, y surcos de agave al pie del volcán de Tequila |
+| `jalisco-sayula` | Guadalajara, la plaza y la laguna salina de Sayula con pelícanos blancos al pie de los volcanes de Colima, y los agaves de Tequila |
 
 Un skyline es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para los monumentos con forma propia. No tiene colores propios: usa los del tema, así que cambia solo entre claro y oscuro y de noche se encienden las ventanas. Para hacer el tuyo, pega [docs/ai/skyline.md](../ai/skyline.md) en tu IA con la ciudad que quieres o una foto. Ejemplos en [examples/skylines](../../examples/skylines) (Ciudad de México, Medellín, Guadalajara, Malmö).
 

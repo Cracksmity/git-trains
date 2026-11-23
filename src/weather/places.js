@@ -16,14 +16,21 @@ export const JALISCO_PLACES = [
   { id: 'tequila', name: 'Tequila', latitude: 20.8826, longitude: -103.836 },
 ];
 
+const SAYULA_PLACES = [
+  JALISCO_PLACES[0],
+  { id: 'sayula', name: 'Sayula', latitude: 19.883, longitude: -103.6 },
+  JALISCO_PLACES[2],
+];
+
 /** Skyline presets with real places behind their tracks. */
 export const WEATHER_PLACES = { jalisco: JALISCO_PLACES };
 
 /**
  * The places of a validated skyline, or null when it has none.
- * @param {{ preset?: string } | null | undefined} skyline
+ * @param {{ preset?: string, variant?: string } | null | undefined} skyline
  * @returns {WeatherPlace[] | null}
  */
 export function placesFor(skyline) {
+  if (skyline?.preset === 'jalisco' && skyline.variant === 'sayula') return SAYULA_PLACES;
   return (skyline?.preset && WEATHER_PLACES[skyline.preset]) || null;
 }

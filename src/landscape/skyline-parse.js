@@ -96,11 +96,17 @@ function parseBuilding(b, i, errors) {
 // Earlier preset ids that are still accepted (the original Spanish ones).
 export const SKYLINE_ALIASES = { ciudad: 'city', 'nueva-york': 'new-york' };
 
-// Accepts a preset id ("new-york") or an object { name, fill, buildings }.
-// Returns null for the procedural city ("city" or empty).
+/** Accepts a preset id or a custom skyline. The procedural city returns null.
+ * @returns {{ name: string, fill: boolean, buildings: ReturnType<typeof parseBuilding>[], region?: ReturnType<typeof parseRegion>, preset?: string, variant?: string } | null}
+ */
 export function parseSkyline(raw) {
   // Hand-painted panorama with three distinct landscapes, selected only by its preset id.
-  if (raw === 'jalisco') return { name: 'Jalisco', preset: 'jalisco', fill: false, buildings: [], region: undefined };
+  if (raw === 'jalisco' || raw === 'jalisco-sayula') {
+    return {
+      name: 'Jalisco', preset: 'jalisco', ...(raw === 'jalisco-sayula' ? { variant: 'sayula' } : {}),
+      fill: false, buildings: [], region: undefined,
+    };
+  }
   if (typeof raw === 'string') raw = SKYLINE_ALIASES[raw] ?? raw;
   if (raw === undefined || raw === null || raw === '' || raw === 'city') return null;
   if (typeof raw === 'string') {
