@@ -15,6 +15,7 @@
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](usage.md#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
 | `weather` | `off` | Para `jalisco` y `jalisco-sayula`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
+| `weather-cache` | | Con `weather: live`: la ruta de un archivo `.json` en el repositorio que guarda la última lectura buena entre corridas, para cuando Open-Meteo no responde (ver [Conservar la última lectura](#conservar-la-última-lectura)) |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto`, o `local`: día o noche donde está la escena (ver [Clima](#clima)) |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
@@ -73,6 +74,31 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 - Agrega `+haze` para dibujar una capa café sobre la loma del fondo y las torres del poniente de Guadalajara. Aparece con `clear`, `partly`, `cloudy`, `heat` y `fog`. Puedes combinarla con viento en cualquier orden, por ejemplo `cloudy+wind+haze`. La Catedral y los monumentos del primer plano se mantienen nítidos.
 - En modo `live`, una segunda consulta opcional lee la concentración de PM2.5 en la API de calidad del aire de Open-Meteo solo para Guadalajara. La calima aparece en esos estados cuando la concentración supera los 55 µg/m³. Si falla esta lectura, la Action registra un aviso y dibuja el clima que recibió.
 - `off`, el valor por defecto, deja la escena como está.
+
+##### Conservar la última lectura
+
+Los runners de GitHub comparten direcciones IP, y Open-Meteo cuenta su cuota gratuita diaria por dirección. Por eso una lectura en vivo puede fallar sin que sea tu culpa: por un timeout, o por un `429` cuando la dirección compartida ya gastó su cuota. Pon en `weather-cache` la ruta de un `.json` y conserva ese archivo entre corridas con `actions/cache`:
+- Después de cada lectura buena, la Action la guarda ahí.
+- Cuando Open-Meteo no responde, la escena usa la lectura guardada si tiene a lo más 6 horas, y el log dice qué tan vieja es.
+- Una lectura guardada para otros lugares no se usa; por ejemplo, la de Los Altos después de cambiar a `jalisco-sayula`.
+
+```yaml
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+          restore-keys: weather-
+      # Tu paso de git-trains, con estas dos entradas en su bloque `with`:
+      #   weather: live
+      #   weather-cache: .weather/last.json
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: always()
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+```
+
+Cada corrida guarda con una clave propia, y `restore-keys` recupera la más reciente. El archivo solo contiene el clima de los lugares públicos de la escena. Déjalo fuera de `output-dir` para que no se publique con las imágenes.
 
 | Estado | Guadalajara | Los Altos | Tequila |
 | --- | --- | --- | --- |

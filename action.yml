@@ -51,6 +51,9 @@ inputs:
   weather:
     description: "Weather in track order for jalisco: Guadalajara, Los Altos and Tequila. For jalisco-sayula: Guadalajara, Sayula and Tequila. off keeps the scene as it is. live reads the current weather from Open-Meteo when the Action runs; run it every few hours to keep it current. clear, frost, heat, partly, cloudy, fog, drizzle, rain, snow, storm or hail fixes it for every place, or give one per place separated by commas. Append +wind to any state (rain+wind) for wind in that place. Live readings add wind from 40 km/h. Append +haze for a dusty sky over Guadalajara in clear, partly, cloudy, heat or fog, alone or with +wind. In live mode a second, optional Open-Meteo request checks Guadalajara for PM2.5 above 55 µg/m³. In Jalisco the weather replaces the seasonal snow, blossom and leaves; holidays stay."
     default: "off"
+  weather-cache:
+    description: "Optional, for weather live: the path to a .json file inside the repository where the Action keeps the last good reading (for example .weather/last.json). GitHub's runners share IP addresses and Open-Meteo counts its free quota per address, so a reading can fail. Then the scene uses the saved reading when it is at most 6 hours old. Restore the file before the step and save it after with actions/cache."
+    default: ""
   calendar:
     description: "true also writes train-calendar.svg (and -light/-dark with theme both): your contribution calendar with your train running through it."
     default: "false"
