@@ -1,0 +1,44 @@
+{
+  "name": "jalisco-sayula",
+  "route": "design",
+  "promptFile": "jalisco-sayula.md",
+  "allow": [
+    "src/landscape/jalisco-*.js",
+    "src/landscape/skyline-parse.js",
+    "src/scene/backdrop.js",
+    "src/scene/weather*.js",
+    "src/scene/spec.js",
+    "src/weather/places.js",
+    "src/weather/inks.js",
+    "src/action/weather.js",
+    "tools/export/raster.js",
+    "tests/scene/**",
+    "tests/weather/**",
+    "tests/landscape/**",
+    "action.yml",
+    "docs/reference.md",
+    "docs/es/reference.md",
+    "docs/customization.md",
+    "docs/es/customization.md",
+    "assets/preview/app.js"
+  ],
+  "gates": [
+    "node tools/conductor/gates/jalisco-sayula.js",
+    "node tools/conductor/gates/weather-unchanged.js",
+    "npm test",
+    "npm run lint",
+    "npm run typecheck",
+    "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "node scripts/checks/docs.js"
+  ],
+  "attempts": 2,
+  "timeoutMin": 60,
+  "ladder": [
+    {
+      "backend": "codex",
+      "model": "gpt-6.2-astra",
+      "effort": "xhigh",
+      "why": "Hand-painted landscape and its weather: GPT-6.2-Astra drew the wind and haze lanes on the first attempt"
+    }
+  ]
+}

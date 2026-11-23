@@ -3,7 +3,7 @@ import { line, polygon } from '../graphics/pixel-shapes.js';
 
 // Night falls from the top of each country strip with the same 25/50/75% dither
 // as the city sky. The faint stars share the daytime haze ink in the light theme.
-function sky(g, base, height, seed) {
+export function sky(g, base, height, seed) {
   const bands = [['@dusk', height], ['@haze', 33], ['@afterglow', 27]];
   for (const [color, top] of bands) g.rect(0, base - top, g.w, top, color);
   for (const [color, top] of bands.slice(1)) {
@@ -20,15 +20,15 @@ function sky(g, base, height, seed) {
   }
 }
 
-function ridge(g, base, mean, wave, color) {
+export function ridge(g, base, mean, wave, color) {
   for (let x = 0; x < g.w; x++) {
     const h = Math.round(mean + 4 * Math.sin(x / 62 + wave) + 2 * Math.sin(x / 25 + wave));
     g.vline(x, base - h, h, color);
   }
 }
 
-function rancho(g, x, base, w) {
-  g.rect(x, base - 9, w, 9, '@stone');
+export function rancho(g, x, base, w, wall = '@stone') {
+  g.rect(x, base - 9, w, 9, wall);
   g.rect(x + w - 5, base - 9, 5, 9, '@stoneShade');
   polygon(g, [[x-2,base-9],[x+4,base-15],[x+w-5,base-15],[x+w+2,base-9]], '@tile');
   for (let dx = 3; dx < w - 1; dx += 4) line(g, x+dx+2, base-14, x+dx, base-10, '@tileLit');
@@ -40,7 +40,7 @@ function rancho(g, x, base, w) {
   g.rect(x + w - 9, base - 7, 4, 7, '@recess');
 }
 
-function mesquite(g, x, bottom, size) {
+export function mesquite(g, x, bottom, size) {
   const top = bottom - size;
   line(g, x, bottom, x - 1, top + 4, '@recess');
   line(g, x - 1, top + 6, x + 4, top + 1, '@recess');

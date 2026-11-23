@@ -8,6 +8,7 @@ import { cityHail, fieldHail } from './jalisco-weather-hail.js';
 import { tequilaShimmer } from './jalisco-weather-heat.js';
 import { paintAltosFog, paintGuadalajaraFog, paintTequilaFog } from './jalisco-weather-fog.js';
 import { altosSnow, citySnow, tequilaSnow } from './jalisco-weather-snow.js';
+import { sayulaWeather, sayulaShimmer } from './jalisco-weather-sayula.js';
 
 const wet = (state) => state === 'drizzle' || state === 'rain' || state === 'storm';
 const heavy = (state) => state === 'rain' || state === 'storm';
@@ -123,8 +124,8 @@ function tequila(g, state, band, backdrop) {
 
 /**
  * Each scattered bank has a left edge, base row, width and crown radii.
- * Banks and bolts use rows from the top of the place's strip.
- * @type {Record<string, { paint: Function, heat?: typeof tequilaShimmer, bolt: { x: number, from: number, to: number }, partly: Array<[number, number, number, number[]]> }>}
+ * Banks, bolts and heat-sky depth use rows from the top of the place's strip.
+ * @type {Record<string, { paint: Function, heat?: typeof tequilaShimmer, heatDepth?: number, bolt: { x: number, from: number, to: number }, partly: Array<[number, number, number, number[]]> }>}
  */
 export const JALISCO_WEATHER = {
   guadalajara: {
@@ -138,6 +139,10 @@ export const JALISCO_WEATHER = {
   altos: {
     paint: altos, bolt: { x: 398, from: 2, to: 26 },
     partly: [[61, 11, 29, [1, 2, 3, 3, 2, 1]], [257, 6, 33, [2, 3, 2, 3, 2, 2]]],
+  },
+  sayula: {
+    paint: sayulaWeather, heat: sayulaShimmer, heatDepth: 40, bolt: { x: 203, from: 1, to: 22 },
+    partly: [[18, 8, 31, [1, 2, 3, 2, 2, 1]], [177, 7, 42, [2, 3, 4, 3, 2, 1]], [315, 7, 34, [1, 2, 3, 2, 1]]],
   },
   tequila: {
     paint: tequila, heat: tequilaShimmer, bolt: { x: 62, from: 3, to: 24 },

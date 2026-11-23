@@ -33,6 +33,37 @@ const inks = {
   water: ['#8ec3d1', '#3e5f80'], waterLit: ['#d9f0f3', '#8db6d6'],
 };
 
-export function jaliscoPalette(theme) {
-  return Object.fromEntries(Object.entries(inks).map(([key, colors]) => [key, colors[theme === 'dark' ? 1 : 0]]));
+// Only the Sayula route emits these CSS variables. Its high volcanic slopes
+// take the color of the haze, while the closer shore reflects the evening sky.
+const roadDay = '#bd9c74';
+const sayula = {
+  // Distant Colima massif sits cooler and paler in the valley haze than the nearer hills.
+  nevado: ['#bfc6cc', '#545873'], nevadoShade: ['#b0b9c2', '#484c66'],
+  summitSnow: ['#eef0ec', '#9ca1b6'],
+  valleyHill: ['#8a9b86', '#3d4854'], valleyFoot: ['#738570', '#313e47'],
+  laguna: ['#9dc0c1', '#536781'], lakeGlint: ['#c8dbd5', '#8493a7'],
+  salt: ['#ece1c8', '#8c8791'], saltSeam: ['#cdbfa8', '#716e7c'],
+  saltDust: ['#cbb086', '#705852'], tule: ['#7d814f', '#555c56'],
+  limewash: ['#eee1c9', '#b2a198'], road: [roadDay, '#685855'], wheelRut: ['#a88c6b', '#584b4d'],
+  plumage: ['#fff8e6', '#e4dfd7'], pinion: ['#454649', '#282f40'],
+  bill: ['#d78439', '#e2a060'],
+  // La Parroquia: pinkish-beige cantera rosa and golden tiled dome, floodlit warm at night.
+  cantera: ['#cfab92', '#c39a80'], canteraLit: ['#e8cdb6', '#e2bf9f'], canteraShade: ['#a3806f', '#8d6a5f'],
+  domeGold: ['#dda832', '#ebb953'], domeGoldShade: ['#a6721e', '#a9762e'],
+  // Plaza kiosk: vermilion base with white trim, dark ironwork, red corrugated metal roof.
+  kioskBase: ['#d9582e', '#b54a32'], kioskTrim: ['#f3ece0', '#cfc9c4'],
+  kioskRoof: ['#b93836', '#8e343e'], kioskRoofShade: ['#93292b', '#6b2532'],
+  ironwork: ['#35383e', '#212533'],
+  // El Santuario de Guadalupe on its cerrito: cream-yellow facade, orange trim and domes, white belfries.
+  santuarioWall: ['#ead79a', '#b69e74'], santuarioTrim: ['#d87638', '#a95d3d'],
+  santuarioWhite: ['#f2efe7', '#b4b4c0'], domeOrange: ['#df6f2d', '#be6039'],
+  domeRib: ['#f6f2e8', '#d5d3db'], tabachin: ['#cf3d32', '#92353d'],
+  // El Ánima and its candle are on an unbroken patch of dirt road.
+  shroud: [roadDay, '#dedaca'], shroudFold: [roadDay, '#aca8ac'], candle: [roadDay, '#ffd37d'],
+};
+
+/** @param {string} theme @param {string} [variant] */
+export function jaliscoPalette(theme, variant) {
+  const palette = variant === 'sayula' ? { ...inks, ...sayula } : inks;
+  return Object.fromEntries(Object.entries(palette).map(([key, colors]) => [key, colors[theme === 'dark' ? 1 : 0]]));
 }

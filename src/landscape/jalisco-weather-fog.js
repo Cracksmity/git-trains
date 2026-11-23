@@ -10,7 +10,7 @@ const isForeground = (ink) => ink === '@mast' || ink === '@wire' || (typeof ink 
  * @param {number} x column
  * @param {number} dist rows outside the solid edge: 1 = 75%, 2 = 50%, 3 = 25%
  */
-function dither(x, dist) {
+export function dither(x, dist) {
   const m = ((x % 4) + 4) % 4;
   if (dist <= 0) return true;
   if (dist === 1) return m !== 3;
@@ -31,7 +31,7 @@ function cloudyCitySkyAt(x, y, base) {
 }
 
 // Choose @wFogLight or @wFog inside a two-tone bank, with a 25/50/75% dither across `mid`.
-function fogTone(x, y, mid) {
+export function fogTone(x, y, mid) {
   if (y >= mid) return '@wFog';
   const dist = mid - y;
   return dist <= 3 && dither(x, dist) ? '@wFog' : '@wFogLight';
