@@ -21,7 +21,7 @@ import { HEMISPHERES } from '../activity/seasons.js';
 import { parseWeatherInput } from '../weather/conditions.js';
 import { placesFor } from '../weather/places.js';
 import { themeFor, weatherFor } from './weather.js';
-import { input, readJson, isJsonPath, list, oneOf, parseCards } from './inputs.js';
+import { input, readJson, isJsonPath, list, oneOf, parseCards, workspaceJson } from './inputs.js';
 import { THEMES, RANKS, BOOLEANS } from '../../config/action-inputs.js';
 
 export async function runAction() {
@@ -52,6 +52,9 @@ export async function runAction() {
   };
   // Weather: off, live (Open-Meteo, read when the Action runs) or fixed states, for skylines with real places.
   const weatherIn = parseWeatherInput(input('weather', 'off'), placesFor(options.skyline)?.length);
+  // The last good live reading, kept between runs by the workflow (actions/cache).
+  const weatherCacheIn = input('weather-cache');
+  const weatherCache = weatherCacheIn ? workspaceJson(weatherCacheIn, 'weather-cache') : null;
   const cardStyle = {
     language,
     rank,
@@ -106,7 +109,7 @@ export async function runAction() {
   // that can't be reviewed stops the run before anything is fetched.
   const reviewYear = yearInReview ? parseReviewYear(input('review-year'), now) : null;
 
-  options.weather = await weatherFor(weatherIn, options.skyline, { sample });
+  options.weather = await weatherFor(weatherIn, options.skyline, { sample, cache: weatherCache });
 
   // Special cars the profile earned (a 100-day streak, 100+ stars, 500+ PRs). They need
   // the profile numbers; if those can't be read the scene still stands, without them.

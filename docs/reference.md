@@ -15,6 +15,7 @@
 | `seasons` | `true` | `true` dresses the scene for the season or holiday of the day it runs; `false` keeps it plain (see [Seasons and holidays](usage.md#seasons-and-holidays)) |
 | `hemisphere` | `north` | `north` or `south`: which hemisphere the seasons follow. Holidays keep their dates |
 | `weather` | `off` | For `jalisco` and `jalisco-sayula`: `live` (the current weather from Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, or one state per place separated by commas (see [Weather](#weather)) |
+| `weather-cache` | | With `weather: live`: the path of a `.json` file in the repository that keeps the last good reading between runs, for when Open-Meteo can't be reached (see [Keep the last reading](#keep-the-last-reading)) |
 | `theme` | `both` | `both` writes `train-light.svg`, `train-dark.svg` and `train.svg` (automatic); or `light`, `dark`, `auto`, or `local`: day or night where the scene is (see [Weather](#weather)) |
 | `language` | `en` | `en` or `es`: the word on the sign (`STREAK` / `RACHA`), the image title and the card texts |
 | `label` | from `language` | Word on the LED sign (overrides `language`) |
@@ -73,6 +74,31 @@ The Jalisco scene can wear the weather of its three places. Add `weather` to the
 - Append `+haze` for a brown layer over Guadalajara’s distant ridge and west-side towers. It appears with `clear`, `partly`, `cloudy`, `heat` and `fog`, and combines with wind in either order, as in `cloudy+wind+haze`. The Cathedral and the landmarks in front stay sharp.
 - In `live` mode a second, optional request reads PM2.5 from Open-Meteo’s air-quality API for Guadalajara alone. Haze appears in those states above 55 µg/m³. If this reading fails, the Action logs a notice and draws the weather it received.
 - `off`, the default, leaves the scene as it is.
+
+##### Keep the last reading
+
+GitHub's runners share IP addresses, and Open-Meteo counts its free daily quota per address. So a live reading can fail through no fault of yours: a timeout, or a `429` once the shared address has spent its quota. Set `weather-cache` to a `.json` path and keep that file between runs with `actions/cache`:
+- After each good reading, the Action saves it there.
+- When Open-Meteo can't be reached, the scene wears the saved reading if it is at most 6 hours old, and the log says how old it is.
+- A reading saved for other places, such as Los Altos after you switch to `jalisco-sayula`, is not used.
+
+```yaml
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+          restore-keys: weather-
+      # Your git-trains step, with these two inputs in its `with` block:
+      #   weather: live
+      #   weather-cache: .weather/last.json
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: always()
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+```
+
+Each run saves under a key of its own, and `restore-keys` brings back the newest one. The file holds only the weather at the scene's public places. Keep it outside `output-dir` so it isn't published with the images.
 
 | State | Guadalajara | Los Altos | Tequila |
 | --- | --- | --- | --- |

@@ -1,7 +1,7 @@
 // action/inputs.js: focused inputs operations.
 
 import { readFileSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { isAbsolute, relative, resolve } from 'node:path';
 import { LEGACY_INPUTS, LEGACY_VALUES, CARDS, CARD_ALIASES } from '../../config/action-inputs.js';
 
 // Action inputs arrive as INPUT_<NAME> (hyphens kept).
@@ -34,6 +34,19 @@ export function readJson(path, what) {
 }
 
 export const isJsonPath = (v) => /\.json$/i.test(v);
+
+// A .json file the Action may write (the weather cache), resolved inside the repository
+// root. Returns its absolute path; a path that leaves the root stops the run.
+export function workspaceJson(path, name) {
+  if (!isJsonPath(path)) throw new Error(`"${name}" must be the path to a .json file inside the repository: "${path}"`);
+  const root = resolve(process.env.GITHUB_WORKSPACE || process.cwd());
+  const file = resolve(root, path);
+  const inside = relative(root, file);
+  if (!inside || inside.startsWith('..') || isAbsolute(inside)) {
+    throw new Error(`"${name}" must stay inside the repository: "${path}"`);
+  }
+  return file;
+}
 
 export const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
 
